@@ -27,7 +27,7 @@ class DbHandler:
             self.db.transaction_commit()
         except:
             self.db.transaction_rollback()
-            logging.error("Error updating sql. Reason : {}".format(format_exc()))
+            raise BaseException("Error updating sql. Reason : {}".format(format_exc()))
 
         logging.warning("Inserted {} queries FROM {}".format(chunk_size, csv_file_name))
 

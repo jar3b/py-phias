@@ -26,7 +26,7 @@ def main():
                  help="Create/update DB from source. Value: \"http\" or absolute path to folder")
     options, arguments = p.parse_args()
 
-    if options.database and options.source:
+    if options.database:
         # create new database
         if options.database == "create":
             create_base(options.source)

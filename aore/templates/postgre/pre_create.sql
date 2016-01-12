@@ -9,7 +9,8 @@ CREATE TABLE "public"."ADDROBJ" (
   "parentguid" UUID,
   "actstatus"  BIT(1),
   "currstatus" INT2,
-  PRIMARY KEY ("id", "aoid")
+  CONSTRAINT "aoid" UNIQUE ("aoid"),
+  CONSTRAINT "id" PRIMARY KEY ("id")
 )
 WITH (OIDS =FALSE
 );
