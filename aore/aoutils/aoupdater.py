@@ -18,6 +18,7 @@ class AoUpdater:
         self.db_handler = DbHandler()
         self.mode = source
         self.updalist_generator = None
+        self.tablelist_generator = None
         self.allowed_tables = None
 
     def __get_entries_from_folder(self, path_to_xmls):
@@ -33,10 +34,16 @@ class AoUpdater:
         # TODO: Вычислять версию, если берем данные из каталога
         yield dict(intver=0, textver="Unknown", url=foldername)
 
+    def __get_updates_from_rar(self, url):
+        aorar = AoRar()
+        fname = aorar.download(url)
+        for table_entry in aorar.get_table_entries(fname, allowed_tables):
+            yield table_entry
+
     def __init_update_entries(self, full_base):
         if self.mode == "http":
+            self.tablelist_generator = self.__get_updates_from_rar
             imp = Importer()
-            self.updalist_generator = None
             if full_base:
                 self.updalist_generator = imp.get_full()
             else:
@@ -44,6 +51,7 @@ class AoUpdater:
         else:
             assert path.isdir(self.mode), "Invalid directory {}".format(self.mode)
             self.updalist_generator = self.__get_updates_from_folder(self.mode)
+            self.tablelist_generator = self.__get_entries_from_folder
 
     def process_single_entry(self, table_xmlentry, chunck_size=50000):
         aoparser = AoDataParser(table_xmlentry, chunck_size)
@@ -54,7 +62,7 @@ class AoUpdater:
         self.db_handler.pre_create()
 
         for update_entry in self.updalist_generator:
-            for table_entry in self.__get_entries_from_folder(update_entry['url']):
+            for table_entry in self.tablelist_generator(update_entry['url']):
                 self.process_single_entry(table_entry)
 
         logging.warning("Create success")
@@ -70,9 +78,7 @@ class AoUpdater:
                 logging.warning("Maximum count of updates are processed - exit")
                 break
 
-            aorar = AoRar()
-            fname = aorar.download(update_entry['url'])
-            for table_entry in aorar.get_table_entries(fname, allowed_tables):
+            for table_entry in self.tablelist_generator(update_entry['url']):
                 self.process_single_entry(table_entry)
 
         logging.warning("Update success")

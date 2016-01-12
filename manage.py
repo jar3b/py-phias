@@ -5,31 +5,34 @@ import optparse
 from aore.aoutils.aoupdater import AoUpdater
 
 
-def update_base(updates_count):
-    aoupdater = AoUpdater()
-    aoupdater.update_db(updates_count)
+def update_base(xml_source, updates_count):
+    aoupdater = AoUpdater(xml_source)
+    aoupdater.update(updates_count)
 
 
-def create_base(path_to_xmls):
-    aoupdater = AoUpdater(path_to_xmls)
+def create_base(xml_source):
+    aoupdater = AoUpdater(xml_source)
     aoupdater.create()
 
 
 def main():
     # Parse options
     p = optparse.OptionParser()
-    p.add_option('--create', '-c', help="Create DB from official full XMLs; "
-                                        "CREATE = path to xml source dir")
-    p.add_option('--update', '-u', help="Update DB from official delta archive; "
-                                        "UPDATE = count of updates")
+    p.add_option('--database', '-b', action="store", type="string",
+                 help="Manage database. Value: create - create new DB, update - update existing DB without loose the data")
+    p.add_option('--update-count', '-u', default=1, type="int",
+                 help="Count of updates to process, only for '--database update' option")
+    p.add_option('--source', '-s', default="http",
+                 help="Create/update DB from source. Value: \"http\" or absolute path to folder")
     options, arguments = p.parse_args()
 
-    # create new database
-    if options.create:
-        create_base(options.create)
-    # update database
-    if options.update:
-        update_base(int(options.update))
+    if options.database and options.source:
+        # create new database
+        if options.database == "create":
+            create_base(options.source)
+        # update database
+        if options.database == "update":
+            update_base(options.source, int(options.update_count))
 
 
 if __name__ == '__main__':
