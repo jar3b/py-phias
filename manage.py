@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from aore.aoutils.aoupdater import AoUpdater
 import optparse
+
+from aore.aoutils.aoupdater import AoUpdater
 
 
 def update_base(updates_count):

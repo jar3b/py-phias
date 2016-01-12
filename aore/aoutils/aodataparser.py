@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+import os
+
 from aore.aoutils.aoxmltableentry import AoXmlTableEntry
-from xmlparser import XMLParser
 from aore.config import trashfolder
 from aore.dbutils.dbschemas import db_shemas
-import os
+from xmlparser import XMLParser
 
 
 class AoDataParser:

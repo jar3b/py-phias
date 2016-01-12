@@ -23,7 +23,7 @@ class Importer:
         assert downloadfileinfo.VersionId < self.get_current_fias_version(), "DB is already up-to-date"
 
         yield dict(intver=int(downloadfileinfo.VersionId), strver=str(downloadfileinfo.TextVersion),
-                    url=str(downloadfileinfo.FiasCompleteXmlUrl))
+                   url=str(downloadfileinfo.FiasCompleteXmlUrl))
 
     # return (intver, strver, url)
     def get_updates(self):

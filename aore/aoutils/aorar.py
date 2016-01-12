@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import requests
 import os.path
-import rarfile
-from aore.config import unrar, trashfolder
 from traceback import format_exc
+
+import rarfile
+import requests
+
+from aore.config import unrar, trashfolder
 from aoxmltableentry import AoXmlTableEntry
 
 

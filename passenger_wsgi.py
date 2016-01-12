@@ -11,4 +11,5 @@ sys.setdefaultencoding("utf-8")
 sys.path.append('/home/i/interc7j/.local/lib/python2.7/site-packages')
 
 from fias import fias
+
 application = fias.app

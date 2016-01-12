@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
+import logging
+from os import walk, path
+
 from aore.aoutils.aodataparser import AoDataParser
 from aore.aoutils.aorar import AoRar
 from aore.aoutils.aoxmltableentry import AoXmlTableEntry
+from aore.aoutils.importer import Importer
 from aore.dbutils.dbhandler import DbHandler
 from aore.dbutils.dbschemas import allowed_tables
-from aore.aoutils.importer import Importer
-from os import walk, path
-import logging
+
 
 class AoUpdater:
     # Source: "http", directory (as a full path to unpacked xmls)
