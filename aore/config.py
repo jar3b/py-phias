@@ -15,9 +15,9 @@ DB_INSTANCES = dict(
     ),
     production=dict(
         host="localhost",
-        user="postgres",
-        password="intercon",
-        database="postgres",
+        user="***",
+        password="***",
+        database="***",
     )
 )
 
@@ -25,6 +25,9 @@ UNRAR_PATHES = dict(
     test="C:\Program Files (x86)\WinRAR\unrar.exe",
     production="unrar"
 )
+
+# Uncomment if you want to specify config_type manually
+# config_type = "test"
 
 # Main section
 db = DB_INSTANCES[config_type]

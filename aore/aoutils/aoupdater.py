@@ -14,7 +14,6 @@ from aore.dbutils.dbschemas import allowed_tables
 class AoUpdater:
     # Source: "http", directory (as a full path to unpacked xmls)
     def __init__(self, source="http"):
-        logging.basicConfig(format='%(asctime)s %(message)s')
         self.db_handler = DbHandler()
         self.mode = source
         self.updalist_generator = None
@@ -53,9 +52,9 @@ class AoUpdater:
             self.updalist_generator = self.__get_updates_from_folder(self.mode)
             self.tablelist_generator = self.__get_entries_from_folder
 
-    def process_single_entry(self, table_xmlentry, chunck_size=50000):
+    def process_single_entry(self, operation_type, table_xmlentry, chunck_size=50000):
         aoparser = AoDataParser(table_xmlentry, chunck_size)
-        aoparser.parse(lambda x: self.db_handler.bulk_csv(chunck_size, table_xmlentry.table_name, x))
+        aoparser.parse(lambda x, y: self.db_handler.bulk_csv(operation_type, table_xmlentry.table_name, x, y))
 
     def create(self):
         self.__init_update_entries(True)
@@ -63,9 +62,11 @@ class AoUpdater:
 
         for update_entry in self.updalist_generator:
             for table_entry in self.tablelist_generator(update_entry['url']):
-                self.process_single_entry(table_entry)
+                if table_entry.operation_type == AoXmlTableEntry.OperationType.update:
+                    table_entry.operation_type = AoXmlTableEntry.OperationType.create
+                self.process_single_entry(table_entry.operation_type, table_entry)
 
-        logging.warning("Create success")
+        logging.info("Create success")
 
     def update(self, count=1):
         self.__init_update_entries(False)
@@ -79,6 +80,6 @@ class AoUpdater:
                 break
 
             for table_entry in self.tablelist_generator(update_entry['url']):
-                self.process_single_entry(table_entry)
+                self.process_single_entry(table_entry.operation_type, table_entry)
 
-        logging.warning("Update success")
+        logging.info("Update success")

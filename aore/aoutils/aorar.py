@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import os.path
 from traceback import format_exc
 
@@ -15,7 +16,7 @@ class AoRar:
         rarfile.UNRAR_TOOL = unrar
 
     def download(self, url):
-        print("Downloading {}".format(url))
+        logging.info("Downloading {}".format(url))
         try:
             local_filename = os.path.abspath(trashfolder + url.split('/')[-1])
             if os.path.isfile(local_filename):
@@ -28,10 +29,9 @@ class AoRar:
                     if chunk:
                         f.write(chunk)
         except:
-            print("Error downloading. Reason : {}".format(format_exc()))
-            return None
+            raise BaseException("Error downloading. Reason : {}".format(format_exc()))
 
-        print("Downloaded {} bytes".format(request.headers['Content-length']))
+        logging.info("Downloaded {} bytes".format(request.headers['Content-length']))
         return local_filename
 
     def get_table_entries(self, file_name, allowed_tables):
@@ -43,7 +43,7 @@ class AoRar:
                 if xmltable.table_name in allowed_tables:
                     yield xmltable
             else:
-                print "Done"
-                # os.remove(file_name) TODO : Uncomment
+                logging.info("All entries processed")
+                os.remove(file_name)
         else:
-            print("No file specified or not exists")
+            logging.error("No file specified or not exists")

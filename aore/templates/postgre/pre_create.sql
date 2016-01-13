@@ -7,10 +7,11 @@ CREATE TABLE "public"."ADDROBJ" (
   "formalname" VARCHAR(120) COLLATE "default",
   "aolevel"    INT2,
   "parentguid" UUID,
-  "actstatus"  BIT(1),
-  "currstatus" INT2,
+  "actstatus"  BOOL,
+  "livestatus" BOOL,
+  "nextid"     UUID,
   CONSTRAINT "aoid" UNIQUE ("aoid"),
-  CONSTRAINT "id" PRIMARY KEY ("id")
+  CONSTRAINT "id_addrobj" PRIMARY KEY ("id")
 )
 WITH (OIDS =FALSE
 );
@@ -21,7 +22,8 @@ CREATE TABLE "public"."SOCRBASE" (
   "scname"   VARCHAR(10),
   "socrname" VARCHAR(50),
   "kod_t_st" VARCHAR(4),
-  PRIMARY KEY ("id")
+  CONSTRAINT "kod_t_st" UNIQUE ("kod_t_st"),
+  CONSTRAINT "id_socrbase" PRIMARY KEY ("id")
 )
 WITH (OIDS =FALSE
 );

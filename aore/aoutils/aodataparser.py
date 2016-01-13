@@ -18,17 +18,23 @@ class AoDataParser:
         self.pagesize = pagesize
         self.currentpage = 0
         self.counter = 0
+        self.addrobj_filter = self.datasource.table_name == 'ADDROBJ' and self.datasource.operation_type == AoXmlTableEntry.OperationType.create
 
         self.base_filename = ""
         self.csv_file = None
         self.data_bereit_callback = None
 
     def import_update(self, attr):
+        # Addrobj anvanced filter
+        if self.addrobj_filter:
+            if attr['ACTSTATUS'] == '0' or 'NEXTID' in attr:
+                return
+
         if self.counter > self.pagesize:
             # Send old file to DB engine
             if self.csv_file:
                 self.csv_file.close()
-                self.data_bereit_callback(os.path.abspath(self.csv_file.name))
+                self.data_bereit_callback(self.counter, os.path.abspath(self.csv_file.name))
                 os.remove(self.csv_file.name)
 
             # Prepare to next iteration
@@ -49,20 +55,21 @@ class AoDataParser:
 
     # Output - sql query
     def parse(self, data_callback):
-        if self.datasource.operation_type == AoXmlTableEntry.OperationType.update:
-            self.data_bereit_callback = data_callback
-            self.currentpage = 0
-            self.base_filename = trashfolder + "fd_" + str(self.datasource.operation_type) + "_" + \
-                                 self.datasource.table_name + ".csv.part{}"
-            self.counter = self.pagesize + 1
+        self.data_bereit_callback = data_callback
+        self.currentpage = 0
+        self.base_filename = \
+            trashfolder + "fd_" + \
+            str(self.datasource.operation_type) + "_" + \
+            self.datasource.table_name + ".csv.part{}"
+        self.counter = self.pagesize + 1
 
-            xml_parser = XMLParser(self.import_update)
-            src = self.datasource.open()
-            xml_parser.parse_buffer(src, db_shemas[self.datasource.table_name].xml_tag)
+        xml_parser = XMLParser(self.import_update)
+        src = self.datasource.open()
+        xml_parser.parse_buffer(src, db_shemas[self.datasource.table_name].xml_tag)
 
-            # Send last file to db processor
-            if self.csv_file:
-                self.csv_file.close()
-                self.data_bereit_callback(os.path.abspath(self.csv_file.name))
-                os.remove(self.csv_file.name)
-            src.close()
+        # Send last file to db processor
+        if self.csv_file:
+            self.csv_file.close()
+            self.data_bereit_callback(self.counter, os.path.abspath(self.csv_file.name))
+            os.remove(self.csv_file.name)
+        src.close()

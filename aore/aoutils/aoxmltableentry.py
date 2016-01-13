@@ -9,6 +9,7 @@ class AoXmlTableEntry:
     class OperationType(Enum):
         update = 1
         delete = 0
+        create = 2
 
         def __str__(self):
             return self._name_

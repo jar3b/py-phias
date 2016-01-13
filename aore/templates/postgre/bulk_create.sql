@@ -1,0 +1,1 @@
+COPY "%tablename%" (%fieldslist%) FROM '%csvname%' DELIMITER '%tab%' NULL 'NULL'
