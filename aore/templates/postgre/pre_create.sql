@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS "public"."ADDROBJ";
-CREATE TABLE "public"."ADDROBJ" (
+DROP TABLE IF EXISTS "ADDROBJ";
+CREATE TABLE "ADDROBJ" (
   "id"         SERIAL4 NOT NULL,
   "aoid"       UUID    NOT NULL,
   "aoguid"     UUID,
@@ -15,8 +15,8 @@ CREATE TABLE "public"."ADDROBJ" (
 )
 WITH (OIDS =FALSE
 );
-DROP TABLE IF EXISTS "public"."SOCRBASE";
-CREATE TABLE "public"."SOCRBASE" (
+DROP TABLE IF EXISTS "SOCRBASE";
+CREATE TABLE "SOCRBASE" (
   "id"       SERIAL4 NOT NULL,
   "level"    INT2,
   "scname"   VARCHAR(10),

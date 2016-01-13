@@ -12,12 +12,14 @@ DB_INSTANCES = dict(
         user="postgres",
         password="intercon",
         database="postgres",
+        port=5432
     ),
     production=dict(
         host="localhost",
         user="***",
         password="***",
         database="***",
+        port=5432
     )
 )
 
@@ -26,10 +28,17 @@ UNRAR_PATHES = dict(
     production="unrar"
 )
 
+SPHINX_VAR_DIRS = dict(
+    test="C:/Sphinx",
+    production="/var/sphinx"
+)
+
 # Uncomment if you want to specify config_type manually
 # config_type = "test"
 
 # Main section
+sphinx_index_name="sph_addrobj"
+sphinx_var_dir=SPHINX_VAR_DIRS[config_type]
 db = DB_INSTANCES[config_type]
 unrar = UNRAR_PATHES[config_type]
 trashfolder = "files/"

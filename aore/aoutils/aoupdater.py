@@ -66,6 +66,8 @@ class AoUpdater:
                     table_entry.operation_type = AoXmlTableEntry.OperationType.create
                 self.process_single_entry(table_entry.operation_type, table_entry)
 
+        self.db_handler.post_create()
+
         logging.info("Create success")
 
     def update(self, count=1):
@@ -76,7 +78,7 @@ class AoUpdater:
         for update_entry in self.updalist_generator:
             counter += 1
             if counter > count:
-                logging.warning("Maximum count of updates are processed - exit")
+                logging.warning("Maximum count of updates ({}) are processed - exit".format(count))
                 break
 
             for table_entry in self.tablelist_generator(update_entry['url']):
