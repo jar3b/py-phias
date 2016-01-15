@@ -3,7 +3,7 @@
 import optparse
 
 from aore.aoutils.aoupdater import AoUpdater
-from aore.miscutils.sphinx import configure_sphinx
+from aore.miscutils.sphinx import SphinxHelper
 from aore.fias.search import SphinxSearch
 
 
@@ -42,7 +42,10 @@ def main():
             update_base(options.source, int(options.update_count))
 
     if options.sphinx and options.indexer_path:
-        configure_sphinx(options.indexer_path)
+        sphinxh = SphinxHelper()
+        sphinxh.configure_indexer(options.indexer_path)
 
 if __name__ == '__main__':
-    main()
+    sph = SphinxSearch()
+    sph.get_suggest('апасьево')
+    #main()

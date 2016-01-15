@@ -30,11 +30,8 @@ class DBImpl:
             self.transaction_rollback()
             raise BaseException("Error execute sql query. Reason : {}".format(format_exc()))
 
-    def get_rows(self, query_string, for_dict=True):
-        if for_dict:
-            cur = self.connection.cursor(self.db_engine.cursors.DictCursor)
-        else:
-            cur = self.connection.cursor()
+    def get_rows(self, query_string):
+        cur = self.connection.cursor()
         cur.execute(query_string)
 
         rows = cur.fetchall()
