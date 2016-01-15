@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import json
-import logging
+import re
 
 import Levenshtein
 import psycopg2
@@ -38,8 +37,9 @@ class SphinxSearch:
             SRANK_EXACTLY_TYPING=['01', '11'],  # Точно - слово недопечатано, не надо подсказок, только word*
             SRANK_PROBABLY_TYPING=['0*'],  # Возможно - слово недопечатано, немного подсказок и word*
             SRANK_PROBABLY_FOUND=['10'],  # Возможно - слово введено точно, немного подсказок, без word*
-            SRANK_PROBABLY_COMPLEX=['1*']
+            SRANK_PROBABLY_COMPLEX=['1*'],
             # Возможно, слово сложное, есть и точное совпадние, по маске Нужно немного подсказок и word*
+            SRANK_PROBABLY_SOCR=['1!']  # Возможно - сокращение, не трогаем вообще
         )
 
         def __init__(self, rtype):
@@ -47,8 +47,11 @@ class SphinxSearch:
             for x, y in self.names.iteritems():
                 self.__dict__[x] = self.rtype in y
 
+        def __str__(self):
+            return ", ".join([x for x in self.names if self.__dict__[x]])
+
     def __get_strong_and_uncomplete_ranks(self, word):
-        word_len = str(len(word) / 2)
+        word_len = len(word)
         sql_qry = "SELECT COUNT(*) FROM \"AOTRIG\" WHERE word LIKE '{}%' AND LENGTH(word) > {} " \
                   "UNION ALL SELECT COUNT(*) FROM \"AOTRIG\" WHERE word='{}'".format(
             word, word_len, word)
@@ -56,14 +59,18 @@ class SphinxSearch:
         result = self.db.get_rows(sql_qry)
         strong_rank = result[1][0]
         uncomplete_rank = result[0][0]
-        if uncomplete_rank > 1:
-            uncomplete_rank = '*'
+
+        if uncomplete_rank > 1000 and word_len < 4:
+            uncomplete_rank = '!'
+        else:
+            if uncomplete_rank > 1:
+                uncomplete_rank = '*'
 
         return self.SRankType(str(strong_rank) + str(uncomplete_rank))
 
-    def get_suggest(self, word):
+    def __get_suggest(self, word):
         word_len = str(len(word) / 2)
-        trigrammed_word = '"{}"/2'.format(trigram(word))
+        trigrammed_word = '"{}"/1'.format(trigram(word))
 
         self.__configure("idx_fias_sugg", word_len)
         result = self.client.Query(trigrammed_word, 'idx_fias_sugg')
@@ -84,9 +91,17 @@ class SphinxSearch:
             print x[0], x[1]
         return outlist
 
+    def __split_phrase(self, phrase):
+        phrase = unicode(phrase).replace('-', '').replace('@', '').lower()
+        return re.split(r"[ ,:.]+", phrase)
+
+    def __process_word(self, word):
+        print word, self.__get_strong_and_uncomplete_ranks(word)
+
     def find(self, text):
-        # TODO: ADD index
-        logging.info("12")
-        result = self.client.Query(text)
-        print json.dumps(result)
-        logging.info("12")
+        words = self.__split_phrase(text)
+        for word in words:
+            self.__process_word(word)
+            # result = self.client.Query(text)
+            # print json.dumps(result)
+            # logging.info("12")

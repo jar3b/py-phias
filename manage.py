@@ -32,9 +32,12 @@ def main():
                  help="Path to sphinx indexer binary. Must be specified for '--sphinx-configure'")
     p.add_option('--output-conf', '-o',
                  help="Output config filename. Must be specified for '--sphinx-configure'")
+    p.add_option('--test', '-t', action="store_true", dest="test",
+                 help="Test")
 
     options, arguments = p.parse_args()
 
+    # Manage DB
     if options.database:
         # create new database
         if options.database == "create":
@@ -43,11 +46,15 @@ def main():
         if options.database == "update":
             update_base(options.source, int(options.update_count))
 
+    # Manage Sphinx
     if options.sphinx and options.indexer_path and options.output_conf:
         sphinxh = SphinxHelper()
         sphinxh.configure_indexer(options.indexer_path, options.output_conf)
 
+    # 4 Debug purposes..
+    if options.test:
+        sph = SphinxSearch()
+        sph.find('город Гавно д. пидарская, ул Кощеева')
+
 if __name__ == '__main__':
-    #sph = SphinxSearch()
-    #sph.get_suggest('апасьево')
     main()
