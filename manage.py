@@ -30,6 +30,8 @@ def main():
                  help="Configure sphinx. Creates sphinx.conf in working direcory")
     p.add_option('--indexer-path', '-i',
                  help="Path to sphinx indexer binary. Must be specified for '--sphinx-configure'")
+    p.add_option('--output-conf', '-o',
+                 help="Output config filename. Must be specified for '--sphinx-configure'")
 
     options, arguments = p.parse_args()
 
@@ -41,11 +43,11 @@ def main():
         if options.database == "update":
             update_base(options.source, int(options.update_count))
 
-    if options.sphinx and options.indexer_path:
+    if options.sphinx and options.indexer_path and options.output_conf:
         sphinxh = SphinxHelper()
-        sphinxh.configure_indexer(options.indexer_path)
+        sphinxh.configure_indexer(options.indexer_path, options.output_conf)
 
 if __name__ == '__main__':
-    sph = SphinxSearch()
-    sph.get_suggest('апасьево')
-    #main()
+    #sph = SphinxSearch()
+    #sph.get_suggest('апасьево')
+    main()

@@ -6,10 +6,9 @@ import os
 from bottle import template
 
 from aore.aoutils.aoxmltableentry import AoXmlTableEntry
+from aore.config import db as dbconfig, sphinx_index_addjobj, sphinx_var_dir, trashfolder, sphinx_index_sugg
 from aore.dbutils.dbhandler import DbHandler
 from trigram import trigram
-
-from aore.config import db as dbconfig, sphinx_index_addjobj, sphinx_var_dir, trashfolder, sphinx_index_sugg
 
 
 class SphinxHelper:
@@ -17,32 +16,39 @@ class SphinxHelper:
         self.index_binary = None
         self.files = dict()
 
-    def configure_indexer(self, indexer_binary):
+    def configure_indexer(self, indexer_binary, config_filename):
         logging.info("Start configuring Sphinx...")
         self.index_binary = indexer_binary
 
         # Create ADDROBJ config
         self.files['addrobj.conf'] = self.__create_ao_index_config()
 
-        # Indexing ADDROBJ config
-        run_index_cmd = "{} -c {} --all".format(self.index_binary, self.files['addrobj.conf'])
-        logging.info("Indexing main ({})...".format(sphinx_index_addjobj))
-        #os.system(run_index_cmd)
-        logging.info("{} index was created.".format(sphinx_index_addjobj))
-
         # Produce dict file
         self.files['dict.txt'] = self.__create_suggestion_dict()
 
         # Put dict into db
-        #self.files['dict.csv'] = self.__dbexport_sugg_dict()
+        self.files['dict.csv'] = self.__dbexport_sugg_dict()
 
         # Create SUGGEST config
         self.files['suggest.conf'] = self.__create_sugg_index_config()
-        run_index_cmd = "{} -c {} --all".format(self.index_binary, self.files['suggest.conf'])
-        logging.info("Indexing main ({})...".format(sphinx_index_sugg))
-        os.system(run_index_cmd)
-        logging.info("{} index was created.".format(sphinx_index_sugg))
 
+        # Create main config (sphinx.conf)
+        out_fname = self.__create_main_config(config_filename)
+
+        # Indexing both configs
+        run_index_cmd = "{} -c {} --all".format(self.index_binary, out_fname)
+        logging.info("Indexing main ({})...".format(out_fname))
+        os.system(run_index_cmd)
+        logging.info("All indexes were created.".format(out_fname))
+
+        # remove temp files
+        for fname, fpath in self.files.iteritems():
+            try:
+                os.remove(fpath)
+            except:
+                logging.warning("Cannot delete {}. Not accessible.".format(fpath))
+        logging.info("Temporary files removed.")
+        logging.info("Successfully configured. Please restart searchd.")
 
     def __create_sugg_index_config(self):
         fname = os.path.abspath(trashfolder + "suggest.conf")
@@ -115,11 +121,27 @@ class SphinxHelper:
         run_builddict_cmd = "{} {} -c {} --buildstops {} 200000 --buildfreqs".format(self.index_binary,
                                                                                      sphinx_index_addjobj,
                                                                                      self.files['addrobj.conf'], fname)
-        #os.system(run_builddict_cmd)
+        os.system(run_builddict_cmd)
         logging.info("Done.")
 
         return fname
 
+    def __create_main_config(self, config_fname):
+        out_filename = os.path.abspath(config_fname)
+        logging.info("Creating main config {}...".format(out_filename))
 
-# TRASH
-#    conf_data = template('aore/templates/sphinx/sphinx.conf', sphinx_var_path=sphinx_var_dir)
+        conf_data = template('aore/templates/sphinx/sphinx.conf', sphinx_var_path=sphinx_var_dir)
+
+        f = open(out_filename, "w")
+        for fname, fpath in self.files.iteritems():
+            if ".conf" in fname:
+                with open(fpath, "r") as conff:
+                    for line in conff:
+                        f.write(line)
+                    f.write('\n')
+        f.write(conf_data)
+        f.close()
+
+        logging.info("Done.")
+
+        return out_filename
