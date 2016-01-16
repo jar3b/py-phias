@@ -41,33 +41,52 @@ class WordEntry:
 
     def __init__(self, db, word):
         self.db = db
-        self.word = word
-        self.ranks = self.__get_word_entity()
+        self.word = str(word)
+        self.variations = []
+        self.scname = None
+        self.ranks = self.__get_ranks()
+
 
         for x, y in self.match_types.iteritems():
             self.__dict__[x] = False
             for z in y:
                 self.__dict__[x] = self.__dict__[x] or re.search(z, self.ranks) is not None
 
-    def __get_word_entity(self):
+        if self.MT_LAST_STAR:
+            self.MT_AS_IS = False
+
+    def add_variation_socr(self):
+        if self.scname:
+            self.add_variation(self.scname)
+
+    def add_variation(self, variation_string):
+        self.variations.append(variation_string)
+
+    def get_variations(self):
+        #if len(self.variations) == 1:
+        #    return "\"{}\"".format(self.variations[0])
+        return "({})".format(" | ".join(self.variations))
+
+    def __get_ranks(self):
         word_len = len(self.word)
-        sql_qry = "SELECT COUNT(*) FROM \"AOTRIG\" WHERE word LIKE '{}%' AND LENGTH(word) > {} " \
-                  "UNION ALL SELECT COUNT(*) FROM \"AOTRIG\" WHERE word='{}' " \
-                  "UNION ALL SELECT COUNT(*) FROM \"SOCRBASE\" WHERE socrname ILIKE '{}'" \
-                  "UNION ALL SELECT COUNT(*) FROM \"SOCRBASE\" WHERE scname ILIKE '{}'".format(
+        sql_qry = "SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word LIKE '{}%' AND LENGTH(word) > {} " \
+                  "UNION ALL SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word='{}' " \
+                  "UNION ALL SELECT COUNT(*), MAX(scname) FROM \"SOCRBASE\" WHERE socrname ILIKE '{}'" \
+                  "UNION ALL SELECT COUNT(*), NULL FROM \"SOCRBASE\" WHERE scname ILIKE '{}'".format(
             self.word, word_len, self.word, self.word, self.word)
 
         result = self.db.get_rows(sql_qry)
+        if not self.scname:
+            self.scname = result[2][1]
+
         outmask = ""
         for ra in result:
             if ra[0] > 1:
                 outmask += 'x'
             else:
                 outmask += str(ra[0])
+
         return outmask
 
     def get_type(self):
         return ", ".join([x for x in self.match_types if self.__dict__[x]])
-
-    def __str__(self):
-        return str(self.word)

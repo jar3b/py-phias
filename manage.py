@@ -27,11 +27,11 @@ def main():
     p.add_option('--source', '-s', default="http",
                  help="Create/update DB from source. Value: \"http\" or absolute path to folder")
     p.add_option('--sphinx-configure', '-c', action="store_true", dest="sphinx", default="False",
-                 help="Configure sphinx. Creates sphinx.conf in working direcory")
+                 help="Configure sphinx. Creates sphinx.conf specified in '--output-conf'")
     p.add_option('--indexer-path', '-i',
-                 help="Path to sphinx indexer binary. Must be specified for '--sphinx-configure'")
+                 help="Path to sphinx indexer binary. Required for '--sphinx-configure'")
     p.add_option('--output-conf', '-o',
-                 help="Output config filename. Must be specified for '--sphinx-configure'")
+                 help="Output config filename. Required for '--sphinx-configure'")
     p.add_option('--test', '-t', action="store_true", dest="test",
                  help="Test")
 
@@ -54,7 +54,7 @@ def main():
     # 4 Debug purposes..
     if options.test:
         sph = SphinxSearch()
-        sph.find('гор Горно-алтайск проспект Ленина')
+        sph.find('#москва$#северное тушино$$$ул#туристская')
 
 if __name__ == '__main__':
     main()
