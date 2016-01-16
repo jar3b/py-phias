@@ -27,3 +27,14 @@ CREATE TABLE "SOCRBASE" (
 )
 WITH (OIDS =FALSE
 );
+DROP TABLE IF EXISTS "AOTRIG";
+CREATE TABLE "AOTRIG" (
+  "id"        SERIAL4 NOT NULL,
+  "word"      VARCHAR(50),
+  "trigramm"  VARCHAR(180),
+  "frequency" INT4,
+  CONSTRAINT "word" UNIQUE ("word"),
+  CONSTRAINT "id_aotrig" PRIMARY KEY ("id")
+)
+WITH (OIDS =FALSE
+);

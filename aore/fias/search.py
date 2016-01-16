@@ -8,6 +8,7 @@ import sphinxapi
 
 from aore.config import db as dbparams
 from aore.dbutils.dbimpl import DBImpl
+from aore.fias.word import WordEntry
 from aore.miscutils.trigram import trigram
 
 
@@ -29,44 +30,6 @@ class SphinxSearch:
                 self.client.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
             else:
                 self.client.SetMatchMode(sphinxapi.MA)
-
-    # Types =
-    class SRankType:
-        names = dict(
-            SRANK_EXACTLY_MISSPRINT=['00'],  # Точно - опечатка, нужно много подсказок, без word*
-            SRANK_EXACTLY_TYPING=['01', '11'],  # Точно - слово недопечатано, не надо подсказок, только word*
-            SRANK_PROBABLY_TYPING=['0*'],  # Возможно - слово недопечатано, немного подсказок и word*
-            SRANK_PROBABLY_FOUND=['10'],  # Возможно - слово введено точно, немного подсказок, без word*
-            SRANK_PROBABLY_COMPLEX=['1*'],
-            # Возможно, слово сложное, есть и точное совпадние, по маске Нужно немного подсказок и word*
-            SRANK_PROBABLY_SOCR=['1!']  # Возможно - сокращение, не трогаем вообще
-        )
-
-        def __init__(self, rtype):
-            self.rtype = rtype
-            for x, y in self.names.iteritems():
-                self.__dict__[x] = self.rtype in y
-
-        def __str__(self):
-            return ", ".join([x for x in self.names if self.__dict__[x]])
-
-    def __get_strong_and_uncomplete_ranks(self, word):
-        word_len = len(word)
-        sql_qry = "SELECT COUNT(*) FROM \"AOTRIG\" WHERE word LIKE '{}%' AND LENGTH(word) > {} " \
-                  "UNION ALL SELECT COUNT(*) FROM \"AOTRIG\" WHERE word='{}'".format(
-            word, word_len, word)
-
-        result = self.db.get_rows(sql_qry)
-        strong_rank = result[1][0]
-        uncomplete_rank = result[0][0]
-
-        if uncomplete_rank > 1000 and word_len < 4:
-            uncomplete_rank = '!'
-        else:
-            if uncomplete_rank > 1:
-                uncomplete_rank = '*'
-
-        return self.SRankType(str(strong_rank) + str(uncomplete_rank))
 
     def __get_suggest(self, word):
         word_len = str(len(word) / 2)
@@ -95,13 +58,15 @@ class SphinxSearch:
         phrase = unicode(phrase).replace('-', '').replace('@', '').lower()
         return re.split(r"[ ,:.]+", phrase)
 
-    def __process_word(self, word):
-        print word, self.__get_strong_and_uncomplete_ranks(word)
+    def __process_words(self, words):
+        for word in words:
+            yield WordEntry(self.db, word)
 
     def find(self, text):
         words = self.__split_phrase(text)
-        for word in words:
-            self.__process_word(word)
+        word_entries = self.__process_words(words)
+        for word_entry in word_entries:
+            print word_entry, word_entry.get_type()
             # result = self.client.Query(text)
             # print json.dumps(result)
             # logging.info("12")

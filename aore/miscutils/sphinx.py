@@ -36,7 +36,7 @@ class SphinxHelper:
         out_fname = self.__create_main_config(config_filename)
 
         # Indexing both configs
-        run_index_cmd = "{} -c {} --all".format(self.index_binary, out_fname)
+        run_index_cmd = "{} -c {} --all --rotate".format(self.index_binary, out_fname)
         logging.info("Indexing main ({})...".format(out_fname))
         os.system(run_index_cmd)
         logging.info("All indexes were created.".format(out_fname))
@@ -81,12 +81,15 @@ class SphinxHelper:
                 if line == '':
                     break
 
-                keyword = line.split(' ')[0]
-                if not keyword:
+                splitting_seq = line.split(' ')
+                keyword = splitting_seq[0]
+                freq = splitting_seq[1].rstrip('\n')
+                if not keyword or not freq:
                     raise BaseException("Cannot process {}".format(self.files['dict.txt']))
 
                 nodes.append(keyword)
                 nodes.append(trigram(keyword))
+                nodes.append(freq)
 
                 exit_file.write("\t".join(nodes) + "\n")
 

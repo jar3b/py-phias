@@ -24,6 +24,7 @@ class DBImpl:
     def execute(self, sql_query):
         try:
             cur = self.get_cursor()
+            print sql_query
             cur.execute(sql_query)
             self.transaction_commit()
         except:
