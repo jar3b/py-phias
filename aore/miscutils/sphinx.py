@@ -73,6 +73,7 @@ class SphinxHelper:
         logging.info("Place suggestion dict to DB {}...".format(self.files['dict.txt']))
         dict_dat_fname = os.path.abspath(trashfolder + "suggdict.csv")
 
+        csv_counter = 0
         with open(self.files['dict.txt'], "r") as dict_file, open(dict_dat_fname, "w") as exit_file:
             line = None
             while line != '':
@@ -80,7 +81,7 @@ class SphinxHelper:
                 line = dict_file.readline()
                 if line == '':
                     break
-
+                csv_counter += 1
                 splitting_seq = line.split(' ')
                 keyword = splitting_seq[0]
                 freq = splitting_seq[1].rstrip('\n')
@@ -92,9 +93,14 @@ class SphinxHelper:
                 nodes.append(freq)
 
                 exit_file.write("\t".join(nodes) + "\n")
+        try:
+            dict_file.close()
+            exit_file.close()
+        except:
+            pass
 
         aodp = DbHandler()
-        aodp.bulk_csv(AoXmlTableEntry.OperationType.update, "AOTRIG", 8, dict_dat_fname)
+        aodp.bulk_csv(AoXmlTableEntry.OperationType.update, "AOTRIG", csv_counter, dict_dat_fname)
         logging.info("Done.")
 
     def __create_ao_index_config(self):
