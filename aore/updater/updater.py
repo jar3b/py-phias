@@ -3,15 +3,15 @@
 import logging
 from os import walk, path
 
-from aore.aoutils.aodataparser import AoDataParser
-from aore.aoutils.aorar import AoRar
-from aore.aoutils.aoxmltableentry import AoXmlTableEntry
-from aore.aoutils.importer import Importer
-from aore.dbutils.dbhandler import DbHandler
+from aore.updater.aodataparser import AoDataParser
+from aore.updater.aorar import AoRar
+from aore.updater.aoxmltableentry import AoXmlTableEntry
+from aore.updater.dbhandler import DbHandler
+from aore.updater.soapreceiver import SoapReceiver
 from aore.dbutils.dbschemas import allowed_tables
 
 
-class AoUpdater:
+class Updater:
     # Source: "http", directory (as a full path to unpacked xmls)
     def __init__(self, source="http"):
         self.db_handler = DbHandler()
@@ -31,7 +31,7 @@ class AoUpdater:
 
     def __get_updates_from_folder(self, foldername):
         # TODO: Вычислять версию, если берем данные из каталога
-        yield dict(intver=0, textver="Unknown", url=foldername)
+        yield dict(intver=0, textver="Unknown", delta_url=foldername, complete_url=foldername)
 
     def __get_updates_from_rar(self, url):
         aorar = AoRar()
@@ -39,14 +39,11 @@ class AoUpdater:
         for table_entry in aorar.get_table_entries(fname, allowed_tables):
             yield table_entry
 
-    def __init_update_entries(self, full_base):
+    def __init_update_entries(self, updates_generator):
         if self.mode == "http":
+            assert updates_generator
             self.tablelist_generator = self.__get_updates_from_rar
-            imp = Importer()
-            if full_base:
-                self.updalist_generator = imp.get_full()
-            else:
-                self.updalist_generator = imp.get_updates()
+            self.updalist_generator = updates_generator
         else:
             assert path.isdir(self.mode), "Invalid directory {}".format(self.mode)
             self.updalist_generator = self.__get_updates_from_folder(self.mode)
@@ -56,12 +53,13 @@ class AoUpdater:
         aoparser = AoDataParser(table_xmlentry, chunck_size)
         aoparser.parse(lambda x, y: self.db_handler.bulk_csv(operation_type, table_xmlentry.table_name, x, y))
 
-    def create(self):
-        self.__init_update_entries(True)
+    def create(self, updates_generator):
+        self.__init_update_entries(updates_generator)
         self.db_handler.pre_create()
 
         for update_entry in self.updalist_generator:
-            for table_entry in self.tablelist_generator(update_entry['url']):
+            logging.info("Processing update #{}".format(update_entry['intver']))
+            for table_entry in self.tablelist_generator(update_entry['complete_url']):
                 if table_entry.operation_type == AoXmlTableEntry.OperationType.update:
                     table_entry.operation_type = AoXmlTableEntry.OperationType.create
                 self.process_single_entry(table_entry.operation_type, table_entry)
@@ -70,18 +68,13 @@ class AoUpdater:
 
         logging.info("Create success")
 
-    def update(self, count=1):
-        self.__init_update_entries(False)
+    def update(self, updates_generator):
+        self.__init_update_entries(updates_generator)
         self.db_handler.pre_update()
 
-        counter = 0
-        for update_entry in self.updalist_generator:
-            counter += 1
-            if counter > count:
-                logging.warning("Maximum count of updates ({}) are processed - exit".format(count))
-                break
-
-            for table_entry in self.tablelist_generator(update_entry['url']):
+        for update_entry in self.updates_generator:
+            logging.info("Processing update #{}".format(update_entry['intver']))
+            for table_entry in self.tablelist_generator(update_entry['delta_url']):
                 self.process_single_entry(table_entry.operation_type, table_entry)
 
         logging.info("Update success")

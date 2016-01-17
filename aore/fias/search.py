@@ -4,7 +4,7 @@ import re
 
 import Levenshtein
 import psycopg2
-import aore.sphinxapi as sphinxapi
+import sphinxapi
 
 from aore.config import db as dbparams, sphinx_index_sugg, sphinx_index_addjobj
 from aore.dbutils.dbimpl import DBImpl
@@ -80,12 +80,12 @@ class SphinxSearch:
         phrase = unicode(phrase).replace('-', '').replace('@', '').lower()
         return re.split(r"[ ,:.#$]+", phrase)
 
-    def __add_word_variations(self, word_entry):
-        if word_entry.MT_MANY_SUGG:
+    def __add_word_variations(self, word_entry, strong):
+        if word_entry.MT_MANY_SUGG and not strong:
             suggs = self.__get_suggest(word_entry.word, self.rating_limit_soft, 6)
             for suggestion in suggs:
                 word_entry.add_variation(suggestion[0])
-        if word_entry.MT_SOME_SUGG:
+        if word_entry.MT_SOME_SUGG and not strong:
             suggs = self.__get_suggest(word_entry.word, self.rating_limit_hard, 3)
             for suggestion in suggs:
                 word_entry.add_variation(suggestion[0])
@@ -96,16 +96,18 @@ class SphinxSearch:
         if word_entry.MT_ADD_SOCR:
             word_entry.add_variation_socr()
 
-    def __get_word_entries(self, words):
+    def __get_word_entries(self, words, strong):
         for word in words:
             if word != '':
                 we = WordEntry(self.db, word)
-                self.__add_word_variations(we)
+                self.__add_word_variations(we, strong)
+                if we.get_variations() == "()":
+                    raise BaseException("Cannot process sentence.")
                 yield we
 
-    def find(self, text):
+    def find(self, text, strong):
         words = self.__split_phrase(text)
-        word_entries = self.__get_word_entries(words)
+        word_entries = self.__get_word_entries(words, strong)
         sentence = "{}".format(" MAYBE ".join(x.get_variations() for x in word_entries))
 
         self.__configure(sphinx_index_addjobj)
@@ -114,4 +116,4 @@ class SphinxSearch:
         results = []
         for ma in rs['matches']:
             results.append([ma['attrs']['aoid'], ma['attrs']['fullname'], ma['weight']])
-        print results
+        return results

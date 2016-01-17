@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from aore.aoutils.aoxmltableentry import AoXmlTableEntry
+from aore.updater.aoxmltableentry import AoXmlTableEntry
 from aore.config import trashfolder
 from aore.dbutils.dbschemas import db_shemas
 from xmlparser import XMLParser
@@ -18,18 +18,12 @@ class AoDataParser:
         self.pagesize = pagesize
         self.currentpage = 0
         self.counter = 0
-        self.addrobj_filter = self.datasource.table_name == 'ADDROBJ' and self.datasource.operation_type == AoXmlTableEntry.OperationType.create
 
         self.base_filename = ""
         self.csv_file = None
         self.data_bereit_callback = None
 
     def import_update(self, attr):
-        # Addrobj anvanced filter
-        if self.addrobj_filter:
-            if attr['ACTSTATUS'] == '0' or 'NEXTID' in attr:
-                return
-
         if self.counter > self.pagesize:
             # Send old file to DB engine
             if self.csv_file:

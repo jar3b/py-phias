@@ -5,9 +5,9 @@ import os
 
 from bottle import template
 
-from aore.aoutils.aoxmltableentry import AoXmlTableEntry
+from aore.updater.aoxmltableentry import AoXmlTableEntry
+from aore.updater.dbhandler import DbHandler
 from aore.config import db as dbconfig, sphinx_index_addjobj, sphinx_var_dir, trashfolder, sphinx_index_sugg
-from aore.dbutils.dbhandler import DbHandler
 from trigram import trigram
 
 

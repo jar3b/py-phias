@@ -5,7 +5,7 @@ import logging
 import psycopg2
 from bottle import template
 
-from aore.aoutils.aoxmltableentry import AoXmlTableEntry
+from aore.updater.aoxmltableentry import AoXmlTableEntry
 from aore.config import db as dbparams
 from aore.dbutils.dbimpl import DBImpl
 from aore.dbutils.dbschemas import db_shemas
