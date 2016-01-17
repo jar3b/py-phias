@@ -54,7 +54,7 @@ def main():
     # 4 Debug purposes..
     if options.test:
         sph = SphinxSearch()
-        sph.find('#москва$#северное тушино$$$ул#туристская')
+        sph.find('кридовая паскаул')
 
 if __name__ == '__main__':
     main()

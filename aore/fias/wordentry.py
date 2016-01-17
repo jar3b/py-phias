@@ -46,7 +46,6 @@ class WordEntry:
         self.scname = None
         self.ranks = self.__get_ranks()
 
-
         for x, y in self.match_types.iteritems():
             self.__dict__[x] = False
             for z in y:
@@ -63,8 +62,6 @@ class WordEntry:
         self.variations.append(variation_string)
 
     def get_variations(self):
-        #if len(self.variations) == 1:
-        #    return "\"{}\"".format(self.variations[0])
         return "({})".format(" | ".join(self.variations))
 
     def __get_ranks(self):
