@@ -5,6 +5,7 @@ import re
 import Levenshtein
 import psycopg2
 import sphinxapi
+import logging
 
 from aore.config import db as dbparams, sphinx_index_sugg, sphinx_index_addjobj
 from aore.dbutils.dbimpl import DBImpl
@@ -23,14 +24,14 @@ class SphinxSearch:
         self.db = DBImpl(psycopg2, dbparams)
 
         self.client_sugg = sphinxapi.SphinxClient()
-        self.client_sugg.SetServer("localhost", 9312)
+        self.client_sugg.SetServer("127.0.0.1", 9312)
         self.client_sugg.SetLimits(0, 10)
-        self.client_sugg.SetConnectTimeout(3.0)
+        self.client_sugg.SetConnectTimeout(7.0)
 
         self.client_show = sphinxapi.SphinxClient()
-        self.client_show.SetServer("localhost", 9312)
+        self.client_show.SetServer("127.0.0.1", 9312)
         self.client_show.SetLimits(0, 10)
-        self.client_show.SetConnectTimeout(3.0)
+        self.client_show.SetConnectTimeout(7.0)
 
     def __configure(self, index_name, wlen=None):
         if index_name == "idx_fias_sugg":
@@ -42,7 +43,7 @@ class SphinxSearch:
                 self.client_sugg.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
         else:
             self.client_show.SetMatchMode(sphinxapi.SPH_MATCH_EXTENDED2)
-            self.client_show.SetRankingMode(sphinxapi.SPH_RANK_BM25)
+            #self.client_show.SetRankingMode(sphinxapi.SPH_RANK_BM25)
 
     def __get_suggest(self, word, rating_limit, count):
         word_len = str(len(word) / 2)
@@ -101,6 +102,7 @@ class SphinxSearch:
             if word != '':
                 we = WordEntry(self.db, word)
                 self.__add_word_variations(we, strong)
+
                 if we.get_variations() == "()":
                     raise BaseException("Cannot process sentence.")
                 yield we
@@ -111,7 +113,13 @@ class SphinxSearch:
         sentence = "{}".format(" MAYBE ".join(x.get_variations() for x in word_entries))
 
         self.__configure(sphinx_index_addjobj)
+        logging.info("QUERY "+sentence)
         rs = self.client_show.Query(sentence, sphinx_index_addjobj)
+        logging.info("OK")
+
+        print json.dumps(rs)
+
+        logging.info("OK")
 
         results = []
         for ma in rs['matches']:

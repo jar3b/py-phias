@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import logging
 
 
 class WordEntry:
@@ -65,7 +66,7 @@ class WordEntry:
         return "({})".format(" | ".join(self.variations))
 
     def __get_ranks(self):
-        word_len = len(self.word)
+        word_len = len(unicode(self.word))
         sql_qry = "SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word LIKE '{}%' AND LENGTH(word) > {} " \
                   "UNION ALL SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word='{}' " \
                   "UNION ALL SELECT COUNT(*), MAX(scname) FROM \"SOCRBASE\" WHERE socrname ILIKE '{}'" \

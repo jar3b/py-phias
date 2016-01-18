@@ -72,7 +72,7 @@ class Updater:
         self.__init_update_entries(updates_generator)
         self.db_handler.pre_update()
 
-        for update_entry in self.updates_generator:
+        for update_entry in self.updalist_generator:
             logging.info("Processing update #{}".format(update_entry['intver']))
             for table_entry in self.tablelist_generator(update_entry['delta_url']):
                 self.process_single_entry(table_entry.operation_type, table_entry)

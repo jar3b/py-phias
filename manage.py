@@ -2,7 +2,7 @@
 
 import optparse
 
-from aore.fias.search import SphinxSearch
+from aore.fias.fiasfactory import FiasFactory
 from aore.miscutils.sphinx import SphinxHelper
 from aore.updater.updater import Updater
 from aore.updater.soapreceiver import SoapReceiver
@@ -116,8 +116,8 @@ def main():
 
     # 4 Debug purposes..
     if options.test:
-        sph = SphinxSearch()
-        sph.find('кедровая пасраул')
+        sph = FiasFactory()
+        sph.find('ул кемровая пасраул алтай майминский р-н')
 
 
 if __name__ == '__main__':
