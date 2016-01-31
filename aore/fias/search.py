@@ -1,40 +1,42 @@
 # -*- coding: utf-8 -*-
-import json
+import logging
 import re
 
 import Levenshtein
-import psycopg2
 import sphinxapi
-import logging
 
-from aore.config import db as dbparams, sphinx_index_sugg, sphinx_index_addjobj
-from aore.dbutils.dbimpl import DBImpl
+from aore.config import sphinx
 from aore.fias.wordentry import WordEntry
 from aore.miscutils.trigram import trigram
 
 
 class SphinxSearch:
-    def __init__(self):
+    def __init__(self, db):
         self.delta_len = 2
+
         self.rating_limit_soft = 0.4
+        self.rating_limit_soft_count = 6
+        self.word_length_soft = 3
+
         self.rating_limit_hard = 0.82
+        self.rating_limit_hard_count = 3
+
         self.default_rating_delta = 2
         self.regression_coef = 0.04
 
-        self.db = DBImpl(psycopg2, dbparams)
-
+        self.db = db
         self.client_sugg = sphinxapi.SphinxClient()
-        self.client_sugg.SetServer("127.0.0.1", 9312)
+        self.client_sugg.SetServer(sphinx.host, sphinx.port)
         self.client_sugg.SetLimits(0, 10)
-        self.client_sugg.SetConnectTimeout(7.0)
+        self.client_sugg.SetConnectTimeout(3.0)
 
         self.client_show = sphinxapi.SphinxClient()
-        self.client_show.SetServer("127.0.0.1", 9312)
+        self.client_show.SetServer(sphinx.host, sphinx.port)
         self.client_show.SetLimits(0, 10)
-        self.client_show.SetConnectTimeout(7.0)
+        self.client_show.SetConnectTimeout(3.0)
 
     def __configure(self, index_name, wlen=None):
-        if index_name == "idx_fias_sugg":
+        if index_name == sphinx.index_sugg:
             if wlen:
                 self.client_sugg.SetMatchMode(sphinxapi.SPH_MATCH_EXTENDED2)
                 self.client_sugg.SetRankingMode(sphinxapi.SPH_RANK_WORDCOUNT)
@@ -43,14 +45,15 @@ class SphinxSearch:
                 self.client_sugg.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
         else:
             self.client_show.SetMatchMode(sphinxapi.SPH_MATCH_EXTENDED2)
-            #self.client_show.SetRankingMode(sphinxapi.SPH_RANK_BM25)
+            self.client_show.SetRankingMode(sphinxapi.SPH_RANK_BM25)
+            self.client_show.SetSortMode(sphinxapi.SPH_SORT_RELEVANCE)
 
     def __get_suggest(self, word, rating_limit, count):
         word_len = str(len(word) / 2)
         trigrammed_word = '"{}"/1'.format(trigram(word))
 
-        self.__configure(sphinx_index_sugg, word_len)
-        result = self.client_sugg.Query(trigrammed_word, sphinx_index_sugg)
+        self.__configure(sphinx.index_sugg, word_len)
+        result = self.client_sugg.Query(trigrammed_word, sphinx.index_sugg)
 
         # Если по данному слову не найдено подсказок (а такое бывает?)
         # возвращаем []
@@ -83,15 +86,15 @@ class SphinxSearch:
 
     def __add_word_variations(self, word_entry, strong):
         if word_entry.MT_MANY_SUGG and not strong:
-            suggs = self.__get_suggest(word_entry.word, self.rating_limit_soft, 6)
+            suggs = self.__get_suggest(word_entry.word, self.rating_limit_soft, self.rating_limit_soft_count)
             for suggestion in suggs:
                 word_entry.add_variation(suggestion[0])
         if word_entry.MT_SOME_SUGG and not strong:
-            suggs = self.__get_suggest(word_entry.word, self.rating_limit_hard, 3)
+            suggs = self.__get_suggest(word_entry.word, self.rating_limit_hard, self.rating_limit_hard_count)
             for suggestion in suggs:
                 word_entry.add_variation(suggestion[0])
         if word_entry.MT_LAST_STAR:
-            word_entry.add_variation(word_entry.word+'*')
+            word_entry.add_variation(word_entry.word + '*')
         if word_entry.MT_AS_IS:
             word_entry.add_variation(word_entry.word)
         if word_entry.MT_ADD_SOCR:
@@ -99,6 +102,8 @@ class SphinxSearch:
 
     def __get_word_entries(self, words, strong):
         for word in words:
+            if not strong and len(word) < self.word_length_soft:
+                continue
             if word != '':
                 we = WordEntry(self.db, word)
                 self.__add_word_variations(we, strong)
@@ -112,16 +117,15 @@ class SphinxSearch:
         word_entries = self.__get_word_entries(words, strong)
         sentence = "{}".format(" MAYBE ".join(x.get_variations() for x in word_entries))
 
-        self.__configure(sphinx_index_addjobj)
-        logging.info("QUERY "+sentence)
-        rs = self.client_show.Query(sentence, sphinx_index_addjobj)
-        logging.info("OK")
-
-        print json.dumps(rs)
-
+        self.__configure(sphinx.index_addjobj)
+        logging.info("QUERY " + sentence)
+        rs = self.client_show.Query(sentence, sphinx.index_addjobj)
         logging.info("OK")
 
         results = []
         for ma in rs['matches']:
-            results.append([ma['attrs']['aoid'], ma['attrs']['fullname'], ma['weight']])
+            results.append(dict(aoid=ma['attrs']['aoid'], text=ma['attrs']['fullname'], ratio=ma['weight']))
+
+        if strong:
+            results.sort(key=lambda x: Levenshtein.ratio(text, x['text']), reverse=True)
         return results

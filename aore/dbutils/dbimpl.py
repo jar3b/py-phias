@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from traceback import format_exc
+import psycopg2.extras
 
 
 class DBImpl:
@@ -30,8 +31,11 @@ class DBImpl:
             self.transaction_rollback()
             raise BaseException("Error execute sql query. Reason : {}".format(format_exc()))
 
-    def get_rows(self, query_string):
-        cur = self.connection.cursor()
+    def get_rows(self, query_string, dict_cursor=False):
+        if dict_cursor:
+            cur = self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        else:
+            cur = self.connection.cursor()
         cur.execute(query_string)
 
         rows = cur.fetchall()

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import json
 import optparse
 
 from aore.fias.fiasfactory import FiasFactory
@@ -117,7 +117,9 @@ def main():
     # 4 Debug purposes..
     if options.test:
         sph = FiasFactory()
-        sph.find('ул кемровая пасраул алтай майминский р-н')
+        print json.dumps(sph.expand("453091f5-2336-4aea-9b90-c4060dca0b33"))
+        print json.dumps(sph.find('с паспаул ул кедровая', True))
+        print json.dumps(sph.find('с паспаул ул кедровая'))
 
 
 if __name__ == '__main__':

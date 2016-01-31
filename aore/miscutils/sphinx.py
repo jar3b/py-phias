@@ -7,12 +7,12 @@ from bottle import template
 
 from aore.updater.aoxmltableentry import AoXmlTableEntry
 from aore.updater.dbhandler import DbHandler
-from aore.config import db as dbconfig, sphinx_index_addjobj, sphinx_var_dir, trashfolder, sphinx_index_sugg
+from aore.config import db as dbconfig, sphinx, trashfolder
 from trigram import trigram
 
 
 class SphinxHelper:
-    def __init__(self, ):
+    def __init__(self):
         self.index_binary = None
         self.files = dict()
 
@@ -58,8 +58,8 @@ class SphinxHelper:
                              db_user=dbconfig['user'],
                              db_password=dbconfig['password'],
                              db_name=dbconfig['database'], db_port=dbconfig['port'],
-                             index_name=sphinx_index_sugg,
-                             sphinx_var_path=sphinx_var_dir)
+                             index_name=sphinx.index_sugg,
+                             sphinx_var_path=sphinx.var_dir)
 
         f = open(fname, "w")
         f.write(conf_data)
@@ -112,8 +112,8 @@ class SphinxHelper:
                              db_password=dbconfig['password'],
                              db_name=dbconfig['database'], db_port=dbconfig['port'],
                              sql_query=template('aore/templates/postgre/sphinx_query.sql').replace("\n", " \\\n"),
-                             index_name=sphinx_index_addjobj,
-                             sphinx_var_path=sphinx_var_dir)
+                             index_name=sphinx.index_addjobj,
+                             sphinx_var_path=sphinx.var_dir)
 
         f = open(fname, "w")
         f.write(conf_data)
@@ -128,7 +128,7 @@ class SphinxHelper:
         logging.info("Make suggestion dict ({})...".format(fname))
 
         run_builddict_cmd = "{} {} -c {} --buildstops {} 200000 --buildfreqs".format(self.index_binary,
-                                                                                     sphinx_index_addjobj,
+                                                                                     sphinx.index_addjobj,
                                                                                      self.files['addrobj.conf'], fname)
         os.system(run_builddict_cmd)
         logging.info("Done.")
@@ -139,7 +139,7 @@ class SphinxHelper:
         out_filename = os.path.abspath(config_fname)
         logging.info("Creating main config {}...".format(out_filename))
 
-        conf_data = template('aore/templates/sphinx/sphinx.conf', sphinx_var_path=sphinx_var_dir)
+        conf_data = template('aore/templates/sphinx/sphinx.conf', sphinx_var_path=sphinx.var_dir)
 
         f = open(out_filename, "w")
         for fname, fpath in self.files.iteritems():

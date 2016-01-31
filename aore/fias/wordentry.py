@@ -80,7 +80,10 @@ class WordEntry:
         outmask = ""
         for ra in result:
             if ra[0] > 1:
-                outmask += 'x'
+                if word_len > 2:
+                    outmask += 'x'
+                else:
+                    outmask += '1'
             else:
                 outmask += str(ra[0])
 

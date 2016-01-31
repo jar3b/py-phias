@@ -37,9 +37,14 @@ SPHINX_VAR_DIRS = dict(
 # config_type = "test"
 
 # Main section
-sphinx_index_addjobj="idx_fias_addrobj"
-sphinx_index_sugg="idx_fias_sugg"
-sphinx_var_dir=SPHINX_VAR_DIRS[config_type]
+sphinx = dict(
+    host_name="localhost",
+    port=9312,
+    index_addjobj="idx_fias_addrobj",
+    index_sugg="idx_fias_sugg",
+    var_dir=SPHINX_VAR_DIRS[config_type]
+)
+
 db = DB_INSTANCES[config_type]
 unrar = UNRAR_PATHES[config_type]
 trashfolder = "files/"
