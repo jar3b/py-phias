@@ -65,23 +65,24 @@ def main():
     # Parse options
     p = optparse.OptionParser()
     p.add_option('--database', '-b', action="store", type="string",
-                 help="Manage database. Values: "
+                 help="Database management. Values: "
                       "create - create new DB, "
-                      "update - update existing DB without loose the data")
+                      "update - update existing DB without losing the data")
     p.add_option('--update-version', '-u', default="all", type="string",
-                 help="Valid for updating via HTTP. "
-                      "Versions of updates to process. Can be 111 or 111-222 or 111,222,333."
-                      "For '--database-create' only one value is necessary. If not specified, "
+                 help="Valid only for updating via HTTP. "
+                      "Version update numbers for processing. Can be 111 or 111-222 or 111,222,333."
+                      "For '--database-create' only one value (like 111) may be specified. If not specified, "
                       "all updates will be processed (for '--database update') or last DB snapshot "
                       "(for '--database create')")
     p.add_option('--show-versions', '-v', action="store_true", dest="show_versions", default=False,
-                 help="Show allowed fias versions")
+                 help="Show available fias versions. "
+                      "These version numbers are required for the '--update-version' option")
     p.add_option('--source', '-s', default="http",
                  help="Create/update DB from source. Value: 'http' or absolute path to folder containing XMLs")
     p.add_option('--sphinx-configure', '-c', action="store_true", dest="sphinx", default="False",
-                 help="Configure sphinx. Creates sphinx.conf specified in '--output-conf'")
+                 help="Configure Sphinx. Creates a sphinx.conf file specified in '--output-conf'")
     p.add_option('--indexer-path', '-i',
-                 help="Path to sphinx indexer binary. Required for '--sphinx-configure'")
+                 help="Path to Sphinx indexer binary. Required for '--sphinx-configure'")
     p.add_option('--output-conf', '-o',
                  help="Output config filename. Required for '--sphinx-configure'")
     p.add_option('--test', '-t', action="store_true", dest="test",
@@ -118,7 +119,7 @@ def main():
     if options.test:
         sph = FiasFactory()
         print json.dumps(sph.normalize("463ce8e4-928b-45cc-be76-46c2494632b6"))
-        print json.dumps(sph.expand("453091f5-2336-4aea-9b90-c4060dca0b33"))
+        print json.dumps(sph.expand("463ce8e4-928b-45cc-be76-46c2494632b6"))
         print json.dumps(sph.find('ул кемровая пасраул алтай майминский р-н'))
 
 

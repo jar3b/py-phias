@@ -8,11 +8,12 @@ setup(
     license='',
     author='hellotan',
     author_email='hellotan@live.ru',
-    description='Python application that can operate with FIAS (Russian Address Object DB)', requires=['lxml',
-                                                                                                       'bottle',
-                                                                                                       'pysimplesoap',
-                                                                                                       'python-Levenshtein',
-                                                                                                       'enum34',
-                                                                                                       'rarfile',
-                                                                                                       'requests']
+    description='Python application that can operate with FIAS (Russian Address Object DB)',
+    requires=['lxml',
+              'bottle',
+              'pysimplesoap',
+              'python-Levenshtein',
+              'enum34',
+              'rarfile',
+              'requests']
 )
