@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class sphinx_conf:
     host_name = "localhost"
     port = 9312

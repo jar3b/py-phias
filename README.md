@@ -27,4 +27,8 @@ Python application that can operate with FIAS (Russian Address Object DB)
 2. Установить sphinxapi последней версии: 
 
 `python -m pip install https://github.com/Romamo/sphinxapi/zipball/master`
-    
+
+### Debian Linux
+1. Установить sphinxapi последней версии: 
+
+`$pip install https://github.com/Romamo/sphinxapi/zipball/master`

@@ -23,7 +23,6 @@ class AoRar:
                 # TODO: UNCOMMENT os.remove(local_filename)
                 return local_filename
 
-
             request = requests.get(url, stream=True)
             with open(local_filename, 'wb') as f:
                 for chunk in request.iter_content(chunk_size=1024):
