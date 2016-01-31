@@ -7,21 +7,22 @@ from traceback import format_exc
 import rarfile
 import requests
 
-from aore.config import unrar, trashfolder
+from aore.config import folders, unrar_config
 from aoxmltableentry import AoXmlTableEntry
 
 
 class AoRar:
     def __init__(self):
-        rarfile.UNRAR_TOOL = unrar
+        rarfile.UNRAR_TOOL = unrar_config.path
 
     def download(self, url):
         logging.info("Downloading {}".format(url))
         try:
-            local_filename = os.path.abspath(trashfolder + url.split('/')[-1])
+            local_filename = os.path.abspath(folders.temp + "/" + url.split('/')[-1])
             if os.path.isfile(local_filename):
+                # TODO: UNCOMMENT os.remove(local_filename)
                 return local_filename
-                os.remove(local_filename)
+
 
             request = requests.get(url, stream=True)
             with open(local_filename, 'wb') as f:

@@ -4,8 +4,8 @@ import optparse
 
 from aore.fias.fiasfactory import FiasFactory
 from aore.miscutils.sphinx import SphinxHelper
-from aore.updater.updater import Updater
 from aore.updater.soapreceiver import SoapReceiver
+from aore.updater.updater import Updater
 
 
 def print_fias_versions():
@@ -25,7 +25,7 @@ def parse_update_str(updates_str):
     if updates_str == "all":
         return None
 
-    upd_list = updates_str.lower().replace(' ','').split(',')
+    upd_list = updates_str.lower().replace(' ', '').split(',')
     out_list = []
 
     for u_entry in upd_list:
@@ -38,7 +38,7 @@ def parse_update_str(updates_str):
     return out_list
 
 
-def get_allowed_updates(updates_str, mode = "create"):
+def get_allowed_updates(updates_str, mode="create"):
     imp = SoapReceiver()
     current_version = imp.get_current_fias_version()
     all_versions = [x for x in imp.get_update_list()]
@@ -56,7 +56,7 @@ def get_allowed_updates(updates_str, mode = "create"):
         if uv_ver > current_version and (not user_defined_list or uv_ver in user_defined_list):
             out_list.append(uv)
 
-    out_list.sort(key=lambda x: x['intver'])
+    out_list.sort(key=lambda item: item['intver'])
     for ol_entry in out_list:
         yield ol_entry
 
@@ -117,9 +117,9 @@ def main():
     # 4 Debug purposes..
     if options.test:
         sph = FiasFactory()
+        print json.dumps(sph.normalize("463ce8e4-928b-45cc-be76-46c2494632b6"))
         print json.dumps(sph.expand("453091f5-2336-4aea-9b90-c4060dca0b33"))
-        print json.dumps(sph.find('с паспаул ул кедровая', True))
-        print json.dumps(sph.find('с паспаул ул кедровая'))
+        print json.dumps(sph.find('ул кемровая пасраул алтай майминский р-н'))
 
 
 if __name__ == '__main__':

@@ -5,15 +5,15 @@ import logging
 import psycopg2
 from bottle import template
 
-from aore.updater.aoxmltableentry import AoXmlTableEntry
-from aore.config import db as dbparams
+from aore.config import db_conf
 from aore.dbutils.dbimpl import DBImpl
 from aore.dbutils.dbschemas import db_shemas
+from aore.updater.aoxmltableentry import AoXmlTableEntry
 
 
 class DbHandler:
     def __init__(self):
-        self.db = DBImpl(psycopg2, dbparams)
+        self.db = DBImpl(psycopg2, db_conf)
 
     def bulk_csv(self, operation_type, table_name, processed_count, csv_file_name):
         sql_query = None

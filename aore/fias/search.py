@@ -5,7 +5,7 @@ import re
 import Levenshtein
 import sphinxapi
 
-from aore.config import sphinx
+from aore.config import sphinx_conf
 from aore.fias.wordentry import WordEntry
 from aore.miscutils.trigram import trigram
 
@@ -26,17 +26,17 @@ class SphinxSearch:
 
         self.db = db
         self.client_sugg = sphinxapi.SphinxClient()
-        self.client_sugg.SetServer(sphinx.host, sphinx.port)
+        self.client_sugg.SetServer(sphinx_conf.host_name, sphinx_conf.port)
         self.client_sugg.SetLimits(0, 10)
         self.client_sugg.SetConnectTimeout(3.0)
 
         self.client_show = sphinxapi.SphinxClient()
-        self.client_show.SetServer(sphinx.host, sphinx.port)
+        self.client_show.SetServer(sphinx_conf.host_name, sphinx_conf.port)
         self.client_show.SetLimits(0, 10)
         self.client_show.SetConnectTimeout(3.0)
 
     def __configure(self, index_name, wlen=None):
-        if index_name == sphinx.index_sugg:
+        if index_name == sphinx_conf.index_sugg:
             if wlen:
                 self.client_sugg.SetMatchMode(sphinxapi.SPH_MATCH_EXTENDED2)
                 self.client_sugg.SetRankingMode(sphinxapi.SPH_RANK_WORDCOUNT)
@@ -52,8 +52,8 @@ class SphinxSearch:
         word_len = str(len(word) / 2)
         trigrammed_word = '"{}"/1'.format(trigram(word))
 
-        self.__configure(sphinx.index_sugg, word_len)
-        result = self.client_sugg.Query(trigrammed_word, sphinx.index_sugg)
+        self.__configure(sphinx_conf.index_sugg, word_len)
+        result = self.client_sugg.Query(trigrammed_word, sphinx_conf.index_sugg)
 
         # Если по данному слову не найдено подсказок (а такое бывает?)
         # возвращаем []
@@ -67,7 +67,7 @@ class SphinxSearch:
         outlist = list()
         for match in result['matches']:
             if len(outlist) >= count:
-                break;
+                break
 
             if maxrank - match['attrs']['krank'] < self.default_rating_delta:
                 jaro_rating = Levenshtein.jaro(word, match['attrs']['word'])
@@ -117,9 +117,9 @@ class SphinxSearch:
         word_entries = self.__get_word_entries(words, strong)
         sentence = "{}".format(" MAYBE ".join(x.get_variations() for x in word_entries))
 
-        self.__configure(sphinx.index_addjobj)
+        self.__configure(sphinx_conf.index_addjobj)
         logging.info("QUERY " + sentence)
-        rs = self.client_show.Query(sentence, sphinx.index_addjobj)
+        rs = self.client_show.Query(sentence, sphinx_conf.index_addjobj)
         logging.info("OK")
 
         results = []
@@ -128,4 +128,5 @@ class SphinxSearch:
 
         if strong:
             results.sort(key=lambda x: Levenshtein.ratio(text, x['text']), reverse=True)
+
         return results

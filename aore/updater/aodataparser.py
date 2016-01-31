@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from aore.updater.aoxmltableentry import AoXmlTableEntry
-from aore.config import trashfolder
+from aore.config import folders
 from aore.dbutils.dbschemas import db_shemas
 from xmlparser import XMLParser
 
@@ -52,7 +51,7 @@ class AoDataParser:
         self.data_bereit_callback = data_callback
         self.currentpage = 0
         self.base_filename = \
-            trashfolder + "fd_" + \
+            folders.temp + "/fd_" + \
             str(self.datasource.operation_type) + "_" + \
             self.datasource.table_name + ".csv.part{}"
         self.counter = self.pagesize + 1

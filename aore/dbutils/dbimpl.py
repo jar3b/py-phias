@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from traceback import format_exc
+
 import psycopg2.extras
 
 
 class DBImpl:
-    def __init__(self, engine, params):
+    def __init__(self, engine, db_config):
         self.db_engine = engine
-        self.connection = engine.connect(**params)
+        self.connection = engine.connect(dbname=db_config.database, user=db_config.user, password=db_config.password,
+                                         port=db_config.port, host=db_config.host)
 
     def transaction_commit(self):
         self.connection.commit()

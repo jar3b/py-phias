@@ -3,12 +3,11 @@
 import logging
 from os import walk, path
 
+from aore.dbutils.dbschemas import allowed_tables
 from aore.updater.aodataparser import AoDataParser
 from aore.updater.aorar import AoRar
 from aore.updater.aoxmltableentry import AoXmlTableEntry
 from aore.updater.dbhandler import DbHandler
-from aore.updater.soapreceiver import SoapReceiver
-from aore.dbutils.dbschemas import allowed_tables
 
 
 class Updater:

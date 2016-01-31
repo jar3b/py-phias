@@ -19,6 +19,6 @@ db_shemas['SOCRBASE'] = DbSchema("SOCRBASE", ["LEVEL", "SOCRNAME", "SCNAME", "KO
                                  "AddressObjectType")
 
 db_shemas['AOTRIG'] = DbSchema("AOTRIG", ["WORD", "TRIGRAMM", "FREQUENCY"], "word",
-                                 None)
+                               None)
 
 allowed_tables = ["ADDROBJ", "SOCRBASE"]
