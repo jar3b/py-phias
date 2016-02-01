@@ -9,7 +9,7 @@ setup(
     author='hellotan',
     author_email='hellotan@live.ru',
     description='Python application that can operate with FIAS (Russian Address Object DB)',
-    requires=['lxml',
+    install_requires=['lxml',
               'psycopg2',
               'bottle',
               'pysimplesoap',
