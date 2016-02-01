@@ -1,11 +1,11 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='py-phias',
     version='0.0.1',
     packages=['aore', 'aore.fias', 'aore.config', 'aore.dbutils', 'aore.updater', 'aore.miscutils'],
     url='https://github.com/jar3b/py-phias',
-    download_url='https://github.com/jar3b/py-phias/archive/{0}.tar.gz'.format("master"),
+    download_url='https://github.com/jar3b/py-phias/archive/master.zip',
     license='',
     author='hellotan',
     author_email='hellotan@live.ru',
