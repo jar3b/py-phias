@@ -1,15 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import os
-import sys
+from aore import phias
 
-# append current dir to module path
-reload(sys)
-cwd = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(cwd)
-sys.setdefaultencoding("utf-8")
-# sys.path.append('/home/i/interc7j/.local/lib/python2.7/site-packages')
+application = phias.app
 
-from aore import aore
-
-application = aore.app
+if __name__ == '__main__':
+    application.run(host='localhost', port=55001, debug=True)

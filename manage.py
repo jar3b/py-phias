@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 import json
+import logging
 import optparse
 
 from aore.fias.fiasfactory import FiasFactory
 from aore.miscutils.sphinx import SphinxHelper
 from aore.updater.soapreceiver import SoapReceiver
 from aore.updater.updater import Updater
+
+logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
 
 def print_fias_versions():
@@ -86,8 +89,6 @@ def main():
                  help="Path to Sphinx indexer binary. Required for '--sphinx-configure'")
     p.add_option('--output-conf', '-o',
                  help="Output config filename. Required for '--sphinx-configure'")
-    p.add_option('--test', '-t', action="store_true", dest="test",
-                 help="Test")
 
     options, arguments = p.parse_args()
 
@@ -115,14 +116,6 @@ def main():
     if options.sphinx and options.indexer_path and options.output_conf:
         sphinxh = SphinxHelper()
         sphinxh.configure_indexer(options.indexer_path, options.output_conf)
-
-    # 4 Debug purposes..
-    if options.test:
-        sph = FiasFactory()
-        print json.dumps(sph.normalize("463ce8e4-928b-45cc-be76-46c2494632b6"))
-        print json.dumps(sph.expand("463ce8e4-928b-45cc-be76-46c2494632b6"))
-        print json.dumps(sph.find('ул кемровая пасраул алтай майминский р-н'))
-
 
 if __name__ == '__main__':
     main()

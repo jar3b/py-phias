@@ -14,7 +14,7 @@ class SphinxSearch:
     def __init__(self, db):
         self.delta_len = 2
 
-        self.rating_limit_soft = 0.4
+        self.rating_limit_soft = 0.6
         self.rating_limit_soft_count = 6
         self.word_length_soft = 3
 
@@ -22,7 +22,7 @@ class SphinxSearch:
         self.rating_limit_hard_count = 3
 
         self.default_rating_delta = 2
-        self.regression_coef = 0.04
+        self.regression_coef = 0.01
 
         self.db = db
         self.client_sugg = sphinxapi.SphinxClient()
