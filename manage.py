@@ -10,7 +10,7 @@ from aore.updater.updater import Updater
 
 def print_fias_versions():
     imp = SoapReceiver()
-    current_version = imp.get_current_fias_version()
+    current_version = Updater.get_current_fias_version()
     all_versions = imp.get_update_list()
 
     print("Installed version: {}".format(current_version))
@@ -40,7 +40,7 @@ def parse_update_str(updates_str):
 
 def get_allowed_updates(updates_str, mode="create"):
     imp = SoapReceiver()
-    current_version = imp.get_current_fias_version()
+    current_version = Updater.get_current_fias_version()
     all_versions = [x for x in imp.get_update_list()]
 
     user_defined_list = parse_update_str(updates_str)
@@ -49,7 +49,8 @@ def get_allowed_updates(updates_str, mode="create"):
     if mode == "create" and not user_defined_list:
         yield all_versions[-1]
 
-    assert (mode == "create" and len(user_defined_list) == 1)
+    if mode == "create":
+        assert len(user_defined_list) == 1, "Ony single update number allowed for DB create"
 
     for uv in all_versions:
         uv_ver = uv['intver']
@@ -101,7 +102,7 @@ def main():
         aoupdater = Updater(options.source)
         allowed_updates = None
         if options.source == "http":
-            allowed_updates = get_allowed_updates(options.update_version)
+            allowed_updates = get_allowed_updates(options.update_version, options.database)
 
         if options.database == "create":
             aoupdater.create(allowed_updates)

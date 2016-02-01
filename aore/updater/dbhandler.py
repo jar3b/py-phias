@@ -46,19 +46,24 @@ class DbHandler:
         self.db.execute(sql_query)
         logging.info("Processed {} queries FROM {}".format(processed_count - 1, csv_file_name))
 
-    def pre_create(self):
+    def create_structure(self):
         logging.info("Prepare to create DB structure...")
-        sql_query = template("aore/templates/postgre/pre_create.sql")
+        sql_query = template("aore/templates/postgre/create_structure.sql")
 
         self.db.execute(sql_query)
+        logging.info("Done.")
 
-    def post_create(self):
-        logging.info("Indexing ADDROBJ...")
-        sql_query = template("aore/templates/postgre/post_create.sql")
+    def create_indexes(self, tables):
+        logging.info("Indexing tables...")
+        sql_query = template("aore/templates/postgre/create_indexes.sql", table_names=tables)
 
         self.db.execute(sql_query)
         logging.info("Indexing done.")
 
-    def pre_update(self):
-        # TODO: update actions
-        pass
+    def drop_indexes(self, tables):
+        logging.info("Deleting indexes...")
+        sql_query = template("aore/templates/postgre/drop_indexes.sql", table_names=tables)
+
+        self.db.execute(sql_query)
+        logging.info("All indexes was deleted.")
+

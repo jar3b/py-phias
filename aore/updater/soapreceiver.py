@@ -2,7 +2,6 @@
 
 from pysimplesoap.client import SoapClient
 
-
 class SoapReceiver:
     def __init__(self):
         self.client = SoapClient(
@@ -10,9 +9,6 @@ class SoapReceiver:
             action='http://fias.nalog.ru/WebServices/Public/DownloadService.asmx/',
             namespace="http://fias.nalog.ru/WebServices/Public/DownloadService.asmx",
             soap_ns='soap', trace=False, ns=False)
-
-    def get_current_fias_version(self):
-        return 224  # TODO FIXIT
 
     # return (intver, strver, url)
     def get_update_list(self):

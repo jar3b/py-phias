@@ -5,6 +5,3 @@ COPY "{{tablename}}_TEMP" ({{fieldslist}}) FROM '{{csvname}}' DELIMITER '{{delim
 INSERT INTO "{{tablename}}" ({{fieldslist}}) SELECT {{fieldslist}}
 FROM
 "{{tablename}}_TEMP" ON CONFLICT ({{uniquekey}}) DO UPDATE SET {{updaterule}};
-% if tablename=="ADDROBJ":
-DELETE FROM "{{tablename}}" WHERE ACTSTATUS = FALSE OR NEXTID IS NOT NULL;
-% end
