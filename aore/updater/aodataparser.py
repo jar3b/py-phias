@@ -3,6 +3,7 @@ import os
 
 from aore.config import folders
 from aore.dbutils.dbschemas import db_shemas
+from aore.miscutils.exceptions import FiasException
 from xmlparser import XMLParser
 
 
@@ -10,7 +11,7 @@ class AoDataParser:
     def __init__(self, datasource, pagesize):
         self.datasource = datasource
         if self.datasource.table_name not in db_shemas:
-            raise BaseException("Cannot parse {}: Not configured.".format(self.datasource.table_name))
+            raise FiasException("Cannot parse {}: Not configured.".format(self.datasource.table_name))
         else:
             self.allowed_fields = db_shemas[self.datasource.table_name].fields
 

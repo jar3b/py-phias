@@ -85,8 +85,7 @@ class SphinxHelper:
                 splitting_seq = line.split(' ')
                 keyword = splitting_seq[0]
                 freq = splitting_seq[1].rstrip('\n')
-                if not keyword or not freq:
-                    raise BaseException("Cannot process {}".format(self.files['dict.txt']))
+                assert keyword and freq, "Cannot process {}".format(self.files['dict.txt'])
 
                 nodes.append(keyword)
                 nodes.append(trigram(keyword))

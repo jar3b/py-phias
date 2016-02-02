@@ -63,7 +63,7 @@ class Updater:
 
     def __init_update_entries(self, updates_generator):
         if self.mode == "http":
-            assert updates_generator
+            assert updates_generator, "No generator"
             self.tablelist_generator = self.__get_updates_from_rar
             self.updalist_generator = updates_generator
         else:

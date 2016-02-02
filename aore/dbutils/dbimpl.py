@@ -4,6 +4,8 @@ from traceback import format_exc
 
 import psycopg2.extras
 
+from aore.miscutils.exceptions import FiasException
+
 
 class DBImpl:
     def __init__(self, engine, db_config):
@@ -28,20 +30,26 @@ class DBImpl:
         try:
             cur = self.get_cursor()
             cur.execute(sql_query)
+            cur.close()
             self.transaction_commit()
         except:
             self.transaction_rollback()
-            raise BaseException("Error execute sql query. Reason : {}".format(format_exc()))
+            raise FiasException("Error execute sql query. Reason : {}".format(format_exc()))
 
     def get_rows(self, query_string, dict_cursor=False):
         if dict_cursor:
             cur = self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         else:
             cur = self.connection.cursor()
-        cur.execute(query_string)
 
-        rows = cur.fetchall()
-        if cur:
+        try:
+            cur.execute(query_string)
+
+            rows = cur.fetchall()
             cur.close()
+            self.transaction_commit()
+        except:
+            self.transaction_rollback()
+            raise FiasException("Error execute sql query. Reason : {}".format(format_exc()))
 
         return rows

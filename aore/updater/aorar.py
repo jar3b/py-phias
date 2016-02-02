@@ -8,6 +8,7 @@ import rarfile
 import requests
 
 from aore.config import folders, unrar_config
+from aore.miscutils.exceptions import FiasException
 from aoxmltableentry import AoXmlTableEntry
 
 
@@ -29,7 +30,7 @@ class AoRar:
                     if chunk:
                         f.write(chunk)
         except:
-            raise BaseException("Error downloading. Reason : {}".format(format_exc()))
+            raise FiasException("Error downloading. Reason : {}".format(format_exc()))
 
         logging.info("Downloaded {} bytes".format(request.headers['Content-length']))
         return local_filename

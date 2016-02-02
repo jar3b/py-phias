@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import psycopg2
 from bottle import template
-
+import sys
 from aore.dbutils.dbimpl import DBImpl
 from aore.fias.search import SphinxSearch
 from aore.config import db_conf
@@ -49,7 +49,7 @@ class FiasFactory:
 
             results = self.searcher.find(text, strong)
         except Exception, err:
-            return dict(error=err.message)
+            return dict(error=err.args[0])
 
         return results
 
@@ -61,7 +61,7 @@ class FiasFactory:
             sql_query = self.normalize_templ.replace("//aoid", aoid_guid)
             rows = self.db.get_rows(sql_query, True)
         except Exception, err:
-            return dict(error=err.message)
+            return dict(error=err.args[0])
 
         if len(rows) == 0:
             return []
@@ -80,6 +80,6 @@ class FiasFactory:
             sql_query = self.expand_templ.replace("//aoid", normalized_id)
             rows = self.db.get_rows(sql_query, True)
         except Exception, err:
-            return dict(error=err.message)
+            return dict(error=err.args[0])
 
         return rows

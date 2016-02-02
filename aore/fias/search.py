@@ -36,15 +36,12 @@ class SphinxSearch:
         self.client_show.SetConnectTimeout(3.0)
 
     def __configure(self, index_name, wlen=None):
-        if index_name == sphinx_conf.index_sugg:
-            if wlen:
-                self.client_sugg.SetMatchMode(sphinxapi.SPH_MATCH_EXTENDED2)
-                self.client_sugg.SetRankingMode(sphinxapi.SPH_RANK_WORDCOUNT)
-                self.client_sugg.SetFilterRange("len", int(wlen) - self.delta_len, int(wlen) + self.delta_len)
-                self.client_sugg.SetSelect("word, len, @weight+{}-abs(len-{}) AS krank".format(self.delta_len, wlen))
-                self.client_sugg.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
+        if index_name == sphinx_conf.index_sugg and wlen:
+            self.client_sugg.SetRankingMode(sphinxapi.SPH_RANK_BM25)
+            self.client_sugg.SetFilterRange("len", int(wlen) - self.delta_len, int(wlen) + self.delta_len)
+            self.client_sugg.SetSelect("word, len, @weight+{}-abs(len-{}) AS krank".format(self.delta_len, wlen))
+            self.client_sugg.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
         else:
-            self.client_show.SetMatchMode(sphinxapi.SPH_MATCH_EXTENDED2)
             self.client_show.SetRankingMode(sphinxapi.SPH_RANK_BM25)
             self.client_show.SetSortMode(sphinxapi.SPH_SORT_RELEVANCE)
 
@@ -108,11 +105,11 @@ class SphinxSearch:
                 we = WordEntry(self.db, word)
                 self.__add_word_variations(we, strong)
 
-                if we.get_variations() == "()":
-                    raise BaseException("Cannot process sentence.")
+                assert we.get_variations() != "()", "Cannot process sentence."
                 yield we
 
     def find(self, text, strong):
+        logging.info("FIND ")
         words = self.__split_phrase(text)
         word_entries = self.__get_word_entries(words, strong)
         sentence = "{}".format(" MAYBE ".join(x.get_variations() for x in word_entries))

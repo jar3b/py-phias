@@ -16,7 +16,7 @@ class WordEntry:
     # -1x - одно по лайку и много точных. Быть не может.
     # x0 - много по лайку и нет точных. Недопечатка. Немного подсказок и *.
     # x1 - много по лайку и один точный. Чет нашли. Как есть и *.
-    # xx - много по лайку и много точных. Оставляем как есть и *
+    # xx - много по лайку и много точных. Оставляем как есть и * TODO В данном случае лайк лучше убрать
     #
     # Теперь по сокращениям. Они работюат отдельно (ПОКА ЧТО)
     # 3rd - кол-во слов по точному совпдению по полному сокращению.
@@ -29,7 +29,7 @@ class WordEntry:
     # 11 - найдено одно полное и одно малое. Бывает (допустим, 'сад'). Добавляем как есть.
     # -1x - найдено одно полное и куча малых. Ну бред.
     # x0 - найдено куча полных и ни одного малого. Добавляем малое.
-    # x1 - Куча полных и 1 малое. TODO Хз, бывает ли. Не обрабатываем.
+    # x1 - Куча полных и 1 малое. Хз, бывает ли. Не обрабатываем.
     # xx - Куча полных и куча малых. Не обрабатываем.
     match_types = dict(
         MT_MANY_SUGG=['0000'],
@@ -39,9 +39,12 @@ class WordEntry:
         MT_ADD_SOCR=['..10', '..x0']
     )
 
+    min_word_len_to_star = 4
+
     def __init__(self, db, word):
         self.db = db
         self.word = str(word)
+        self.word_len = len(unicode(self.word))
         self.variations = []
         self.scname = None
         self.ranks = self.__get_ranks()
@@ -51,8 +54,14 @@ class WordEntry:
             for z in y:
                 self.__dict__[x] = self.__dict__[x] or re.search(z, self.ranks) is not None
 
+        # Если ищем по лайку, то точное совпадение не ищем (оно и так будет включено)
         if self.MT_LAST_STAR:
             self.MT_AS_IS = False
+
+        # Строка слишком котроткая, то по лайку не ищем, будет очень долго
+        if self.MT_LAST_STAR and self.word_len < self.min_word_len_to_star:
+            self.MT_LAST_STAR = False
+            self.MT_AS_IS = True
 
     def add_variation_socr(self):
         if self.scname:
@@ -65,28 +74,32 @@ class WordEntry:
         return "({})".format(" | ".join(self.variations))
 
     def __get_ranks(self):
-        word_len = len(unicode(self.word))
         sql_qry = "SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word LIKE '{}%' AND LENGTH(word) > {} " \
                   "UNION ALL SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word='{}' " \
                   "UNION ALL SELECT COUNT(*), MAX(scname) FROM \"SOCRBASE\" WHERE socrname ILIKE '{}'" \
-                  "UNION ALL SELECT COUNT(*), NULL FROM \"SOCRBASE\" WHERE scname ILIKE '{}'".format(
-            self.word, word_len, self.word, self.word, self.word)
+                  "UNION ALL SELECT COUNT(*), NULL FROM \"SOCRBASE\" WHERE scname ILIKE '{}';".format(
+            self.word, self.word_len, self.word, self.word, self.word)
 
         result = self.db.get_rows(sql_qry)
+
+        # Проставляем "сокращенное" сокращение, если нашли полное
         if not self.scname:
             self.scname = result[2][1]
 
-        outmask = ""
+        # Формируем список найденных величин совпадений:
+        # result[x]
+        # x = 0, поиск по неполному совпадению (лайк*), и по длине строки больше исходной
+        # x = 1, поиск по точному совпадению
+        # x = 2, поиск по базе сокращений (по полному)
+        # x = 3, то же, но по краткому
+        out_mask_list = []
         for ra in result:
             if ra[0] > 1:
-                if word_len > 2:
-                    outmask += 'x'
-                else:
-                    outmask += '1'
+                out_mask_list.append('x')
             else:
-                outmask += str(ra[0])
+                out_mask_list.append(str(ra[0]))
 
-        return outmask
+        return ''.join(out_mask_list)
 
     def get_type(self):
         return ", ".join([x for x in self.match_types if self.__dict__[x]])
