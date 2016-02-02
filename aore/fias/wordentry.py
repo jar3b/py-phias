@@ -71,14 +71,16 @@ class WordEntry:
         self.variations.append(variation_string)
 
     def get_variations(self):
-        return "({})".format(" | ".join(self.variations))
+        if len(self.variations) == 1:
+            return self.variations[0]
+        return "{}".format(" ".join(self.variations))
 
     def __get_ranks(self):
         sql_qry = "SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word LIKE '{}%' AND LENGTH(word) > {} " \
                   "UNION ALL SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word='{}' " \
                   "UNION ALL SELECT COUNT(*), MAX(scname) FROM \"SOCRBASE\" WHERE socrname ILIKE '{}'" \
                   "UNION ALL SELECT COUNT(*), NULL FROM \"SOCRBASE\" WHERE scname ILIKE '{}';".format(
-            self.word, self.word_len, self.word, self.word, self.word)
+                self.word, self.word_len, self.word, self.word, self.word)
 
         result = self.db.get_rows(sql_qry)
 

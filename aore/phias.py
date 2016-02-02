@@ -26,13 +26,10 @@ def normalize(aoid):
 @app.route('/find/<text>')
 @app.route('/find/<text>/<strong>')
 def find(text, strong=False):
-    logging.warning("START")
     strong = (strong == "strong")
     response.content_type = 'application/json'
 
-    res = json.dumps(fias_factory.find(text, strong))
-    logging.warning("END")
-    return res
+    return json.dumps(fias_factory.find(text, strong))
 
 
 @app.error(404)

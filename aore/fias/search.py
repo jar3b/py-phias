@@ -22,22 +22,24 @@ class SphinxSearch:
         self.rating_limit_hard_count = 3
 
         self.default_rating_delta = 2
-        self.regression_coef = 0.04
+        self.regression_coef = 0.08
+
+        self.max_result = 10
 
         self.db = db
         self.client_sugg = sphinxapi.SphinxClient()
         self.client_sugg.SetServer(sphinx_conf.host_name, sphinx_conf.port)
-        self.client_sugg.SetLimits(0, 10)
+        self.client_sugg.SetLimits(0, self.max_result)
         self.client_sugg.SetConnectTimeout(3.0)
 
         self.client_show = sphinxapi.SphinxClient()
         self.client_show.SetServer(sphinx_conf.host_name, sphinx_conf.port)
-        self.client_show.SetLimits(0, 10)
+        self.client_show.SetLimits(0, self.max_result)
         self.client_show.SetConnectTimeout(3.0)
 
     def __configure(self, index_name, wlen=None):
         if index_name == sphinx_conf.index_sugg and wlen:
-            self.client_sugg.SetRankingMode(sphinxapi.SPH_RANK_BM25)
+            self.client_sugg.SetRankingMode(sphinxapi.SPH_RANK_WORDCOUNT)
             self.client_sugg.SetFilterRange("len", int(wlen) - self.delta_len, int(wlen) + self.delta_len)
             self.client_sugg.SetSelect("word, len, @weight+{}-abs(len-{}) AS krank".format(self.delta_len, wlen))
             self.client_sugg.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
@@ -98,30 +100,40 @@ class SphinxSearch:
             word_entry.add_variation_socr()
 
     def __get_word_entries(self, words, strong):
+        we_list = []
         for word in words:
-            if not strong and len(word) < self.word_length_soft:
-                continue
             if word != '':
                 we = WordEntry(self.db, word)
                 self.__add_word_variations(we, strong)
 
-                assert we.get_variations() != "()", "Cannot process sentence."
-                yield we
+                assert we.get_variations() != "", "Cannot process sentence."
+                we_list.append(we)
+        return we_list
 
     def find(self, text, strong):
-        logging.info("FIND ")
         words = self.__split_phrase(text)
         word_entries = self.__get_word_entries(words, strong)
-        sentence = "{}".format(" MAYBE ".join(x.get_variations() for x in word_entries))
+        word_count = len(word_entries)
+        for x in range(word_count, max(0, word_count - 3), -1):
+            self.client_show.AddQuery("\"{}\"/{}".format(" ".join(x.get_variations() for x in word_entries), x),
+                                      sphinx_conf.index_addjobj)
 
         self.__configure(sphinx_conf.index_addjobj)
-        logging.info("QUERY " + sentence)
-        rs = self.client_show.Query(sentence, sphinx_conf.index_addjobj)
+        logging.info("QUERY ")
+        rs = self.client_show.RunQueries()
         logging.info("OK")
 
         results = []
-        for ma in rs['matches']:
-            results.append(dict(aoid=ma['attrs']['aoid'], text=ma['attrs']['fullname'], ratio=ma['weight']))
+        parsed_ids = []
+
+        for i in range(0, len(rs)):
+            for ma in rs[i]['matches']:
+                if len(results) >= self.max_result:
+                    break
+                if not ma['attrs']['aoid'] in parsed_ids:
+                    parsed_ids.append(ma['attrs']['aoid'])
+                    results.append(
+                        dict(aoid=ma['attrs']['aoid'], text=ma['attrs']['fullname'], ratio=ma['weight'], cort=i))
 
         if strong:
             results.sort(key=lambda x: Levenshtein.ratio(text, x['text']), reverse=True)
