@@ -1,13 +1,29 @@
 # py-phias
 Python application that can operate with FIAS (Russian Address Object DB)
 
-Простое приложение для работы с БД ФИАС, написано для Python 2.7
+Простое приложение для работы с БД ФИАС, написано для Python 2.7, использует БД PostgreSQL
+
+## Возможности
+1. API (выходной формат - JSON), основные функции которого:
+    - Актуализация AOID, AOGUID.
+    - Получение полного дерева адресного объекта по AOID.
+    - Поиск адресного объекта по произвольной строке, выдает 10 самых релеватных результатов, может быть "мягким",
+    с более широкими вариациями и исправлением опечаток (для подсказок), или "строгим" (к примеру, для автоматического 
+    импорта из внешних систем).
+2. Автоматическое развертывание базы ФИАС
+    - Из директории с файлами XML (like 'AS_ADDROBJ_20160107_xxx.XML').
+    - Напрямую с HTTP сервера ФНС.
+3. Актуалиация базы (из XML, HTTP) с возможностью выбора необходимых обновлений.
+
 
 ## Установка
-Протестирована работа на следующих ОС: [Windows](#Windows) (8.1) и [Debian](#debian-linux) Jessie
+Протестирована работа на следующих ОС: [Windows](#windows) (8.1) и [Debian](#debian-linux) Jessie
 
 ### Зависимости
 
+_Внимание_! Только Python 2.7, только PostgreSQL, только Sphinx. Python 3, MySQL/MariaDB, Lucene/Solr не
+поддерживаются и не будут.
+ 
 Для работы приложения необходимо достаточное кол-во RAM (1Gb+) и 4.5Gb места на диске 
 (3-3.5Gb для скачивания архива с базой и  300-400Mb для индексов Sphinx). Также необходимы root права 
 (Администратора, для OS Windows), для работы searchd и предварительной установки. 
@@ -15,20 +31,22 @@ Python application that can operate with FIAS (Russian Address Object DB)
 На shared хостинге работоспособность не гарантируется (только если хостер Вам сам все установит и настроит, 
 и разрешит запуск демонов - читай: "невозможно")
 
-Предварительно нужно установить и настроить:
+Предварительно обязательно установить и настроить:
 
-1. Python 2.7 [Windows](https://www.python.org/downloads/windows/), [Debian](https://www.python.org/downloads/source/) 
-(`sudo apt-get install python2.7 python2.7-dev`), pip
+1. Python 2.7.x, pip
 2. PostgreSql 9.5 и выше (из-за синтаксиса _ON CONFLICT ... DO_)
 3. Sphinx 2.2.3 и новее (из-за синтаксиса _MAYBE_)
+4. Web-сервер с поддержкой WSGI, любой, по Вашему желанию.
 
 ### Windows
 1. Установить lxml, через pip не ставится, так что качаем [отсюда](https://pypi.python.org/pypi/lxml/3.5.0).
-2. Установить sphinxapi последней версии: 
+2. Установить unrar.exe (можно установить WinRar целиком).
+3. Установить sphinxapi последней версии (либо взять из директории Sphinx): 
 
 `python -m pip install https://github.com/Romamo/sphinxapi/zipball/master`
 
 ### Debian Linux
-1. Установить sphinxapi последней версии: 
+1. Установить unrar
+2. Установить sphinxapi последней версии: 
 
 `pip install https://github.com/Romamo/sphinxapi/zipball/master`
