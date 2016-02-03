@@ -15,6 +15,7 @@ class SphinxHelper:
     def __init__(self):
         self.index_binary = None
         self.files = dict()
+        self.aodp = DbHandler()
 
     def configure_indexer(self, indexer_binary, config_filename):
         logging.info("Start configuring Sphinx...")
@@ -98,8 +99,7 @@ class SphinxHelper:
         except:
             pass
 
-        aodp = DbHandler()
-        aodp.bulk_csv(AoXmlTableEntry.OperationType.update, "AOTRIG", csv_counter, dict_dat_fname)
+        self.aodp.bulk_csv(AoXmlTableEntry.OperationType.update, "AOTRIG", csv_counter, dict_dat_fname)
         logging.info("Done.")
 
     def __create_ao_index_config(self):
@@ -112,7 +112,8 @@ class SphinxHelper:
                              db_name=db_conf.database, db_port=db_conf.port,
                              sql_query=template('aore/templates/postgre/sphinx_query.sql').replace("\n", " \\\n"),
                              index_name=sphinx_conf.index_addjobj,
-                             sphinx_var_path=sphinx_conf.var_dir)
+                             sphinx_var_path=sphinx_conf.var_dir,
+                             min_length_to_star=sphinx_conf.min_length_to_star)
 
         f = open(fname, "w")
         f.write(conf_data)

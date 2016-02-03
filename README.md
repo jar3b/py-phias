@@ -35,7 +35,7 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
 
 1. Python 2.7.x, pip
 2. PostgreSql 9.5 и выше (из-за синтаксиса _ON CONFLICT ... DO_)
-3. Sphinx 2.2.3 и новее (из-за синтаксиса _MAYBE_)
+3. Sphinx 2.2.1 и новее
 4. Web-сервер с поддержкой WSGI, любой, по Вашему желанию.
 
 ### Windows

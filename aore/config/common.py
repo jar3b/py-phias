@@ -7,6 +7,7 @@ class sphinx_conf:
     index_addjobj = "idx_fias_addrobj"
     index_sugg = "idx_fias_sugg"
     var_dir = None
+    min_length_to_star = 3
 
 
 class db_conf:

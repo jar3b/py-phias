@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import re
 
+from aore.config import sphinx_conf
+
 
 class WordEntry:
     # Варианты распеределния для слов с первыми двумя символами, где:
@@ -39,14 +41,13 @@ class WordEntry:
         MT_ADD_SOCR=['..10', '..x0']
     )
 
-    min_word_len_to_star = 4
-
     def __init__(self, db, word):
         self.db = db
         self.word = str(word)
         self.word_len = len(unicode(self.word))
         self.variations = []
         self.scname = None
+        self.is_freq_word = False
         self.ranks = self.__get_ranks()
 
         for x, y in self.match_types.iteritems():
@@ -59,7 +60,7 @@ class WordEntry:
             self.MT_AS_IS = False
 
         # Строка слишком котроткая, то по лайку не ищем, будет очень долго
-        if self.MT_LAST_STAR and self.word_len < self.min_word_len_to_star:
+        if self.MT_LAST_STAR and self.word_len < sphinx_conf.min_length_to_star:
             self.MT_LAST_STAR = False
             self.MT_AS_IS = True
 
@@ -79,14 +80,18 @@ class WordEntry:
         sql_qry = "SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word LIKE '{}%' AND LENGTH(word) > {} " \
                   "UNION ALL SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word='{}' " \
                   "UNION ALL SELECT COUNT(*), MAX(scname) FROM \"SOCRBASE\" WHERE socrname ILIKE '{}'" \
-                  "UNION ALL SELECT COUNT(*), NULL FROM \"SOCRBASE\" WHERE scname ILIKE '{}';".format(
-                self.word, self.word_len, self.word, self.word, self.word)
+                  "UNION ALL SELECT COUNT(*), NULL FROM \"SOCRBASE\" WHERE scname ILIKE '{}'" \
+                  "UNION ALL SELECT frequency, NULL FROM \"AOTRIG\" WHERE word='{}';".format(
+            self.word, self.word_len, self.word, self.word, self.word, self.word)
 
         result = self.db.get_rows(sql_qry)
 
         # Проставляем "сокращенное" сокращение, если нашли полное
         if not self.scname:
             self.scname = result[2][1]
+
+        if len(result) == 5 and result[4][0] > 30000:
+            self.is_freq_word = True
 
         # Формируем список найденных величин совпадений:
         # result[x]
@@ -95,11 +100,11 @@ class WordEntry:
         # x = 2, поиск по базе сокращений (по полному)
         # x = 3, то же, но по краткому
         out_mask_list = []
-        for ra in result:
-            if ra[0] > 1:
+        for i in range(0, 4):
+            if result[i][0] > 1:
                 out_mask_list.append('x')
             else:
-                out_mask_list.append(str(ra[0]))
+                out_mask_list.append(str(result[i][0]))
 
         return ''.join(out_mask_list)
 

@@ -11,21 +11,21 @@ from aore.miscutils.trigram import trigram
 
 
 class SphinxSearch:
+    # Config's
+    delta_len = 2
+
+    rating_limit_soft = 0.41
+    rating_limit_soft_count = 6
+    word_length_soft = 3
+
+    rating_limit_hard = 0.82
+    rating_limit_hard_count = 3
+
+    default_rating_delta = 2
+    regression_coef = 0.08
+    max_result = 10
+
     def __init__(self, db):
-        self.delta_len = 2
-
-        self.rating_limit_soft = 0.41
-        self.rating_limit_soft_count = 6
-        self.word_length_soft = 3
-
-        self.rating_limit_hard = 0.82
-        self.rating_limit_hard_count = 3
-
-        self.default_rating_delta = 2
-        self.regression_coef = 0.08
-
-        self.max_result = 10
-
         self.db = db
         self.client_sugg = sphinxapi.SphinxClient()
         self.client_sugg.SetServer(sphinx_conf.host_name, sphinx_conf.port)
@@ -38,6 +38,7 @@ class SphinxSearch:
         self.client_show.SetConnectTimeout(3.0)
 
     def __configure(self, index_name, wlen=None):
+        self.client_sugg.ResetFilters()
         if index_name == sphinx_conf.index_sugg and wlen:
             self.client_sugg.SetRankingMode(sphinxapi.SPH_RANK_WORDCOUNT)
             self.client_sugg.SetFilterRange("len", int(wlen) - self.delta_len, int(wlen) + self.delta_len)
@@ -116,6 +117,7 @@ class SphinxSearch:
         word_entries = self.__get_word_entries(words, strong)
         word_count = len(word_entries)
         for x in range(word_count, max(0, word_count - 3), -1):
+            logging.info("\"{}\"/{}".format(" ".join(x.get_variations() for x in word_entries), x))
             self.client_show.AddQuery("\"{}\"/{}".format(" ".join(x.get_variations() for x in word_entries), x),
                                       sphinx_conf.index_addjobj)
 
