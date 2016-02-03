@@ -2,6 +2,6 @@ import os
 import sys
 
 reload(sys)
-cwd = os.getcwd()
-sys.path.append(cwd)
+cwd_dir = os.getcwd()
+sys.path.append(cwd_dir)
 sys.setdefaultencoding("utf-8")

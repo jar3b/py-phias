@@ -4,7 +4,7 @@ import os
 from aore.config import folders
 from aore.dbutils.dbschemas import db_shemas
 from aore.miscutils.exceptions import FiasException
-from xmlparser import XMLParser
+from aore.updater.xmlparser import XMLParser
 
 
 class AoDataParser:

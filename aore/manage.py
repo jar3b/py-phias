@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
 import optparse
 
-from aore.fias.fiasfactory import FiasFactory
 from aore.miscutils.sphinx import SphinxHelper
 from aore.updater.soapreceiver import SoapReceiver
 from aore.updater.updater import Updater
@@ -116,6 +114,7 @@ def main():
     if options.sphinx and options.indexer_path and options.output_conf:
         sphinxh = SphinxHelper()
         sphinxh.configure_indexer(options.indexer_path, options.output_conf)
+
 
 if __name__ == '__main__':
     main()

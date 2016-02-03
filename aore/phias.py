@@ -33,6 +33,6 @@ def find(text, strong=False):
 
 
 @app.error(404)
-def error404(error):
+def error404():
     response.content_type = 'application/json'
     return json.dumps(dict(error="Page not found"))

@@ -17,7 +17,7 @@ class AoRar:
         rarfile.UNRAR_TOOL = unrar_config.path
 
     def download(self, url):
-        logging.info("Downloading {}".format(url))
+        logging.info("Downloading %s", url)
         try:
             local_filename = os.path.abspath(folders.temp + "/" + url.split('/')[-1])
             if os.path.isfile(local_filename):
@@ -32,7 +32,7 @@ class AoRar:
         except:
             raise FiasException("Error downloading. Reason : {}".format(format_exc()))
 
-        logging.info("Downloaded {} bytes".format(request.headers['Content-length']))
+        logging.info("Downloaded %d bytes", request.headers['Content-length'])
         return local_filename
 
     def get_table_entries(self, file_name, allowed_tables):

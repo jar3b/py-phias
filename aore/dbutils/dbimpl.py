@@ -31,6 +31,7 @@ class DBImpl:
             cur = self.get_cursor()
             cur.execute(sql_query)
             cur.close()
+            del cur
             self.transaction_commit()
         except:
             self.transaction_rollback()
@@ -47,6 +48,7 @@ class DBImpl:
 
             rows = cur.fetchall()
             cur.close()
+            del cur
             self.transaction_commit()
         except:
             self.transaction_rollback()

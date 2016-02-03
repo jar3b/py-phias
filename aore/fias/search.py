@@ -74,14 +74,11 @@ class SphinxSearch:
                     maxleven = jaro_rating - jaro_rating * self.regression_coef
                 if jaro_rating >= rating_limit and jaro_rating >= maxleven:
                     outlist.append([match['attrs']['word'], jaro_rating])
+                del jaro_rating
 
         outlist.sort(key=lambda x: x[1], reverse=True)
 
         return outlist
-
-    def __split_phrase(self, phrase):
-        phrase = unicode(phrase).replace('-', '').replace('@', '').lower()
-        return re.split(r"[ ,:.#$]+", phrase)
 
     def __add_word_variations(self, word_entry, strong):
         if word_entry.MT_MANY_SUGG and not strong:
@@ -111,7 +108,11 @@ class SphinxSearch:
         return we_list
 
     def find(self, text, strong):
-        words = self.__split_phrase(text)
+        def split_phrase(phrase):
+            phrase = unicode(phrase).replace('-', '').replace('@', '').lower()
+            return re.split(r"[ ,:.#$]+", phrase)
+
+        words = split_phrase(text)
         word_entries = self.__get_word_entries(words, strong)
         word_count = len(word_entries)
         for x in range(word_count, max(0, word_count - 3), -1):

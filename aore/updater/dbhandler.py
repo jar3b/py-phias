@@ -44,7 +44,7 @@ class DbHandler:
         assert sql_query, "Invalid operation type: {}".format(operation_type)
 
         self.db.execute(sql_query)
-        logging.info("Processed {} queries FROM {}".format(processed_count - 1, csv_file_name))
+        logging.info("Processed %d queries FROM %s", processed_count - 1, csv_file_name)
 
     def create_structure(self):
         logging.info("Prepare to create DB structure...")

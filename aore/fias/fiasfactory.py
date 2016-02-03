@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
+import re
+from uuid import UUID
+
 import psycopg2
 from bottle import template
-import sys
+
+from aore.config import db_conf
 from aore.dbutils.dbimpl import DBImpl
 from aore.fias.search import SphinxSearch
-from aore.config import db_conf
-from uuid import UUID
-import re
 
 
 class FiasFactory:
@@ -30,18 +31,20 @@ class FiasFactory:
     # rule - "boolean", "uuid", "text"
     def __check_param(self, param, rule):
         if rule == "boolean":
-            assert type(param) is bool, "Invalid parameter type"
+            assert isinstance(param, bool), "Invalid parameter type"
         if rule == "uuid":
-            assert (type(param) is str or type(param) is unicode) and self.__check_uuid(param), "Invalid parameter value"
-        if rule == "text":
-            assert type(param) is str or type(param) is unicode, "Invalid parameter type"
+            assert (isinstance(param, str) or isinstance(param, unicode)) and self.__check_uuid(
+                param), "Invalid parameter value"
+            if rule == "text":
+                assert isinstance(param, str) or isinstance(param, unicode), "Invalid parameter type"
             assert len(param) > 3, "Text too short"
-            pattern = re.compile("[A-za-zА-Яа-я \-,.#№]+")
+            pattern = re.compile(r"[A-za-zА-Яа-я \-,.#№]+")
             assert pattern.match(param), "Invalid parameter value"
 
-    # text - строка поиска
-    # strong - строгий поиск (True) или "мягкий" (False) (с допущением ошибок, опечаток)
-    # Строгий используется при импорте из внешних систем (автоматически), где ошибка критична
+            # text - строка поиска
+            # strong - строгий поиск (True) или "мягкий" (False) (с допущением ошибок, опечаток)
+            # Строгий используется при импорте из внешних систем (автоматически), где ошибка критична
+
     def find(self, text, strong=False):
         try:
             self.__check_param(text, "text")
