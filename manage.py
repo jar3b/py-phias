@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import optparse
+import sys
 
 from aore.miscutils.sphinx import SphinxHelper
 from aore.updater.soapreceiver import SoapReceiver
@@ -91,7 +92,7 @@ def main():
     options, arguments = p.parse_args()
 
     # if no arguments
-    if not arguments:
+    if len(sys.argv)<2:
         print("Py-Phias manager. Try manage.py --help for options.")
         return
 
