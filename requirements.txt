@@ -1,0 +1,9 @@
+lxml==3.5.0
+bottle>=0.12.9
+psycopg2>=2.6.1
+PySimpleSOAP==1.16
+python-Levenshtein==0.12.0
+enum34>=1.0.0
+rarfile
+requests==2.8.1
+soap2py==1.16
