@@ -32,7 +32,7 @@ class AoRar:
         except:
             raise FiasException("Error downloading. Reason : {}".format(format_exc()))
 
-        logging.info("Downloaded %d bytes", request.headers['Content-length'])
+        logging.info("Downloaded %d bytes", int(request.headers['Content-length']))
         return local_filename
 
     def get_table_entries(self, file_name, allowed_tables):

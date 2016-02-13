@@ -39,6 +39,8 @@ class Updater:
             rows = db.get_rows('SELECT version FROM "CONFIG" WHERE id=0', True)
             assert len(rows) > 0, "Cannot get a version"
             return rows[0]['version']
+        except:
+            return 0
         finally:
             db.close()
 
