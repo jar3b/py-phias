@@ -34,6 +34,7 @@ class Updater:
 
     @classmethod
     def get_current_fias_version(cls):
+        db = None
         try:
             db = DBImpl(psycopg2, db_conf)
             rows = db.get_rows('SELECT version FROM "CONFIG" WHERE id=0', True)
