@@ -90,6 +90,7 @@ class WordEntry:
         if not self.scname:
             self.scname = result[2][1]
 
+        # Проверяем, если слово встречается слишком много раз
         if len(result) == 5 and result[4][0] > 30000:
             self.is_freq_word = True
 

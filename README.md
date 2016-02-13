@@ -45,6 +45,7 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
 
 `python -m pip install https://github.com/Romamo/sphinxapi/zipball/master`
 
+
 ### Debian Linux
 1. Установить unrar
 2. Установить sphinxapi последней версии: 

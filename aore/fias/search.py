@@ -16,7 +16,6 @@ class SphinxSearch:
 
     rating_limit_soft = 0.41
     rating_limit_soft_count = 6
-    word_length_soft = 3
 
     rating_limit_hard = 0.82
     rating_limit_hard_count = 3

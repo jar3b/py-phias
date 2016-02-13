@@ -37,13 +37,13 @@ class FiasFactory:
                 param), "Invalid parameter value"
             if rule == "text":
                 assert isinstance(param, str) or isinstance(param, unicode), "Invalid parameter type"
-            assert len(param) > 3, "Text too short"
-            pattern = re.compile(r"[A-za-zА-Яа-я \-,.#№]+")
-            assert pattern.match(param), "Invalid parameter value"
+                assert len(param) > 3, "Text too short"
+                pattern = re.compile(r"[A-za-zА-Яа-я \-,.#№]+")
+                assert pattern.match(param), "Invalid parameter value"
 
-            # text - строка поиска
-            # strong - строгий поиск (True) или "мягкий" (False) (с допущением ошибок, опечаток)
-            # Строгий используется при импорте из внешних систем (автоматически), где ошибка критична
+                # text - строка поиска
+                # strong - строгий поиск (True) или "мягкий" (False) (с допущением ошибок, опечаток)
+                # Строгий используется при импорте из внешних систем (автоматически), где ошибка критична
 
     def find(self, text, strong=False):
         try:
