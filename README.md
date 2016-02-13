@@ -36,16 +36,17 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
 1. Python 2.7.x, pip
 Для Windows качаем - ставим, для Debian:
 ```
-	sudo apt-get install python-setuptools
-	sudo easy_install pip
+sudo apt-get install python-setuptools
+sudo easy_install pip
+sudo pip install --upgrade pip 
 ```
 2. PostgreSql 9.5 и выше (из-за синтаксиса _ON CONFLICT ... DO_)
 Для Windows, как обычно, [качаем](http://www.enterprisedb.com/products-services-training/pgdownload#windows) - ставим, для Debian:
 ```
-    sudo sh -c 'echo deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main 9.5 > /etc/apt/sources.list.d/postgresql.list'
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-    sudo apt-get update
-    sudo apt-get install postgresql-9.5
+sudo sh -c 'echo deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main 9.5 > /etc/apt/sources.list.d/postgresql.list'
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install postgresql-9.5
 ```
 Затем создайте пользователя и базу данных.
 3. Sphinx 2.2.1 и новее:
@@ -67,22 +68,26 @@ sudo make install
 2. Установить unrar.exe (можно установить WinRar целиком).
 3. Установить sphinxapi последней версии (либо взять из директории Sphinx): 
 ```
-    python -m pip install https://github.com/Romamo/sphinxapi/zipball/master
+python -m pip install https://github.com/Romamo/sphinxapi/zipball/master
 ```
 
 
 ### Debian Linux
+1. Установить libxml
+```
+sudo apt-get install python-dev libxml2 libxml2-dev libxslt-dev
+```
 1. Установить unrar (non-free)
 ```
-    sudo sh -c 'echo deb ftp://ftp.us.debian.org/debian/ stable main non-free > /etc/apt/sources.list.d/non-free.list'
-    sudo apt-get update
-    sudo apt-get install unrar
+sudo sh -c 'echo deb ftp://ftp.us.debian.org/debian/ stable main non-free > /etc/apt/sources.list.d/non-free.list'
+sudo apt-get update
+sudo apt-get install unrar
 ```
 2. Установить sphinxapi последней версии: 
 ```
-    pip install https://github.com/Romamo/sphinxapi/zipball/master
+pip install https://github.com/Romamo/sphinxapi/zipball/master
 ```
 3. Установить, собственно, нашу штуку:
 ```
-    pip install --target=d:\somewhere\other\than\the\default https://github.com/jar3b/...
+pip install --target=d:\somewhere\other\than\the\default https://github.com/jar3b/...
 ```
