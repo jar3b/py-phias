@@ -90,6 +90,11 @@ def main():
 
     options, arguments = p.parse_args()
 
+    # if no arguments
+    if not arguments:
+        print("Py-Phias manager. Try manage.py --help for options.")
+        return
+
     # Show FIAS updates
     if options.show_versions:
         print_fias_versions()
