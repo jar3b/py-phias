@@ -15,6 +15,10 @@ class AoDataParser:
         else:
             self.allowed_fields = db_shemas[self.datasource.table_name].fields
 
+        # Создаем временную папку, если ее нет
+        if not os.path.exists(folders.temp):
+            os.makedirs(folders.temp)
+
         self.pagesize = pagesize
         self.currentpage = 0
         self.counter = 0

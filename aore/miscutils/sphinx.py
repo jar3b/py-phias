@@ -17,6 +17,11 @@ class SphinxHelper:
         self.files = dict()
         self.aodp = DbHandler()
 
+        # Создаем временную папку, если ее нет
+        if not os.path.exists(folders.temp):
+            os.makedirs(folders.temp)
+
+
     def configure_indexer(self, indexer_binary, config_filename):
         logging.info("Start configuring Sphinx...")
         self.index_binary = indexer_binary

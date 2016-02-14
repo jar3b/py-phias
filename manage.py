@@ -4,6 +4,7 @@ import logging
 import optparse
 import os
 import sys
+import platform
 
 from aore.miscutils.sphinx import SphinxHelper
 from aore.updater.soapreceiver import SoapReceiver
@@ -115,9 +116,9 @@ def main():
 
     # Manage DB
     if options.database:
-        if not is_root():
+        if 'Linux' in platform.system() and not is_root():
             print "This option need to be run with elevated privileges."
-            # return
+            return
 
         # create new database
         aoupdater = Updater(options.source)
@@ -134,7 +135,7 @@ def main():
 
     # Manage Sphinx
     if options.sphinx and options.indexer_path and options.output_conf:
-        if not is_root():
+        if 'Linux' in platform.system() and not is_root():
             print "This option need to be run with elevated privileges."
             return
         sphinxh = SphinxHelper()

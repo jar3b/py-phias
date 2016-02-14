@@ -21,8 +21,9 @@ class AoRar:
         try:
             local_filename = os.path.abspath(folders.temp + "/" + url.split('/')[-1])
             if os.path.isfile(local_filename):
-                # TODO: UNCOMMENT os.remove(local_filename)
-                return local_filename
+                os.remove(local_filename)
+            else:
+                os.makedirs(local_filename)
 
             request = requests.get(url, stream=True)
             with open(local_filename, 'wb') as f:

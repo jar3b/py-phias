@@ -71,28 +71,33 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
 1. Установить lxml, через pip не ставится, так что качаем [отсюда](https://pypi.python.org/pypi/lxml/3.5.0).
 2. Установить unrar.exe (можно установить WinRar целиком).
 3. Установить sphinxapi последней версии (либо взять из директории Sphinx): 
+
     ```
     python -m pip install https://github.com/Romamo/sphinxapi/zipball/master
     ```
 
 
 ### Debian Linux
-1. Установить libxml
+1. Установить libxml:
+
     ```
     sudo apt-get install python-dev libxml2 libxml2-dev libxslt-dev
     ```
-2. Установить unrar (non-free)
+2. Установить unrar (non-free):
+
     ```
     sudo sh -c 'echo deb ftp://ftp.us.debian.org/debian/ stable main non-free > /etc/apt/sources.list.d/non-free.list'
     sudo apt-get update
     sudo apt-get install unrar
     ```
-3. Установить sphinxapi последней версии: 
+3. Установить sphinxapi последней версии:
+
     ```
     pip install https://github.com/Romamo/sphinxapi/zipball/master
     ```
 4. Установить, собственно, приложение:
  - полностью:
+ 
     ```
     sudo mkdir -p /var/www/py-phias
     sudo chown www-fias: /var/www/py-phias
@@ -102,6 +107,7 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
     sudo pip install -r requirements.txt
     ```
  - как библиотеку:
+ 
     ```
     python -m pip install ....
     ```
