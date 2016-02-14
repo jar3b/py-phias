@@ -61,16 +61,13 @@ class Updater:
 
     def __get_updates_from_rar(self, url):
         aorar = AoRar()
-        fname = None
 
         if url.startswith("http://") or url.startswith("https://"):
-            fname = aorar.download(url)
+            aorar.download(url)
         if url.endswith(".rar") and path.isfile(url):
-            fname = url
+            aorar.local(url)
 
-        assert fname, "No source was specified"
-
-        for table_entry in aorar.get_table_entries(fname, allowed_tables):
+        for table_entry in aorar.get_table_entries(allowed_tables):
             yield table_entry
 
     def __init_update_entries(self, updates_generator):

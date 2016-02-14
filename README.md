@@ -50,7 +50,17 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
     sudo apt-get update
     sudo apt-get install postgresql-9.5
     ```
-    Затем создайте пользователя и базу данных.
+    Затем создайте пользователя и базу данных:
+    ```
+    sudo adduser phias
+	sudo -u postgres psql
+	postgres=# CREATE EXTENSION pg_trgm;
+	postgres=# CREATE EXTENSION btree_gin;
+	postgres=# CREATE DATABASE fias_db;
+	postgres=# CREATE USER phias WITH password 'phias';
+	postgres=# GRANT ALL privileges ON DATABASE fias_db TO phias;
+	postgres=# ALTER USER phias WITH SUPERUSER;
+    ```
 
 3. Sphinx 2.2.1 и новее:
     [Windows](http://sphinxsearch.com/downloads/release/), Debian:
@@ -59,7 +69,7 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
     wget http://sphinxsearch.com/files/sphinx-2.2.10-release.tar.gz
     tar xzf sphinx-2.2.10-release.tar.gz
     cd sphinx-2.2.10-release
-    sudo apt-get install  postgresql-server-dev-9.5
+    sudo apt-get install postgresql-server-dev-9.5
     ./configure --without-mysql --with-pgsql
     make
     sudo make install
@@ -93,7 +103,7 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
 3. Установить sphinxapi последней версии:
 
     ```
-    pip install https://github.com/Romamo/sphinxapi/zipball/master
+    sudo pip install https://github.com/Romamo/sphinxapi/zipball/master
     ```
 4. Установить, собственно, приложение:
  - полностью:
@@ -106,8 +116,12 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
     cd /var/www/py-phias
     sudo pip install -r requirements.txt
     ```
- - как библиотеку:
+ - как repo:
  
     ```
-    python -m pip install ....
+    sudo mkdir -p /var/www/py-phias
+    sudo chown phias: /var/www/py-phias
+    cd /var/www
+    sudo -u phias -H git clone --branch=master https://github.com/jar3b/py-phias.git py-phias
+    sudo pip install -r requirements.txt
     ```

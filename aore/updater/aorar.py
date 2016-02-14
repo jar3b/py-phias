@@ -15,6 +15,12 @@ from aoxmltableentry import AoXmlTableEntry
 class AoRar:
     def __init__(self):
         rarfile.UNRAR_TOOL = unrar_config.path
+        self.fname = None
+        self.mode = None
+
+    def local(self, fname):
+        self.fname = fname
+        self.mode = "local"
 
     def download(self, url):
         logging.info("Downloading %s", url)
@@ -35,11 +41,12 @@ class AoRar:
             raise FiasException("Error downloading. Reason : {}".format(format_exc()))
 
         logging.info("Downloaded %d bytes", int(request.headers['Content-length']))
-        return local_filename
+        self.fname = local_filename
+        self.mode = "remote"
 
-    def get_table_entries(self, file_name, allowed_tables):
-        if file_name and os.path.isfile(file_name):
-            rf = rarfile.RarFile(file_name)
+    def get_table_entries(self, allowed_tables):
+        if self.fname and os.path.isfile(self.fname):
+            rf = rarfile.RarFile(self.fname)
 
             for arch_entry in rf.infolist():
                 xmltable = AoXmlTableEntry.from_rar(arch_entry.filename, rf, arch_entry)
@@ -47,6 +54,10 @@ class AoRar:
                     yield xmltable
             else:
                 logging.info("All entries processed")
-                os.remove(file_name)
+                if self.mode == "remote":
+                    try:
+                        os.remove(self.fname)
+                    except:
+                        logging.warning("Cannot delete %s, do it manually", self.fname)
         else:
             logging.error("No file specified or not exists")
