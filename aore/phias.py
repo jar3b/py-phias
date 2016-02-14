@@ -14,12 +14,16 @@ fias_factory = FiasFactory()
 @app.route(r'/expand/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>')
 def expand(aoid):
     response.content_type = 'application/json'
+    response.set_header('Access-Control-Allow-Origin', '*')
+
     return json.dumps(fias_factory.expand(aoid))
 
 
 @app.route(r'/normalize/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>')
 def normalize(aoid):
     response.content_type = 'application/json'
+    response.set_header('Access-Control-Allow-Origin', '*')
+
     return json.dumps(fias_factory.normalize(aoid))
 
 
@@ -28,6 +32,7 @@ def normalize(aoid):
 def find(text, strong=False):
     strong = (strong == "strong")
     response.content_type = 'application/json'
+    response.set_header('Access-Control-Allow-Origin', '*')
 
     return json.dumps(fias_factory.find(text, strong))
 
@@ -35,4 +40,6 @@ def find(text, strong=False):
 @app.error(404)
 def error404(error):
     response.content_type = 'application/json'
+    response.set_header('Access-Control-Allow-Origin', '*')
+
     return json.dumps(dict(error="Page not found"))

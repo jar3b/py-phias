@@ -129,7 +129,7 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
 
 ## Настройка
 1. Создадим базу:
-`sudo -u phias python manage.py -b create -s /tmp/fias_xml.rar`
+ `sudo -u phias python manage.py -b create -s /tmp/fias_xml.rar`
 2. Проиндексируем Sphinx
  `sudo python manage.py -c -i indexer -o /usr/local/sphinx/etc/sphinx.conf`
  Затем запустим searchd
