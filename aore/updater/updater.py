@@ -18,7 +18,7 @@ class Updater:
     # Source: "http", directory (as a full path to unpacked xmls)
     def __init__(self, source="http"):
         self.db_handler = DbHandler()
-        self.mode = source
+        self.source = source
         self.updalist_generator = None
         self.tablelist_generator = None
         self.allowed_tables = None
@@ -61,19 +61,33 @@ class Updater:
 
     def __get_updates_from_rar(self, url):
         aorar = AoRar()
-        fname = aorar.download(url)
+        fname = None
+
+        if url.startswith("http://") or url.startswith("https://"):
+            fname = aorar.download(url)
+        if url.endswith(".rar") and path.isfile(url):
+            fname = url
+
+        assert fname, "No source was specified"
+
         for table_entry in aorar.get_table_entries(fname, allowed_tables):
             yield table_entry
 
     def __init_update_entries(self, updates_generator):
-        if self.mode == "http":
+        if self.source == "http":
             assert updates_generator, "No generator"
             self.tablelist_generator = self.__get_updates_from_rar
             self.updalist_generator = updates_generator
-        else:
-            assert path.isdir(self.mode), "Invalid directory {}".format(self.mode)
-            self.updalist_generator = self.__get_updates_from_folder(self.mode)
+            return
+        if self.source.endswith(".rar"):
+            self.tablelist_generator = self.__get_updates_from_rar
+            self.updalist_generator = self.__get_updates_from_folder(self.source)
+            return
+        if path.isdir(self.source):
             self.tablelist_generator = self.__get_entries_from_folder
+            self.updalist_generator = self.__get_updates_from_folder(self.source)
+
+        assert self.tablelist_generator, "No valid source."
 
     def process_single_entry(self, operation_type, table_xmlentry, chunck_size=50000):
         aoparser = AoDataParser(table_xmlentry, chunck_size)

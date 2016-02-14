@@ -9,7 +9,7 @@ from aore.miscutils.sphinx import SphinxHelper
 from aore.updater.soapreceiver import SoapReceiver
 from aore.updater.updater import Updater
 
-logging.basicConfig(format='%(asctime)s %(message)s', level=logging.WARNING)
+logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
 
 def is_root():
@@ -92,7 +92,8 @@ def main():
                  help="Show available fias versions. "
                       "These version numbers are required for the '--update-version' option")
     p.add_option('--source', '-s', default="http",
-                 help="Create/update DB from source. Value: 'http' or absolute path to folder containing XMLs")
+                 help="Create/update DB from source. Value: 'http', absolute path to folder containing XMLs "
+                      "or absolute path to rar file.")
     p.add_option('--sphinx-configure', '-c', action="store_true", dest="sphinx", default="False",
                  help="Configure Sphinx. Creates a sphinx.conf file specified in '--output-conf'")
     p.add_option('--indexer-path', '-i',
@@ -116,7 +117,7 @@ def main():
     if options.database:
         if not is_root():
             print "This option need to be run with elevated privileges."
-            return
+            # return
 
         # create new database
         aoupdater = Updater(options.source)
