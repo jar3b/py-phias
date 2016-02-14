@@ -23,7 +23,8 @@ class AoRar:
             if os.path.isfile(local_filename):
                 os.remove(local_filename)
             else:
-                os.makedirs(folders.temp)
+                if not os.path.exists(folders.temp):
+                    os.makedirs(folders.temp)
 
             request = requests.get(url, stream=True)
             with open(local_filename, 'wb') as f:
