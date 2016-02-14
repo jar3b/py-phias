@@ -1,25 +1,13 @@
 # -*- coding: utf-8 -*-
-import ctypes
 import logging
 import optparse
-import os
 import sys
-import platform
 
 from aore.miscutils.sphinx import SphinxHelper
 from aore.updater.soapreceiver import SoapReceiver
 from aore.updater.updater import Updater
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
-
-
-def is_root():
-    try:
-        is_admin = os.getuid() == 0
-    except AttributeError:
-        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-
-    return is_admin
 
 
 def print_fias_versions():
@@ -116,10 +104,6 @@ def main():
 
     # Manage DB
     if options.database:
-        if 'Linux' in platform.system() and not is_root():
-            print "This option need to be run with elevated privileges."
-            return
-
         # create new database
         aoupdater = Updater(options.source)
         allowed_updates = None
@@ -135,9 +119,6 @@ def main():
 
     # Manage Sphinx
     if options.sphinx and options.indexer_path and options.output_conf:
-        if 'Linux' in platform.system() and not is_root():
-            print "This option need to be run with elevated privileges."
-            return
         sphinxh = SphinxHelper()
         sphinxh.configure_indexer(options.indexer_path, options.output_conf)
 

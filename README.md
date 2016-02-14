@@ -100,9 +100,9 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
  
     ```
     sudo mkdir -p /var/www/py-phias
-    sudo chown www-fias: /var/www/py-phias
+    sudo chown phias: /var/www/py-phias
     wget https://github.com/jar3b/py-phias/archive/v0.0.1.tar.gz
-    sudo -u www-fias tar xzf v0.0.1.tar.gz -C /var/www/py-phias --strip-components=1
+    sudo -u phias tar xzf v0.0.1.tar.gz -C /var/www/py-phias --strip-components=1
     cd /var/www/py-phias
     sudo pip install -r requirements.txt
     ```
