@@ -51,7 +51,7 @@ def get_allowed_updates(updates_str, mode="create"):
     if mode == "create" and not user_defined_list:
         yield all_versions[-1]
 
-    if mode == "create":
+    if mode == "create" and user_defined_list:
         assert len(user_defined_list) == 1, "Ony single update number allowed for DB create"
 
     for uv in all_versions:
