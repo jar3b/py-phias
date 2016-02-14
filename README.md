@@ -50,16 +50,17 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
     sudo apt-get update
     sudo apt-get install postgresql-9.5
     ```
-    Затем создайте пользователя и базу данных:
+    Затем создайте пользователя и базу данных и установите расширение pg_trgm:
     ```
     sudo adduser phias
 	sudo -u postgres psql
-	postgres=# CREATE EXTENSION pg_trgm;
-	postgres=# CREATE EXTENSION btree_gin;
 	postgres=# CREATE DATABASE fias_db;
 	postgres=# CREATE USER phias WITH password 'phias';
 	postgres=# GRANT ALL privileges ON DATABASE fias_db TO phias;
 	postgres=# ALTER USER phias WITH SUPERUSER;
+	postgres=# \q
+	postgres=# sudo -u phias psql -d fias_db -U phias
+	postgres=# CREATE EXTENSION pg_trgm SCHEMA public;
     ```
 
 3. Sphinx 2.2.1 и новее:
@@ -125,3 +126,11 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
     sudo -u phias -H git clone --branch=master https://github.com/jar3b/py-phias.git py-phias
     sudo pip install -r requirements.txt
     ```
+
+## Настройка
+1. Создадим базу:
+`sudo -u phias python manage.py -b create -s /tmp/fias_xml.rar`
+2. Проиндексируем Sphinx
+ `sudo python manage.py -c -i indexer -o /usr/local/sphinx/etc/sphinx.conf`
+ Затем запустим searchd
+ `sudo searchd --config /usr/local/sphinx/etc/sphinx.conf`
