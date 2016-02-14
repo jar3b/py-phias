@@ -40,6 +40,7 @@ sudo apt-get install python-setuptools
 sudo easy_install pip
 sudo pip install --upgrade pip 
 ```
+
 2. PostgreSql 9.5 и выше (из-за синтаксиса _ON CONFLICT ... DO_)
 Для Windows, как обычно, [качаем](http://www.enterprisedb.com/products-services-training/pgdownload#windows) - ставим, для Debian:
 ```
@@ -49,6 +50,7 @@ sudo apt-get update
 sudo apt-get install postgresql-9.5
 ```
 Затем создайте пользователя и базу данных.
+
 3. Sphinx 2.2.1 и новее:
 [Windows](http://sphinxsearch.com/downloads/release/), Debian:
 ```
@@ -61,6 +63,7 @@ sudo apt-get install  postgresql-server-dev-9.5
 make
 sudo make install
 ```
+
 4. Web-сервер с поддержкой WSGI, любой, по Вашему желанию.
 
 ### Windows
@@ -77,17 +80,26 @@ python -m pip install https://github.com/Romamo/sphinxapi/zipball/master
 ```
 sudo apt-get install python-dev libxml2 libxml2-dev libxslt-dev
 ```
-1. Установить unrar (non-free)
+2. Установить unrar (non-free)
 ```
 sudo sh -c 'echo deb ftp://ftp.us.debian.org/debian/ stable main non-free > /etc/apt/sources.list.d/non-free.list'
 sudo apt-get update
 sudo apt-get install unrar
 ```
-2. Установить sphinxapi последней версии: 
+3. Установить sphinxapi последней версии: 
 ```
 pip install https://github.com/Romamo/sphinxapi/zipball/master
 ```
-3. Установить, собственно, нашу штуку:
+4. Установить, собственно, приложение:
+ - полностью:
 ```
-pip install --target=d:\somewhere\other\than\the\default https://github.com/jar3b/...
+sudo mkdir -p /var/www/py-phias
+sudo chown www-fias: /var/www/py-phias
+wget https://github.com/jar3b/py-phias/archive/v0.0.1.tar.gz
+sudo -u www-fias tar xzf v0.0.1.tar.gz -C /var/www/py-phias --strip-components=1
+sudo pip install -r requirements.txt
+```
+ - как библиотеку:
+```
+python -m pip install ....
 ```

@@ -1,13 +1,24 @@
 # -*- coding: utf-8 -*-
+import ctypes
 import logging
 import optparse
+import os
 import sys
 
 from aore.miscutils.sphinx import SphinxHelper
 from aore.updater.soapreceiver import SoapReceiver
 from aore.updater.updater import Updater
 
-logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(message)s', level=logging.WARNING)
+
+
+def is_root():
+    try:
+        is_admin = os.getuid() == 0
+    except AttributeError:
+        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+
+    return is_admin
 
 
 def print_fias_versions():
@@ -92,7 +103,7 @@ def main():
     options, arguments = p.parse_args()
 
     # if no arguments
-    if len(sys.argv)<2:
+    if len(sys.argv) < 2:
         print("Py-Phias manager. Try manage.py --help for options.")
         return
 
@@ -103,6 +114,10 @@ def main():
 
     # Manage DB
     if options.database:
+        if not is_root():
+            print "This option need to be run with elevated privileges."
+            return
+
         # create new database
         aoupdater = Updater(options.source)
         allowed_updates = None
@@ -118,6 +133,9 @@ def main():
 
     # Manage Sphinx
     if options.sphinx and options.indexer_path and options.output_conf:
+        if not is_root():
+            print "This option need to be run with elevated privileges."
+            return
         sphinxh = SphinxHelper()
         sphinxh.configure_indexer(options.indexer_path, options.output_conf)
 
