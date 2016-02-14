@@ -48,20 +48,20 @@ def get_allowed_updates(updates_str, mode="create"):
     user_defined_list = parse_update_str(updates_str)
     out_list = []
 
-    if mode == "create" and not user_defined_list:
-        yield all_versions[-1]
+    if mode == "create":
+        if not user_defined_list:
+            yield all_versions[-1]
+        else:
+            assert len(user_defined_list) == 1, "Ony single update number allowed for DB create"
+    if mode == "update":
+        for uv in all_versions:
+            uv_ver = uv['intver']
+            if uv_ver > current_version and (not user_defined_list or uv_ver in user_defined_list):
+                out_list.append(uv)
 
-    if mode == "create" and user_defined_list:
-        assert len(user_defined_list) == 1, "Ony single update number allowed for DB create"
-
-    for uv in all_versions:
-        uv_ver = uv['intver']
-        if uv_ver > current_version and (not user_defined_list or uv_ver in user_defined_list):
-            out_list.append(uv)
-
-    out_list.sort(key=lambda item: item['intver'])
-    for ol_entry in out_list:
-        yield ol_entry
+        out_list.sort(key=lambda item: item['intver'])
+        for ol_entry in out_list:
+            yield ol_entry
 
 
 def main():
