@@ -59,7 +59,7 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
 	postgres=# GRANT ALL privileges ON DATABASE fias_db TO phias;
 	postgres=# ALTER USER phias WITH SUPERUSER;
 	postgres=# \q
-	postgres=# sudo -u phias psql -d fias_db -U phias
+	sudo -u phias psql -d fias_db -U phias
 	postgres=# CREATE EXTENSION pg_trgm SCHEMA public;
     ```
 

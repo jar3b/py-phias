@@ -16,3 +16,5 @@ db_conf.password = "postgres"
 
 unrar_config.path = "unrar"
 folders.temp = "/tmp/py-fias"
+
+basic.logging = True
