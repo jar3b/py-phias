@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+class basic:
+    logging = False
+
 
 class sphinx_conf:
     host_name = "localhost"

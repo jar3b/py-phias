@@ -116,14 +116,11 @@ class SphinxSearch:
         word_entries = self.__get_word_entries(words, strong)
         word_count = len(word_entries)
         for x in range(word_count, max(0, word_count - 3), -1):
-            logging.info("\"{}\"/{}".format(" ".join(x.get_variations() for x in word_entries), x))
             self.client_show.AddQuery("\"{}\"/{}".format(" ".join(x.get_variations() for x in word_entries), x),
                                       sphinx_conf.index_addjobj)
 
         self.__configure(sphinx_conf.index_addjobj)
-        logging.info("QUERY ")
         rs = self.client_show.RunQueries()
-        logging.info("OK")
 
         results = []
         parsed_ids = []

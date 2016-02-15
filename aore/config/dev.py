@@ -16,3 +16,5 @@ db_conf.password = "intercon"
 
 unrar_config.path = "C:\\Program Files (x86)\\WinRAR\\unrar.exe"
 folders.temp = "E:\\!TEMP"
+
+basic.logging = True

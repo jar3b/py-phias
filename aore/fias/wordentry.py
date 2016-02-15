@@ -2,6 +2,7 @@
 import re
 
 from aore.config import sphinx_conf
+from aore.config import basic
 
 
 class WordEntry:
@@ -106,7 +107,8 @@ class WordEntry:
                 out_mask_list.append('x')
             else:
                 out_mask_list.append(str(result[i][0]))
-
+        if basic.logging:
+            print str(self.word) + ''.join(out_mask_list)
         return ''.join(out_mask_list)
 
     def get_type(self):
