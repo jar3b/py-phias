@@ -44,7 +44,7 @@ class WordEntry:
 
     def __init__(self, db, word):
         self.db = db
-        self.word = unicode(word)
+        self.word = str(word).decode('utf8')
         self.word_len = len(unicode(self.word))
         self.variations = []
         self.scname = None
