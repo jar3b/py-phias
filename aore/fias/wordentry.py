@@ -85,6 +85,9 @@ class WordEntry:
                   "UNION ALL SELECT frequency, NULL FROM \"AOTRIG\" WHERE word='{}';".format(
             self.word, self.word_len, self.word, self.word, self.word, self.word)
 
+        if basic.logging:
+            print sql_qry
+
         result = self.db.get_rows(sql_qry)
 
         # Проставляем "сокращенное" сокращение, если нашли полное
@@ -108,7 +111,7 @@ class WordEntry:
             else:
                 out_mask_list.append(str(result[i][0]))
         if basic.logging:
-            print str(self.word) + ''.join(out_mask_list)
+            print str(self.word) + ' ' + ''.join(out_mask_list)
         return ''.join(out_mask_list)
 
     def get_type(self):
