@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import urllib
 from uuid import UUID
 
 import psycopg2
@@ -47,6 +48,7 @@ class FiasFactory:
 
     def find(self, text, strong=False):
         try:
+            text = urllib.unquote(text).decode('utf8')
             self.__check_param(text, "text")
             self.__check_param(strong, "boolean")
 
