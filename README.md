@@ -2,6 +2,10 @@
 Python application that can operate with FIAS (Russian Address Object DB)
 
 Простое приложение для работы с БД ФИАС, написано для Python 2.7, использует БД PostgreSQL
+## Содержание
+ - [Возможности](#Возможности)
+ - [Установка](#Установка)
+ - [Настройка](#Настройка)
 
 ## Возможности
 1. API (выходной формат - JSON), основные функции которого:
@@ -86,7 +90,8 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
     ```
     python -m pip install https://github.com/Romamo/sphinxapi/zipball/master
     ```
-
+4. Установить приложение, скачав релиз `https://github.com/jar3b/py-phias/archive/v0.0.2.zip`, распакуйте его в удобное
+ Вам место и запустите оттуда `python -m pip install -r requirements.txt`
 
 ### Debian Linux
 1. Установить libxml:
@@ -112,7 +117,7 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
     ```
     sudo mkdir -p /var/www/py-phias
     sudo chown phias: /var/www/py-phias
-    wget https://github.com/jar3b/py-phias/archive/v0.0.1.tar.gz
+    wget https://github.com/jar3b/py-phias/archive/v0.0.2.tar.gz
     sudo -u phias tar xzf v0.0.1.tar.gz -C /var/www/py-phias --strip-components=1
     cd /var/www/py-phias
     sudo pip install -r requirements.txt
@@ -128,9 +133,20 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
     ```
 
 ## Настройка
-1. Создадим базу:
- `sudo -u phias python manage.py -b create -s /tmp/fias_xml.rar`
-2. Проиндексируем Sphinx
- `sudo python manage.py -c -i indexer -o /usr/local/sphinx/etc/sphinx.conf`
- Затем запустим searchd
- `sudo searchd --config /usr/local/sphinx/etc/sphinx.conf`
+### Первоначальная настройка базы данных
+1. Настроим конфиг, он лежит в `aore/config/__init__.py`, в этом файле можно изменить `.dev` на `.prod`, 
+ отредактировать, соотвественно, dev.py или prod.py: прописать параметры доступа к базе и путь, 
+ куда будут сохраняться данные Sphinx; по этому пути дополнительно необходимо создать 3 папки: log, run и data
+2. Создадим базу:
+ `sudo -u phias python manage.py -b create -s /tmp/fias_xml.rar` - из архива.
+ `sudo -u phias python manage.py -b create -s /tmp/fias_xml_unpacked` - из директории.
+ `sudo -u phias python manage.py -b create -s http` - онлайн, с сервера ФНС.
+ Также, можно указать конкретную версию ФИАС _только_ при http загрузке, с ключом `--update-version <num>`, где num - 
+ номер версии ФИАС, все доступные версии можно получить, выполнив `manage.py -v`
+3. Проиндексируем Sphinx:
+ Windows: `python manage.py -c -i C://sphinx//indexer.exe -o C://sphinx//sphinx.conf`
+ Debian: `sudo python manage.py -c -i indexer -o /usr/local/sphinx/etc/sphinx.conf`
+4. Затем запустим searchd:
+ Windows: `net start sphinxsearch`, при этом файл настройки должен быть доступен Sphinx'у.
+ Debian: `sudo searchd --config /usr/local/sphinx/etc/sphinx.conf`
+5. Настроим WSGI server, я использую nginx + passenger, Вы можете использовать любое приемлемое сочетание.
