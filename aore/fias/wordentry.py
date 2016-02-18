@@ -112,3 +112,10 @@ class WordEntry:
 
     def get_type(self):
         return ", ".join([x for x in self.match_types if self.__dict__[x]])
+
+    def __unicode__(self):
+        return self.word
+
+    def __str__(self):
+        return str(self.word)
+

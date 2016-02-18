@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-import logging
 import re
 
 import Levenshtein
 import sphinxapi
+import time
 
 from aore.config import sphinx_conf
 from aore.fias.wordentry import WordEntry
 from aore.miscutils.trigram import trigram
+from aore.config import basic
 
 
 class SphinxSearch:
@@ -23,6 +24,8 @@ class SphinxSearch:
     default_rating_delta = 2
     regression_coef = 0.08
     max_result = 10
+
+    exclude_freq_words = True
 
     def __init__(self, db):
         self.db = db
@@ -96,15 +99,20 @@ class SphinxSearch:
         if word_entry.MT_ADD_SOCR:
             word_entry.add_variation_socr()
 
+    # Получает список объектов (слово), пропуская часто используемые слова
     def __get_word_entries(self, words, strong):
         we_list = []
         for word in words:
             if word != '':
                 we = WordEntry(self.db, word)
-                self.__add_word_variations(we, strong)
+                if self.exclude_freq_words and we.is_freq_word:
+                    pass
+                else:
+                    self.__add_word_variations(we, strong)
 
-                assert we.get_variations() != "", "Cannot process sentence."
-                we_list.append(we)
+                    assert we.get_variations() != "", "Cannot process sentence."
+                    we_list.append(we)
+
         return we_list
 
     def find(self, text, strong):
@@ -112,15 +120,29 @@ class SphinxSearch:
             phrase = unicode(phrase).replace('-', '').replace('@', '').lower()
             return re.split(r"[ ,:.#$]+", phrase)
 
+        # сплитим текст на слова
         words = split_phrase(text)
+
+        # получаем список объектов
         word_entries = self.__get_word_entries(words, strong)
         word_count = len(word_entries)
+
+        # проверяем, есть ли вообще что-либо в списке объектов слов (или же все убрали как частое)
+        assert word_count > 0, "No legal words is specified"
+
+        # формируем строки для поиска в Сфинксе
         for x in range(word_count, max(0, word_count - 3), -1):
             self.client_show.AddQuery("\"{}\"/{}".format(" ".join(x.get_variations() for x in word_entries), x),
                                       sphinx_conf.index_addjobj)
 
         self.__configure(sphinx_conf.index_addjobj)
+
+        start_t = time.time()
         rs = self.client_show.RunQueries()
+        elapsed_t = time.time() - start_t
+
+        if basic.logging:
+            print(elapsed_t)
 
         results = []
         parsed_ids = []
@@ -132,7 +154,7 @@ class SphinxSearch:
                 if not ma['attrs']['aoid'] in parsed_ids:
                     parsed_ids.append(ma['attrs']['aoid'])
                     results.append(
-                        dict(aoid=ma['attrs']['aoid'], text=ma['attrs']['fullname'], ratio=ma['weight'], cort=i))
+                        dict(aoid=ma['attrs']['aoid'], text=unicode(ma['attrs']['fullname']), ratio=ma['weight'], cort=i))
 
         results.sort(key=lambda x: Levenshtein.ratio(text, x['text']), reverse=True)
 
