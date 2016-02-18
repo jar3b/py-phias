@@ -9,6 +9,6 @@
 	PATH.fullname || ', ' || child.shortname || ' ' || child.formalname AS fullname
 	FROM "ADDROBJ" AS child
 	, PATH
-	WHERE child.parentguid = PATH.aoguid AND actstatus = TRUE AND livestatus = TRUE AND nextid IS NULL
+	WHERE child.parentguid = PATH.aoguid
 	)
 	SELECT * FROM PATH WHERE AOLEVEL NOT IN (1,3)

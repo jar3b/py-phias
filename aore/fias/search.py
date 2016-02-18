@@ -48,7 +48,7 @@ class SphinxSearch:
             self.client_sugg.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
         else:
             self.client_show.SetRankingMode(sphinxapi.SPH_RANK_BM25)
-            self.client_show.SetSortMode(sphinxapi.SPH_SORT_RELEVANCE)
+            #self.client_show.SetSortMode(sphinxapi.SPH_SORT_)
 
     def __get_suggest(self, word, rating_limit, count):
         word_len = str(len(word) / 2)
@@ -132,7 +132,7 @@ class SphinxSearch:
 
         # формируем строки для поиска в Сфинксе
         for x in range(word_count, max(0, word_count - 3), -1):
-            self.client_show.AddQuery("\"{}\"/{}".format(" ".join(x.get_variations() for x in word_entries), x),
+            self.client_show.AddQuery("\"{}\"/{} \"ул \"/0".format(" ".join(x.get_variations() for x in word_entries), x),
                                       sphinx_conf.index_addjobj)
 
         self.__configure(sphinx_conf.index_addjobj)
@@ -156,6 +156,6 @@ class SphinxSearch:
                     results.append(
                         dict(aoid=ma['attrs']['aoid'], text=unicode(ma['attrs']['fullname']), ratio=ma['weight'], cort=i))
 
-        results.sort(key=lambda x: Levenshtein.ratio(text, x['text']), reverse=True)
+        # results.sort(key=lambda x: Levenshtein.ratio(text, x['text']), reverse=True)
 
         return results
