@@ -134,7 +134,6 @@ class SphinxSearch:
                     results.append(
                         dict(aoid=ma['attrs']['aoid'], text=ma['attrs']['fullname'], ratio=ma['weight'], cort=i))
 
-        if strong:
-            results.sort(key=lambda x: Levenshtein.ratio(text, x['text']), reverse=True)
+        results.sort(key=lambda x: Levenshtein.ratio(text, x['text']), reverse=True)
 
         return results
