@@ -21,7 +21,6 @@ class SphinxHelper:
         if not os.path.exists(folders.temp):
             os.makedirs(folders.temp)
 
-
     def configure_indexer(self, indexer_binary, config_filename):
         logging.info("Start configuring Sphinx...")
         self.index_binary = indexer_binary
@@ -144,7 +143,8 @@ class SphinxHelper:
         out_filename = os.path.abspath(config_fname)
         logging.info("Creating main config %s...", out_filename)
 
-        conf_data = template('aore/templates/sphinx/sphinx.conf', sphinx_var_path=sphinx_conf.var_dir)
+        conf_data = template('aore/templates/sphinx/sphinx.conf', sphinx_listen=sphinx_conf.listen,
+                             sphinx_var_path=sphinx_conf.var_dir)
 
         f = open(out_filename, "w")
         for fname, fpath in self.files.iteritems():

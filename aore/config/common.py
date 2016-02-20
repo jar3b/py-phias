@@ -5,8 +5,7 @@ class basic:
 
 
 class sphinx_conf:
-    host_name = "localhost"
-    port = 9312
+    listen = "127.0.0.1:9312"
     index_addjobj = "idx_fias_addrobj"
     index_sugg = "idx_fias_sugg"
     var_dir = None

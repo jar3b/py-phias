@@ -25,13 +25,20 @@ class SphinxSearch:
 
     def __init__(self, db):
         self.db = db
+
+        sphinx_host = sphinx_conf.listen
+        sphinx_port = None
+        if ":" in sphinx_conf.listen:
+            sphinx_host, sphinx_port = sphinx_conf.listen.split(":")
+            sphinx_port = int(sphinx_port)
+
         self.client_sugg = sphinxapi.SphinxClient()
-        self.client_sugg.SetServer(sphinx_conf.host_name, sphinx_conf.port)
+        self.client_sugg.SetServer(sphinx_host, sphinx_port)
         self.client_sugg.SetLimits(0, self.max_result)
         self.client_sugg.SetConnectTimeout(3.0)
 
         self.client_show = sphinxapi.SphinxClient()
-        self.client_show.SetServer(sphinx_conf.host_name, sphinx_conf.port)
+        self.client_show.SetServer(sphinx_host, sphinx_port)
         self.client_show.SetLimits(0, self.max_result)
         self.client_show.SetConnectTimeout(3.0)
 

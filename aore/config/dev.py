@@ -4,8 +4,7 @@ from __future__ import absolute_import
 
 from .common import *
 
-sphinx_conf.host_name = "localhost"
-sphinx_conf.port = 9312
+sphinx_conf.listen = "127.0.0.1:9312"
 sphinx_conf.var_dir = "C:\\Sphinx"
 
 db_conf.database = "postgres"
