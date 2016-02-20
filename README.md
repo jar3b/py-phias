@@ -26,12 +26,12 @@ Python application that can operate with FIAS (Russian Address Object DB)
 
 ### Зависимости
 
-_Внимание_! Только Python 2.7, только PostgreSQL, только Sphinx. Python 3, MySQL/MariaDB, Lucene/Solr не
-поддерживаются и не будут.
+_Внимание_! Только Python 2.7+ (на 3+ не тестировал), только PostgreSQL, только Sphinx. MySQL/MariaDB, ElasticSearch/Solr
+не поддерживаются и, скорее всего, не будут.
  
-Для работы приложения необходимо достаточное кол-во RAM (1Gb+) и 4.5Gb места на диске 
-(3-3.5Gb для скачивания архива с базой и  300-400Mb для индексов Sphinx). Также необходимы root права 
-(Администратора, для OS Windows), для работы searchd и предварительной установки. 
+Для работы приложения необходимо достаточное кол-во RAM (1Gb+) и ~5.5Gb места на диске 
+(3-3.5Gb для скачивания архива с базой, 350-400Mb для индексов Sphinx, 1Gb для базы). Также необходимы root права 
+(администратора, для Windows), для работы searchd и предварительной установки. 
 Рекомендую устанавливать или на отдельном сервере, или на своей машине, либо же на VPS. 
 На shared хостинге работоспособность не гарантируется (только если хостер Вам сам все установит и настроит, 
 и разрешит запуск демонов - читай: "невозможно")
@@ -83,7 +83,7 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
 4. Web-сервер с поддержкой WSGI, любой, по Вашему желанию.
 
 ### Windows
-1. Установить lxml, через pip не ставится, так что качаем [отсюда](https://pypi.python.org/pypi/lxml/3.5.0).
+1. Установить lxml, скачав [отсюда](https://pypi.python.org/pypi/lxml/3.5.0).
 2. Установить unrar.exe (можно установить WinRar целиком).
 3. Установить sphinxapi последней версии (либо взять из директории Sphinx): 
 
@@ -147,6 +147,9 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
     - Windows: `python manage.py -c -i C://sphinx//indexer.exe -o C://sphinx//sphinx.conf`
     - Debian: `sudo python manage.py -c -i indexer -o /usr/local/sphinx/etc/sphinx.conf`
 4. Затем запустим searchd:
-    - Windows: `net start sphinxsearch`, при этом файл настройки должен быть доступен Sphinx'у.
+    - Windows: 
+        - Устанавливаем службу: `C:\Sphinx\bin\searchd --install --config C:\Sphinx\sphinx.conf.in --servicename sphinxsearch`
+        - и запускаем: `net start sphinxsearch`
     - Debian: `sudo searchd --config /usr/local/sphinx/etc/sphinx.conf`
-5. Настроим WSGI server, я использую nginx + passenger, Вы можете использовать любое приемлемое сочетание.
+5. Настроим WSGI server, я использую nginx + passenger (см. файл passenger_wsgi.py). Вы можете использовать любое 
+приемлемое сочетание.

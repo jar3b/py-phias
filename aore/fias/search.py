@@ -125,14 +125,14 @@ class SphinxSearch:
 
         # формируем строки для поиска в Сфинксе
         for i in range(good_vars_word_count, max(0, good_vars_word_count - 3), -1):
-            first_q = "\"{}\"/{}".format(" ".join(good_var.text for good_var in good_vars), i)
+            first_q = "@fullname \"{}\"/{}".format(" ".join(good_var.text for good_var in good_vars), i)
 
             if self.search_freq_words:
                 for j in range(freq_vars_word_count, -1, -1):
                     if j == 0:
                         second_q = ""
                     else:
-                        second_q = " \"{}\"/{}".format(" ".join(freq_var.text for freq_var in freq_vars), j)
+                        second_q = " @sname \"{}\"/{}".format(" ".join(freq_var.text for freq_var in freq_vars), j)
                         second_q = second_q.replace("*", "")
 
                     print first_q + second_q
