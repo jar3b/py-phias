@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import re
 
-from aore.config import basic
 from aore.config import sphinx_conf
+from aore.fias.wordvariation import WordVariation, VariationType
 
 
 class WordEntry:
@@ -42,42 +42,68 @@ class WordEntry:
         MT_ADD_SOCR=['..10', '..x0']
     )
 
+    rating_limit_soft = 0.41
+    rating_limit_soft_count = 6
+
+    rating_limit_hard = 0.82
+    rating_limit_hard_count = 3
+
     def __init__(self, db, word):
         self.db = db
         self.word = str(word)
         self.word_len = len(unicode(self.word))
-        self.variations = []
-        self.scname = None
-        self.is_freq_word = False
-        self.ranks = self.__get_ranks()
+        self.parameters = dict(IS_FREQ=False, SOCR_WORD=None)
+        self.ranks = self.__init_ranks()
 
-        for x, y in self.match_types.iteritems():
-            self.__dict__[x] = False
-            for z in y:
-                self.__dict__[x] = self.__dict__[x] or re.search(z, self.ranks) is not None
+        # Заполняем параметры слова
+        for mt_name, mt_values in self.match_types.iteritems():
+            self.__dict__[mt_name] = False
+            for mt_value in mt_values:
+                self.__dict__[mt_name] = self.__dict__[mt_name] or re.search(mt_value, self.ranks) is not None
 
         # Если ищем по лайку, то точное совпадение не ищем (оно и так будет включено)
         if self.MT_LAST_STAR:
             self.MT_AS_IS = False
 
-        # Строка слишком котроткая, то по лайку не ищем, будет очень долго
-        if self.MT_LAST_STAR and self.word_len < sphinx_conf.min_length_to_star:
+        # Строка слишком котроткая, то по лайку не ищем, сфинкс такого не прожует
+        # Если найдено сокращение, то по лайку тоже не ищем TODO добавить это в правила
+        if self.MT_LAST_STAR and (self.word_len < sphinx_conf.min_length_to_star or self.MT_ADD_SOCR):
             self.MT_LAST_STAR = False
             self.MT_AS_IS = True
 
-    def add_variation_socr(self):
-        if self.scname:
-            self.add_variation(self.scname)
+    def variations_gen(self, strong, suggestion_func):
+        default_var_type = VariationType.normal
+        # Если слово встречается часто, ставим у всех вариантов тип VariationType.freq
+        if self.parameters['IS_FREQ']:
+            default_var_type = VariationType.freq
 
-    def add_variation(self, variation_string):
-        self.variations.append(variation_string)
+        # Добавляем подсказки (много штук)
+        if self.MT_MANY_SUGG and not strong:
+            suggs = suggestion_func(self.word, self.rating_limit_soft, self.rating_limit_soft_count)
+            for suggestion in suggs:
+                yield WordVariation(self, suggestion[0], default_var_type)
 
-    def get_variations(self):
-        if len(self.variations) == 1:
-            return self.variations[0]
-        return "{}".format(" ".join(self.variations))
+        # Добавляем подсказки (немного)
+        if self.MT_SOME_SUGG and not strong:
+            suggs = suggestion_func(self.word, self.rating_limit_hard, self.rating_limit_hard_count)
+            for suggestion in suggs:
+                yield WordVariation(self, suggestion[0], default_var_type)
 
-    def __get_ranks(self):
+        # Добавляем звездочку на конце
+        if self.MT_LAST_STAR:
+            yield WordVariation(self, self.word + '*', default_var_type)
+
+        # Добавляем слово "как есть"
+        if self.MT_AS_IS:
+            yield WordVariation(self, self.word, default_var_type)
+
+        # -- Дополнительные функции --
+        # Добавляем сокращение
+        if self.MT_ADD_SOCR:
+            if self.parameters['SOCR_WORD']:
+                yield WordVariation(self, self.parameters['SOCR_WORD'], VariationType.freq)
+
+    def __init_ranks(self):
         sql_qry = "SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word LIKE '{}%' AND LENGTH(word) > {} " \
                   "UNION ALL SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word='{}' " \
                   "UNION ALL SELECT COUNT(*), MAX(scname) FROM \"SOCRBASE\" WHERE socrname ILIKE '{}'" \
@@ -88,12 +114,12 @@ class WordEntry:
         result = self.db.get_rows(sql_qry)
 
         # Проставляем "сокращенное" сокращение, если нашли полное
-        if not self.scname:
-            self.scname = result[2][1]
+        if not self.parameters['SOCR_WORD']:
+            self.parameters['SOCR_WORD'] = result[2][1]
 
         # Проверяем, если слово встречается слишком много раз
         if len(result) == 5 and result[4][0] > 30000:
-            self.is_freq_word = True
+            self.parameters['IS_FREQ'] = True
 
         # Формируем список найденных величин совпадений:
         # result[x]
@@ -118,4 +144,3 @@ class WordEntry:
 
     def __str__(self):
         return str(self.word)
-
