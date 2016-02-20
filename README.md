@@ -137,20 +137,16 @@ _Внимание_! Только Python 2.7, только PostgreSQL, тольк
 1. Настроим конфиг, он лежит в `aore/config/__init__.py`, в этом файле можно изменить `.dev` на `.prod`, 
 отредактировать, соотвественно, dev.py или prod.py: прописать параметры доступа к базе и путь, 
 куда будут сохраняться данные Sphinx; по этому пути дополнительно необходимо создать 3 папки: log, run и data
-
 2. Создадим базу:
-- из архива `sudo -u phias python manage.py -b create -s /tmp/fias_xml.rar`
-- из директории `sudo -u phias python manage.py -b create -s /tmp/fias_xml_unpacked`
-- онлайн, с сервера ФНС `sudo -u phias python manage.py -b create -s http`
+    - из архива `sudo -u phias python manage.py -b create -s /tmp/fias_xml.rar`
+    - из директории `sudo -u phias python manage.py -b create -s /tmp/fias_xml_unpacked`
+    - онлайн, с сервера ФНС `sudo -u phias python manage.py -b create -s http`
     Также, можно указать конкретную версию ФИАС _только_ при http загрузке, с ключом `--update-version <num>`, где num - 
 номер версии ФИАС, все доступные версии можно получить, выполнив `manage.py -v`.
-
 3. Проиндексируем Sphinx:
-- Windows: `python manage.py -c -i C://sphinx//indexer.exe -o C://sphinx//sphinx.conf`
-- Debian: `sudo python manage.py -c -i indexer -o /usr/local/sphinx/etc/sphinx.conf`
-
+    - Windows: `python manage.py -c -i C://sphinx//indexer.exe -o C://sphinx//sphinx.conf`
+    - Debian: `sudo python manage.py -c -i indexer -o /usr/local/sphinx/etc/sphinx.conf`
 4. Затем запустим searchd:
-- Windows: `net start sphinxsearch`, при этом файл настройки должен быть доступен Sphinx'у.
-- Debian: `sudo searchd --config /usr/local/sphinx/etc/sphinx.conf`
-
+    - Windows: `net start sphinxsearch`, при этом файл настройки должен быть доступен Sphinx'у.
+    - Debian: `sudo searchd --config /usr/local/sphinx/etc/sphinx.conf`
 5. Настроим WSGI server, я использую nginx + passenger, Вы можете использовать любое приемлемое сочетание.

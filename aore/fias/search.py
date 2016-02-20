@@ -35,17 +35,17 @@ class SphinxSearch:
         self.client_show.SetLimits(0, self.max_result)
         self.client_show.SetConnectTimeout(3.0)
 
-    def __configure(self, index_name, word_len=None):
+    def __configure(self, index_name, word_len):
         self.client_sugg.ResetFilters()
-        if index_name == sphinx_conf.index_sugg and word_len:
+        if index_name == sphinx_conf.index_sugg:
             self.client_sugg.SetRankingMode(sphinxapi.SPH_RANK_WORDCOUNT)
             self.client_sugg.SetFilterRange("len", int(word_len) - self.delta_len, int(word_len) + self.delta_len)
             self.client_sugg.SetSelect("word, len, @weight+{}-abs(len-{}) AS krank".format(self.delta_len, word_len))
             self.client_sugg.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
         else:
             self.client_show.SetRankingMode(sphinxapi.SPH_RANK_BM25)
-            #self.client_show.SetSelect("aoid, fullname, @weight AS krank")
-            #self.client_show.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
+            self.client_show.SetSelect("aoid, fullname, @weight-abs(wordcount-{}) AS krank".format(word_len))
+            self.client_show.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
 
     def __get_suggest(self, word, rating_limit, count):
         word_len = str(len(word) / 2)
