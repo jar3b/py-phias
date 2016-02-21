@@ -19,7 +19,7 @@ class WordEntry:
     # -1x - одно по лайку и много точных. Быть не может.
     # x0 - много по лайку и нет точных. Недопечатка. Немного подсказок и *.
     # x1 - много по лайку и один точный. Чет нашли. Как есть и *.
-    # xx - много по лайку и много точных. Оставляем как есть и * TODO В данном случае лайк лучше убрать
+    # xx - много по лайку и много точных. Оставляем как есть и *
     #
     # Теперь по сокращениям. Они работюат отдельно (ПОКА ЧТО)
     # 3rd - кол-во слов по точному совпдению по полному сокращению.
@@ -37,9 +37,10 @@ class WordEntry:
     match_types = dict(
         MT_MANY_SUGG=['0000'],
         MT_SOME_SUGG=['10..', 'x0..'],
-        MT_LAST_STAR=['10..', 'x...'],
+        MT_LAST_STAR=['100.', 'x.0.'],
         MT_AS_IS=['.1..', '...1', '...x'],
-        MT_ADD_SOCR=['..10', '..x0']
+        MT_ADD_SOCR=['..10', '..x0'],
+        MT_IS_SOCR=['..01', '..0x']
     )
 
     rating_limit_soft = 0.41
@@ -50,7 +51,8 @@ class WordEntry:
 
     def __init__(self, db, word):
         self.db = db
-        self.word = str(word)
+        self.bare_word = str(word)
+        self.word = self.__cleanify(self.bare_word)
         self.word_len = len(unicode(self.word))
         self.parameters = dict(IS_FREQ=False, SOCR_WORD=None)
         self.ranks = self.__init_ranks()
@@ -59,17 +61,19 @@ class WordEntry:
         for mt_name, mt_values in self.match_types.iteritems():
             self.__dict__[mt_name] = False
             for mt_value in mt_values:
-                self.__dict__[mt_name] = self.__dict__[mt_name] or re.search(mt_value, self.ranks) is not None
+                self.__dict__[mt_name] = self.__dict__[mt_name] or re.search(mt_value, self.ranks)
 
         # Если ищем по лайку, то точное совпадение не ищем (оно и так будет включено)
         if self.MT_LAST_STAR:
             self.MT_AS_IS = False
 
         # Строка слишком котроткая, то по лайку не ищем, сфинкс такого не прожует
-        # Если найдено сокращение, то по лайку тоже не ищем TODO добавить это в правила
-        if self.MT_LAST_STAR and (self.word_len < sphinx_conf.min_length_to_star or self.MT_ADD_SOCR):
+        if self.MT_LAST_STAR and self.word_len < sphinx_conf.min_length_to_star:
             self.MT_LAST_STAR = False
             self.MT_AS_IS = True
+
+    def __cleanify(self, word):
+        return word.replace('-', '').replace('@', '')
 
     def variations_gen(self, strong, suggestion_func):
         default_var_type = VariationType.normal
@@ -93,9 +97,12 @@ class WordEntry:
         if self.MT_LAST_STAR:
             yield WordVariation(self, self.word + '*', default_var_type)
 
-        # Добавляем слово "как есть"
+        # Добавляем слово "как есть", если это сокращение, то добавляем как частое слово
         if self.MT_AS_IS:
-            yield WordVariation(self, self.word, default_var_type)
+            var_t = default_var_type
+            if self.MT_IS_SOCR:
+                var_t = VariationType.freq
+            yield WordVariation(self, self.word, var_t)
 
         # -- Дополнительные функции --
         # Добавляем сокращение
@@ -109,7 +116,7 @@ class WordEntry:
                   "UNION ALL SELECT COUNT(*), MAX(scname) FROM \"SOCRBASE\" WHERE socrname ILIKE '{}'" \
                   "UNION ALL SELECT COUNT(*), NULL FROM \"SOCRBASE\" WHERE scname ILIKE '{}'" \
                   "UNION ALL SELECT frequency, NULL FROM \"AOTRIG\" WHERE word='{}';".format(
-            self.word, self.word_len, self.word, self.word, self.word, self.word)
+            self.word, self.word_len, self.word, self.bare_word, self.bare_word, self.word)
 
         result = self.db.get_rows(sql_qry)
 

@@ -15,7 +15,7 @@ class XMLParser:
             elem.clear()
             # Also eliminate now-empty references from the root node to elem
             for ancestor in elem.xpath('ancestor-or-self::*'):
-                while ancestor.getprevious() is not None:
+                while ancestor.getprevious():
                     del ancestor.getparent()[0]
         del context
 

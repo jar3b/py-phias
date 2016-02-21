@@ -28,7 +28,7 @@ class SphinxSearch:
 
         sphinx_host = sphinx_conf.listen
         sphinx_port = None
-        if ":" in sphinx_conf.listen:
+        if ":" in sphinx_conf.listen and "unix:/" not in sphinx_conf.listen:
             sphinx_host, sphinx_port = sphinx_conf.listen.split(":")
             sphinx_port = int(sphinx_port)
 
@@ -51,7 +51,7 @@ class SphinxSearch:
             self.client_sugg.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
         else:
             self.client_show.SetRankingMode(sphinxapi.SPH_RANK_BM25)
-            self.client_show.SetSelect("aoid, fullname, @weight-abs(wordcount-{}) AS krank".format(word_len))
+            self.client_show.SetSelect("aoid, fullname, @weight-2*abs(wordcount-{}) AS krank".format(word_len))
             self.client_show.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
 
     def __get_suggest(self, word, rating_limit, count):
@@ -98,7 +98,7 @@ class SphinxSearch:
 
     def find(self, text, strong):
         def split_phrase(phrase):
-            phrase = unicode(phrase).replace('-', '').replace('@', '').lower()
+            phrase = unicode(phrase).lower()
             return re.split(r"[ ,:.#$]+", phrase)
 
         # сплитим текст на слова
@@ -126,20 +126,24 @@ class SphinxSearch:
         # формируем строки для поиска в Сфинксе
         for i in range(good_vars_word_count, max(0, good_vars_word_count - 3), -1):
             first_q = "@fullname \"{}\"/{}".format(" ".join(good_var.text for good_var in good_vars), i)
+            if self.search_freq_words and freq_vars_word_count:
+                second_q = " @sname {}".format(" ".join(freq_var.text for freq_var in freq_vars))
+                self.client_show.AddQuery(first_q + second_q, sphinx_conf.index_addjobj)
+            self.client_show.AddQuery(first_q, sphinx_conf.index_addjobj)
 
-            if self.search_freq_words:
-                for j in range(freq_vars_word_count, -1, -1):
-                    if j == 0:
-                        second_q = ""
-                    else:
-                        second_q = " @sname \"{}\"/{}".format(" ".join(freq_var.text for freq_var in freq_vars), j)
-                        second_q = second_q.replace("*", "")
-
-                    print first_q + second_q
-                    self.client_show.AddQuery(first_q + second_q, sphinx_conf.index_addjobj)
-            else:
-                print first_q
-                self.client_show.AddQuery(first_q, sphinx_conf.index_addjobj)
+            # if self.search_freq_words:
+            #     for j in range(freq_vars_word_count, -1, -1):
+            #         if j == 0:
+            #             second_q = ""
+            #         else:
+            #             second_q = " @sname {}".format(" | ".join(freq_var.text for freq_var in freq_vars), j)
+            #             second_q = second_q.replace("*", "")
+            #
+            #         print first_q + second_q
+            #         self.client_show.AddQuery(first_q + second_q, sphinx_conf.index_addjobj)
+            # else:
+            #     print first_q
+            #     self.client_show.AddQuery(first_q, sphinx_conf.index_addjobj)
 
         self.__configure(sphinx_conf.index_addjobj, word_count)
 

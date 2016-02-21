@@ -20,7 +20,7 @@ def print_fias_versions():
     print("Number\t\tDate")
     for upd in all_versions:
         mark_current = (' ', '*')[int(upd['intver']) == current_version]
-        print "{}{}\t\t{}".format(mark_current, upd['intver'], upd['strver'])
+        print("{}{}\t\t{}".format(mark_current, upd['intver'], upd['strver']))
 
 
 def parse_update_str(updates_str):
