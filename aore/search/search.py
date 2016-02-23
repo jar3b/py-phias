@@ -7,8 +7,8 @@ import sphinxapi
 
 from aore.config import basic
 from aore.config import sphinx_conf
-from aore.fias.wordentry import WordEntry
-from aore.fias.wordvariation import VariationType
+from aore.search.wordentry import WordEntry
+from aore.search.wordvariation import VariationType
 from aore.miscutils.trigram import trigram
 
 
@@ -130,8 +130,10 @@ class SphinxSearch:
             if self.search_freq_words and freq_vars_word_count:
                 second_q = " @sname {}".format(" ".join(freq_var.text for freq_var in freq_vars))
                 self.client_show.AddQuery(first_q + second_q, sphinx_conf.index_addjobj)
+                del second_q
 
             self.client_show.AddQuery(first_q, sphinx_conf.index_addjobj)
+            del first_q
 
         start_t = time.time()
         rs = self.client_show.RunQueries()
@@ -144,13 +146,15 @@ class SphinxSearch:
         parsed_ids = []
 
         for i in range(0, len(rs)):
-            for ma in rs[i]['matches']:
+            for match in rs[i]['matches']:
                 if len(results) >= self.max_result:
                     break
-                if not ma['attrs']['aoid'] in parsed_ids:
-                    parsed_ids.append(ma['attrs']['aoid'])
+                if not match['attrs']['aoid'] in parsed_ids:
+                    parsed_ids.append(match['attrs']['aoid'])
                     results.append(
-                        dict(aoid=ma['attrs']['aoid'], text=unicode(ma['attrs']['fullname']), ratio=ma['attrs']['krank'],
+                        dict(aoid=match['attrs']['aoid'],
+                             text=unicode(match['attrs']['fullname']),
+                             ratio=match['attrs']['krank'],
                              cort=i))
 
         return results

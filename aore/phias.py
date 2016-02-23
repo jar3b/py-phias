@@ -4,7 +4,7 @@ import logging
 
 from bottle import Bottle, response
 
-from aore.fias.fiasfactory import FiasFactory
+from aore.search.fiasfactory import FiasFactory
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 app = Bottle()

@@ -2,7 +2,7 @@
 import re
 
 from aore.config import sphinx_conf
-from aore.fias.wordvariation import WordVariation, VariationType
+from aore.search.wordvariation import WordVariation, VariationType
 
 
 class WordEntry:

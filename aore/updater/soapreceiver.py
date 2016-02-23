@@ -5,9 +5,9 @@ from pysimplesoap.client import SoapClient
 class SoapReceiver:
     def __init__(self):
         self.client = SoapClient(
-            location="http://fias.nalog.ru/WebServices/Public/DownloadService.asmx",
-            action='http://fias.nalog.ru/WebServices/Public/DownloadService.asmx/',
-            namespace="http://fias.nalog.ru/WebServices/Public/DownloadService.asmx",
+            location="http://search.nalog.ru/WebServices/Public/DownloadService.asmx",
+            action='http://search.nalog.ru/WebServices/Public/DownloadService.asmx/',
+            namespace="http://search.nalog.ru/WebServices/Public/DownloadService.asmx",
             soap_ns='soap', trace=False, ns=False)
 
     # return (intver, strver, url)
