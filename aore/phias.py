@@ -2,44 +2,48 @@
 import json
 import logging
 
-from bottle import Bottle, response
-
-from aore.search.fiasfactory import FiasFactory
-
-logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
-app = Bottle()
-fias_factory = FiasFactory()
+from bottle import response
+from miscutils.bottlecl import BottleCL
 
 
-@app.route(r'/expand/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>')
-def expand(aoid):
-    response.content_type = 'application/json'
-    response.set_header('Access-Control-Allow-Origin', '*')
+class App(BottleCL):
+    def __init__(self, config):
+        super(App, self).__init__()
+        logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
-    return json.dumps(fias_factory.expand(aoid))
+        self._config = config
+        # self._factory = FiasFactory()
 
+    def init_routes(self):
+        self.add_route(r'/expand/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>', self.__expand)
+        self.add_route(r'/normalize/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>', self.__normalize)
+        self.add_route(r'/find/<text>', self.__find)
+        self.add_route(r'/find/<text>/<strong>', self.__find)
+        self.add_error(404, self.basic_error_handler)
+        self.add_error(500, self.basic_error_handler)
 
-@app.route(r'/normalize/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>')
-def normalize(aoid):
-    response.content_type = 'application/json'
-    response.set_header('Access-Control-Allow-Origin', '*')
+    def __expand(self, aoid):
+        response.content_type = 'application/json'
+        response.set_header('Access-Control-Allow-Origin', '*')
 
-    return json.dumps(fias_factory.normalize(aoid))
+        return json.dumps(self._factory.expand(aoid))
 
+    def __normalize(self, aoid):
+        response.content_type = 'application/json'
+        response.set_header('Access-Control-Allow-Origin', '*')
 
-@app.route(r'/find/<text>')
-@app.route(r'/find/<text>/<strong>')
-def find(text, strong=False):
-    strong = (strong == "strong")
-    response.content_type = 'application/json'
-    response.set_header('Access-Control-Allow-Origin', '*')
+        return json.dumps(self._factory.normalize(aoid))
 
-    return json.dumps(fias_factory.find(text, strong))
+    def __find(self, text, strong=False):
+        strong = (strong == "strong")
+        response.content_type = 'application/json'
+        response.set_header('Access-Control-Allow-Origin', '*')
 
+        return json.dumps(self._factory.find(text, strong))
 
-@app.error(404)
-def error404(error):
-    response.content_type = 'application/json'
-    response.set_header('Access-Control-Allow-Origin', '*')
+    @staticmethod
+    def basic_error_handler(error):
+        response.content_type = 'application/json'
+        response.set_header('Access-Control-Allow-Origin', '*')
 
-    return json.dumps(dict(error="Page not found"))
+        return json.dumps(dict(error=error.status))
