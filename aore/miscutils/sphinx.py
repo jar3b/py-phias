@@ -21,6 +21,14 @@ class SphinxHelper:
         if not os.path.exists(folders.temp):
             os.makedirs(folders.temp)
 
+        # оздаем 3 папки для Сфинкса
+        if not os.path.exists(sphinx_conf.var_dir+'/run'):
+            os.makedirs(sphinx_conf.var_dir+'/run')
+        if not os.path.exists(sphinx_conf.var_dir+'/log'):
+            os.makedirs(sphinx_conf.var_dir+'/log')
+        if not os.path.exists(sphinx_conf.var_dir+'/data'):
+            os.makedirs(sphinx_conf.var_dir+'/data')
+
     def configure_indexer(self, indexer_binary, config_filename):
         logging.info("Start configuring Sphinx...")
         self.index_binary = indexer_binary
