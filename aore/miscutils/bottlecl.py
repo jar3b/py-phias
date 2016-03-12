@@ -20,5 +20,5 @@ class BottleCL(object):
         else:
             self._app.error_handler[error_code] = handler
 
-    def start(self, host, port):
-        self._app.run(host=host, port=port)
+    def start(self, **kwargs):
+        self._app.run(**kwargs)
