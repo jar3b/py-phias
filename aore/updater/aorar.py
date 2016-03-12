@@ -61,3 +61,4 @@ class AoRar:
                         logging.warning("Cannot delete %s, do it manually", self.fname)
         else:
             logging.error("No file specified or not exists")
+            raise FiasException("No DB archive specified.")

@@ -134,9 +134,10 @@ _Внимание_! Только Python 2.7+ (на 3+ не тестировал)
 
 ## Настройка
 ### Первоначальная настройка базы данных
-1. Настроим конфиг, для этого необходимо изменить параметры в Вашем wsgi-entrypoint (в моем случае _passenger_wsgi.py_):
-в строке `from config import *` измените _config_ на имя Вашего конфигурационного файла (создается рядом с wsgi app),
-пример конфига находится в файле _config.example.py_.
+1. Настроим конфиг, для этого необходимо изменить параметры в Вашем wsgi-entrypoint (в моем случае
+[passenger_wsgi.py](passenger_wsgi.py)): в строке `from config import *` измените _config_ на имя Вашего
+конфигурационного файла (создается рядом с wsgi app), пример конфига находится в файле
+[config.example.py](config.example.py).
 2. Создадим базу:
     - из архива `sudo -u phias python manage.py -b create -s /tmp/fias_xml.rar`
     - из директории `sudo -u phias python manage.py -b create -s /tmp/fias_xml_unpacked`
@@ -144,8 +145,11 @@ _Внимание_! Только Python 2.7+ (на 3+ не тестировал)
     - Также, можно указать конкретную версию ФИАС _только_ при http загрузке, с ключом `--update-version <num>`, где num -
 номер версии ФИАС, все доступные версии можно получить, выполнив `manage.py -v`.
 
-    Внимание! Если Вы инициализируете БД из архива или директории, при создании или обновлении базы у Вас будет
-     запрошен номер устанавливаемой версии ФИАС.
+    Примечание 1: Если Вы инициализируете БД из архива или директории, при создании или обновлении базы у Вас будет
+    запрошен номер устанавливаемой версии ФИАС.
+
+    Примечание 2: У пользователя PostgreSql (postgres, либо созданного Вами) должны быть права на чтение из директории,
+    указанной в `config.folders.temp`, иначе будет Permission denied при попытке bulk-import.
 3. Проиндексируем Sphinx:
     - Windows: `python manage.py -c -i C:\sphinx\bin\indexer.exe -o C:\sphinx\sphinx.conf`
     - Debian: `sudo python manage.py -c -i indexer -o /usr/local/sphinx/etc/sphinx.conf`
@@ -154,5 +158,5 @@ _Внимание_! Только Python 2.7+ (на 3+ не тестировал)
         - Устанавливаем службу: `C:\Sphinx\bin\searchd --install --config C:\Sphinx\sphinx.conf --servicename sphinxsearch`
         - и запускаем: `net start sphinxsearch`
     - Debian: `sudo searchd --config /usr/local/sphinx/etc/sphinx.conf`
-5. Настроим WSGI server, я использую nginx + passenger (см. файл passenger_wsgi.py). Вы можете использовать любое 
-приемлемое сочетание.
+5. Настроим WSGI server, я использую nginx + passenger (см. файл [passenger_wsgi.py](passenger_wsgi.py)). Вы можете
+использовать любое приемлемое сочетание.
