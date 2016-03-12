@@ -3,16 +3,17 @@ import json
 import logging
 
 from bottle import response
+
+from aore.search.fiasfactory import FiasFactory
 from miscutils.bottlecl import BottleCL
 
 
 class App(BottleCL):
-    def __init__(self, config):
+    def __init__(self):
         super(App, self).__init__()
         logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
-        self._config = config
-        # self._factory = FiasFactory()
+        self._factory = FiasFactory()
 
     def init_routes(self):
         self.add_route(r'/expand/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>', self.__expand)
