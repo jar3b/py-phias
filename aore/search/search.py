@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import re
 import time
 
@@ -7,9 +8,9 @@ import sphinxapi
 
 from aore.config import basic
 from aore.config import sphinx_conf
+from aore.miscutils.trigram import trigram
 from aore.search.wordentry import WordEntry
 from aore.search.wordvariation import VariationType
-from aore.miscutils.trigram import trigram
 
 
 class SphinxSearch:
@@ -140,7 +141,7 @@ class SphinxSearch:
         elapsed_t = time.time() - start_t
 
         if basic.logging:
-            print(elapsed_t)
+            logging.info("Sphinx time for {} = {}".format(text, elapsed_t))
 
         results = []
         parsed_ids = []

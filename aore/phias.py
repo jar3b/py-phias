@@ -11,7 +11,7 @@ from miscutils.bottlecl import BottleCL
 class App(BottleCL):
     def __init__(self, log_filename):
         super(App, self).__init__()
-        logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO, filename=log_filename)
+        logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG, filename=log_filename)
 
         self._factory = FiasFactory()
 
