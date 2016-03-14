@@ -8,7 +8,7 @@ from bottle import template
 
 from aore.config import db_conf
 from aore.dbutils.dbimpl import DBImpl
-from aore.search.search import SphinxSearch
+from search import SphinxSearch
 
 
 class FiasFactory:

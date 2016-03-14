@@ -9,8 +9,8 @@ import sphinxapi
 from aore.config import basic
 from aore.config import sphinx_conf
 from aore.miscutils.trigram import trigram
-from aore.search.wordentry import WordEntry
-from aore.search.wordvariation import VariationType
+from wordentry import WordEntry
+from wordvariation import VariationType
 
 
 class SphinxSearch:
