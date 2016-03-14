@@ -8,6 +8,7 @@ import sphinxapi
 
 from aore.config import basic
 from aore.config import sphinx_conf
+from aore.miscutils.exceptions import FiasException
 from aore.miscutils.trigram import trigram
 from wordentry import WordEntry
 from wordvariation import VariationType
@@ -142,6 +143,9 @@ class SphinxSearch:
 
         if basic.logging:
             logging.info("Sphinx time for {} = {}".format(text, elapsed_t))
+
+        if rs is None:
+            raise FiasException("Cannot find sentence.")
 
         results = []
         parsed_ids = []

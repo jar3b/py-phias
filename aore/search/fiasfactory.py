@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
+import logging
 import re
 import urllib
 from uuid import UUID
 
 import psycopg2
+import traceback
 from bottle import template
 
-from aore.config import db_conf
+from aore.config import db_conf, basic
 from aore.dbutils.dbimpl import DBImpl
 from search import SphinxSearch
 
@@ -54,6 +56,8 @@ class FiasFactory:
 
             results = self.searcher.find(text, strong)
         except Exception, err:
+            if basic.logging:
+                logging.error(traceback.format_exc(err))
             return dict(error=err.args[0])
 
         return results
@@ -66,6 +70,8 @@ class FiasFactory:
             sql_query = self.normalize_templ.replace("//aoid", aoid_guid)
             rows = self.db.get_rows(sql_query, True)
         except Exception, err:
+            if basic.logging:
+                logging.error(traceback.format_exc(err))
             return dict(error=err.args[0])
 
         if len(rows) == 0:
@@ -85,6 +91,8 @@ class FiasFactory:
             sql_query = self.expand_templ.replace("//aoid", normalized_id)
             rows = self.db.get_rows(sql_query, True)
         except Exception, err:
+            if basic.logging:
+                logging.error(traceback.format_exc(err))
             return dict(error=err.args[0])
 
         return rows
