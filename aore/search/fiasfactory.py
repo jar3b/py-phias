@@ -21,7 +21,8 @@ class FiasFactory:
         self.normalize_templ = template('aore/templates/postgre/normalize_query.sql', aoid="//aoid")
 
     # Проверка, что строка является действительым UUID v4
-    def __check_uuid(self, guid):
+    @staticmethod
+    def __check_uuid(guid):
         try:
             UUID(guid)
         except ValueError:
