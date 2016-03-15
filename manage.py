@@ -7,6 +7,13 @@ from aore.miscutils.sphinx import SphinxHelper
 from aore.updater.soapreceiver import SoapReceiver
 from aore.updater.updater import Updater
 
+# Load config
+try:
+    from config import *
+except ImportError:
+    assert "No config"
+
+# Initialize logging
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
 

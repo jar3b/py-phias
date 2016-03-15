@@ -55,11 +55,27 @@ class Updater:
         finally:
             db.close()
 
+    # Получает верию ФИАС с клавиатуры (если мы берем базу из папки или  локального архива и не можем определить,
+    # что это за версия
+    @staticmethod
+    def __get_update_version_from_console():
+        mode = None
+        while not mode:
+            try:
+                mode = int(raw_input('Enter FIAS update version (3 digit):'))
+            except ValueError:
+                print "Not a valid fias version, try again."
+
+        return mode
+
     def __get_updates_from_folder(self, foldername):
         # TODO: Вычислять версию, если берем данные из каталога
-        yield dict(intver=0, textver="Unknown", delta_url=foldername, complete_url=foldername)
+        yield dict(intver=self.__get_update_version_from_console(),
+                   textver="Unknown", delta_url=foldername,
+                   complete_url=foldername)
 
-    def __get_updates_from_rar(self, url):
+    @staticmethod
+    def __get_updates_from_rar(url):
         aorar = AoRar()
 
         if url.startswith("http://") or url.startswith("https://"):

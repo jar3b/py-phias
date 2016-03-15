@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import re
 import time
 
@@ -7,9 +8,10 @@ import sphinxapi
 
 from aore.config import basic
 from aore.config import sphinx_conf
-from aore.search.wordentry import WordEntry
-from aore.search.wordvariation import VariationType
+from aore.miscutils.exceptions import FiasException
 from aore.miscutils.trigram import trigram
+from wordentry import WordEntry
+from wordvariation import VariationType
 
 
 class SphinxSearch:
@@ -28,15 +30,19 @@ class SphinxSearch:
 
         sphinx_host = sphinx_conf.listen
         sphinx_port = None
+
+        # Получаем строку подключения для Sphinx
         if ":" in sphinx_conf.listen and "unix:/" not in sphinx_conf.listen:
             sphinx_host, sphinx_port = sphinx_conf.listen.split(":")
             sphinx_port = int(sphinx_port)
 
+        # Настраиваем подключение для подсказок
         self.client_sugg = sphinxapi.SphinxClient()
         self.client_sugg.SetServer(sphinx_host, sphinx_port)
         self.client_sugg.SetLimits(0, self.max_result)
         self.client_sugg.SetConnectTimeout(3.0)
 
+        # Настраиваем подключение для поиска адреса
         self.client_show = sphinxapi.SphinxClient()
         self.client_show.SetServer(sphinx_host, sphinx_port)
         self.client_show.SetLimits(0, self.max_result)
@@ -139,8 +145,11 @@ class SphinxSearch:
         rs = self.client_show.RunQueries()
         elapsed_t = time.time() - start_t
 
+        if rs is None:
+            raise FiasException("Cannot find sentence.")
+
         if basic.logging:
-            print(elapsed_t)
+            logging.info("Sphinx time for {} = {}".format(text, elapsed_t))
 
         results = []
         parsed_ids = []
