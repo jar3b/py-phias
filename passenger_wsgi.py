@@ -9,9 +9,9 @@ except ImportError:
     assert "No config"
 
 # Define main app
-phias_app = phias.App("pyphias.log")
+phias_app = phias.App(config.basic.logfile)
 # Define wsgi app
-application = phias_app._app
+application = phias_app.get_app()
 
 # Run bottle WSGI server if no external
 if __name__ == '__main__':

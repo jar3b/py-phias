@@ -15,6 +15,9 @@ class App(BottleCL):
 
         self._factory = FiasFactory()
 
+    def get_app(self):
+        return self._app
+
     def init_routes(self):
         self.add_route(r'/expand/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>', self.__expand)
         self.add_route(r'/normalize/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>', self.__normalize)

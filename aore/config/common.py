@@ -2,6 +2,7 @@
 
 class basic:
     logging = False
+    logfile = ""
 
 
 class sphinx_conf:
