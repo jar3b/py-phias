@@ -102,6 +102,12 @@ class SphinxSearch:
 
         return we_list
 
+    # Осуществляет поиск строки, на выходе массив таких параметров:
+    # aoid - AOID
+    # text - текст найденного адресного объекта
+    # ratio - рейтинг найденного пункта
+    # cort - рейтинг количества совпавших слов
+
     def find(self, text, strong):
         def split_phrase(phrase):
             phrase = unicode(phrase).lower()
@@ -120,7 +126,7 @@ class SphinxSearch:
         # получаем все вариации слов
         all_variations = []
         for we in word_entries:
-            for vari in we.variations_gen(strong, self.__get_suggest):
+            for vari in we.variations_generator(strong, self.__get_suggest):
                 all_variations.append(vari)
 
         good_vars = [v for v in all_variations if v.var_type == VariationType.normal]

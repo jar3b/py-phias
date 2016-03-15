@@ -75,7 +75,7 @@ class WordEntry:
     def __cleanify(self, word):
         return word.replace('-', '').replace('@', '')
 
-    def variations_gen(self, strong, suggestion_func):
+    def variations_generator(self, strong, suggestion_func):
         default_var_type = VariationType.normal
         # Если слово встречается часто, ставим у всех вариантов тип VariationType.freq
         if self.parameters['IS_FREQ']:
