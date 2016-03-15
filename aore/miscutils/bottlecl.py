@@ -8,9 +8,6 @@ class BottleCL(object):
         self._app = Bottle()
         self.init_routes()
 
-    def __call__(self, environ, start_response):
-        self._app.__call__(environ, start_response)
-
     def init_routes(self):
         pass
 
