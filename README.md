@@ -157,6 +157,9 @@ _Внимание_! Только Python 2.7+ (на 3+ не тестировал)
     - Windows: 
         - Устанавливаем службу: `C:\Sphinx\bin\searchd --install --config C:\Sphinx\sphinx.conf --servicename sphinxsearch`
         - и запускаем: `net start sphinxsearch`
-    - Debian: `sudo searchd --config /usr/local/sphinx/etc/sphinx.conf`
-5. Настроим WSGI server, я использую nginx + passenger (см. файл [passenger_wsgi.py](passenger_wsgi.py)). Вы можете
+    - Debian:
+        - Запустим : `sudo searchd --config /usr/local/sphinx/etc/sphinx.conf`
+        - если необходимо, добавьте `searchd --config /usr/local/sphinx/etc/sphinx.conf` в `/etc/rc.local` для автостарта
+5. Настроим WSGI server, я использую nginx + passenger. Конфиг для passenger - [passenger_wsgi.py](passenger_wsgi.py),
+конфиг для nginx - [py-phias.conf](https://gist.github.com/jar3b/f8f5d351e0ea8ae2ed8e). Вы можете
 использовать любое приемлемое сочетание.
