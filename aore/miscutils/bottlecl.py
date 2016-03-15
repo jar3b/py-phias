@@ -8,8 +8,8 @@ class BottleCL(object):
         self._app = Bottle()
         self.init_routes()
 
-    def __call__(self, **kwargs):
-        self._app(**kwargs)
+    def __call__(self, *args):
+        self._app(*args)
 
     def init_routes(self):
         pass
