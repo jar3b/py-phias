@@ -6,10 +6,10 @@ import time
 import Levenshtein
 import sphinxapi
 
+from aore.config import BasicConfig
+from aore.config import SphinxConfig
 from fuzzywuzzy import fuzz
 
-from aore.config import basic
-from aore.config import sphinx_conf
 from aore.miscutils.exceptions import FiasException
 from aore.miscutils.fysearch import violet_ratio
 from aore.miscutils.trigram import trigram
@@ -31,7 +31,7 @@ class SphinxSearch:
     def __init__(self, db):
         self.db = db
 
-        sphinx_host = sphinx_conf.listen
+        sphinx_host = SphinxConfig.listen
         sphinx_port = None
 
         # Получаем строку подключения для Sphinx
@@ -53,7 +53,7 @@ class SphinxSearch:
 
     def __configure(self, index_name, word_len):
         self.client_sugg.ResetFilters()
-        if index_name == sphinx_conf.index_sugg:
+        if index_name == SphinxConfig.index_sugg:
             self.client_sugg.SetRankingMode(sphinxapi.SPH_RANK_WORDCOUNT)
             self.client_sugg.SetFilterRange("len", int(word_len) - self.delta_len, int(word_len) + self.delta_len)
             self.client_sugg.SetSelect("word, len, @weight+{}-abs(len-{}) AS krank".format(self.delta_len, word_len))
@@ -67,8 +67,8 @@ class SphinxSearch:
         word_len = str(len(word) / 2)
         trigrammed_word = '"{}"/1'.format(trigram(word))
 
-        self.__configure(sphinx_conf.index_sugg, word_len)
-        result = self.client_sugg.Query(trigrammed_word, sphinx_conf.index_sugg)
+        self.__configure(SphinxConfig.index_sugg, word_len)
+        result = self.client_sugg.Query(trigrammed_word, SphinxConfig.index_sugg)
 
         # Если по данному слову не найдено подсказок (а такое бывает?)
         # возвращаем []
@@ -138,26 +138,27 @@ class SphinxSearch:
         good_vars_word_count = len(set([v.parent for v in good_vars]))
         freq_vars_word_count = len(set([v.parent for v in freq_vars]))
 
-        self.__configure(sphinx_conf.index_addjobj, word_count)
+        self.__configure(SphinxConfig.index_addjobj, word_count)
         # формируем строки для поиска в Сфинксе
         for i in range(good_vars_word_count, max(0, good_vars_word_count - 3), -1):
             first_q = "@fullname \"{}\"/{}".format(" ".join(good_var.text for good_var in good_vars), i)
             if self.search_freq_words and freq_vars_word_count:
                 second_q = " @sname {}".format(" ".join(freq_var.text for freq_var in freq_vars))
-                self.client_show.AddQuery(first_q + second_q, sphinx_conf.index_addjobj)
+                self.client_show.AddQuery(first_q + second_q, SphinxConfig.index_addjobj)
                 del second_q
 
-            self.client_show.AddQuery(first_q, sphinx_conf.index_addjobj)
+            self.client_show.AddQuery(first_q, SphinxConfig.index_addjobj)
             del first_q
 
         start_t = time.time()
         rs = self.client_show.RunQueries()
         elapsed_t = time.time() - start_t
 
+
         if rs is None:
             raise FiasException("Cannot find sentence.")
 
-        if basic.logging:
+        if BasicConfig.logging:
             logging.info("Sphinx time for {} = {}".format(text, elapsed_t))
 
         results = []

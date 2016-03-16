@@ -5,7 +5,7 @@ from os import walk, path
 
 import psycopg2
 
-from aore.config import db_conf
+from aore.config import DatabaseConfig
 from aore.dbutils.dbimpl import DBImpl
 from aore.dbutils.dbschemas import allowed_tables, db_shemas
 from aore.updater.aodataparser import AoDataParser
@@ -36,7 +36,7 @@ class Updater:
     def get_current_fias_version(cls):
         db = None
         try:
-            db = DBImpl(psycopg2, db_conf)
+            db = DBImpl(psycopg2, DatabaseConfig)
             rows = db.get_rows('SELECT version FROM "CONFIG" WHERE id=0', True)
             assert len(rows) > 0, "Cannot get a version"
             return rows[0]['version']
@@ -48,7 +48,7 @@ class Updater:
 
     @classmethod
     def __set__update_version(cls, updver=0):
-        db = DBImpl(psycopg2, db_conf)
+        db = DBImpl(psycopg2, DatabaseConfig)
         try:
             assert isinstance(updver, int), "Update version must be of int type."
             db.execute('UPDATE "CONFIG" SET version={} WHERE id=0'.format(updver))
@@ -69,9 +69,10 @@ class Updater:
         return mode
 
     def __get_updates_from_folder(self, foldername):
-        # TODO: Вычислять версию, если берем данные из каталога
-        yield dict(intver=self.__get_update_version_from_console(),
-                   textver="Unknown", delta_url=foldername,
+        fias_db_version = self.__get_update_version_from_console()
+        yield dict(intver=fias_db_version,
+                   textver="Version {}".format(fias_db_version),
+                   delta_url=foldername,
                    complete_url=foldername)
 
     @staticmethod
