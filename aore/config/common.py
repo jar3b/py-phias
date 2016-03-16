@@ -2,31 +2,44 @@
 
 
 class BasicConfig:
+    logging = False
+    logfile = ""
+
     def __init__(self):
-        self.logging = False
-        self.logfile = ""
+        pass
+
 
 class SphinxConfig:
+    listen = "127.0.0.1:9312"
+    index_addjobj = "idx_fias_addrobj"
+    index_sugg = "idx_fias_sugg"
+    var_dir = None
+    min_length_to_star = 3
+
     def __init__(self):
-        self.listen = "127.0.0.1:9312"
-        self.index_addjobj = "idx_fias_addrobj"
-        self.index_sugg = "idx_fias_sugg"
-        self.var_dir = None
-        self.min_length_to_star = 3
+        pass
+
 
 class DatabaseConfig:
+    host = None
+    user = None
+    password = None
+    database = None
+    port = None
+
     def __init__(self):
-        self.host = None
-        self.user = None
-        self.password = None
-        self.database = None
-        self.port = None
+        pass
+
 
 class UnrarConfig:
+    path = None
+
     def __init__(self):
-        self.path = None
+        pass
 
 
 class Folders:
+    temp = None
+
     def __init__(self):
-        self.temp = None
+        pass

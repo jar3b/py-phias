@@ -10,10 +10,10 @@ def violet_ratio(pattern, candidate):
 
     result = list()
 
-    for i in range(len(arr_pattern) - 1, 0, -1):
+    for i in range(len(arr_pattern) - 1, -1, -1):
         max_j = -1
-        max_ratio = 0
-        allowed_nums = range(len(arr_candidate) - 1, 0, -1)
+        max_ratio = -1
+        allowed_nums = range(len(arr_candidate) - 1, -1, -1)
 
         for j in allowed_nums:
             ratio = Levenshtein.ratio(arr_pattern[i], arr_candidate[j])
@@ -21,7 +21,7 @@ def violet_ratio(pattern, candidate):
                 max_ratio = ratio
                 max_j = j
 
-        result.append(max_j*max_ratio)
+        result.append(max_j*abs(max_ratio))
 
         if max_j > -1:
             allowed_nums.remove(max_j)

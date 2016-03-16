@@ -57,7 +57,7 @@ class FiasFactory:
 
             results = self.searcher.find(text, strong)
         except Exception, err:
-            if basic.logging:
+            if BasicConfig.logging:
                 logging.error(traceback.format_exc(err))
             return dict(error=err.args[0])
 

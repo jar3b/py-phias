@@ -9,7 +9,7 @@ except ImportError:
     assert "No config"
 
 # Define main app
-phias_app = phias.App(config.basic.logfile)
+phias_app = phias.App(config.BasicConfig.logfile)
 # Define wsgi app
 application = phias_app.get_app()
 

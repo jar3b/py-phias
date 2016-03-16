@@ -8,8 +8,6 @@ import sphinxapi
 
 from aore.config import BasicConfig
 from aore.config import SphinxConfig
-from fuzzywuzzy import fuzz
-
 from aore.miscutils.exceptions import FiasException
 from aore.miscutils.fysearch import violet_ratio
 from aore.miscutils.trigram import trigram
@@ -35,8 +33,8 @@ class SphinxSearch:
         sphinx_port = None
 
         # Получаем строку подключения для Sphinx
-        if ":" in sphinx_conf.listen and "unix:/" not in sphinx_conf.listen:
-            sphinx_host, sphinx_port = sphinx_conf.listen.split(":")
+        if ":" in SphinxConfig.listen and "unix:/" not in SphinxConfig.listen:
+            sphinx_host, sphinx_port = SphinxConfig.listen.split(":")
             sphinx_port = int(sphinx_port)
 
         # Настраиваем подключение для подсказок
@@ -154,7 +152,6 @@ class SphinxSearch:
         rs = self.client_show.RunQueries()
         elapsed_t = time.time() - start_t
 
-
         if rs is None:
             raise FiasException("Cannot find sentence.")
 
@@ -178,10 +175,18 @@ class SphinxSearch:
 
         # При строгом поиске нам надо еще добавить fuzzy и выбрать самое большое значение при отклонении
         # выше заданного
-        for result in results:
-            print("{} {}".format(result['text'], fuzz.ratio(text, result['text'])))
-            print("{} {}".format(result['text'], fuzz.partial_ratio(text, result['text'])))
-            print("{} {}".format(result['text'], violet_ratio(text, result['text'].lower())))
-            print("--")
+        if strong:
+            for result in results:
+                result['strong_rank'] = violet_ratio(text, result['text'].lower())
+
+            # Сортируем по убыванию признака
+            results.sort(key=lambda x: x['strong_rank'], reverse=True)
+
+            # Если подряд два одинаково релеватных результата - это плохо, на автомат такое отдавать нельзя
+            if abs(results[0]['strong_rank'] - results[1]['strong_rank']) == 0.0:
+                raise FiasException("No matches")
+            else:
+                print results[0]['text'], results[0]['strong_rank']
+                return results[0]
 
         return results

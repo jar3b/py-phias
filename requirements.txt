@@ -1,4 +1,3 @@
-fuzzywuzzy>=0.10.0
 lxml>=3.4.0
 bottle>=0.12.9
 psycopg2>=2.6.1
@@ -8,3 +7,4 @@ enum34>=1.0.0
 rarfile
 requests>=2.8.1
 soap2py==1.16
+sphinxapi
