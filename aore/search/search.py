@@ -6,9 +6,12 @@ import time
 import Levenshtein
 import sphinxapi
 
+from fuzzywuzzy import fuzz
+
 from aore.config import basic
 from aore.config import sphinx_conf
 from aore.miscutils.exceptions import FiasException
+from aore.miscutils.fysearch import violet_ratio
 from aore.miscutils.trigram import trigram
 from wordentry import WordEntry
 from wordvariation import VariationType
@@ -171,5 +174,13 @@ class SphinxSearch:
                              text=unicode(match['attrs']['fullname']),
                              ratio=match['attrs']['krank'],
                              cort=i))
+
+        # При строгом поиске нам надо еще добавить fuzzy и выбрать самое большое значение при отклонении
+        # выше заданного
+        for result in results:
+            print("{} {}".format(result['text'], fuzz.ratio(text, result['text'])))
+            print("{} {}".format(result['text'], fuzz.partial_ratio(text, result['text'])))
+            print("{} {}".format(result['text'], violet_ratio(text, result['text'].lower())))
+            print("--")
 
         return results
