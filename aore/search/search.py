@@ -186,7 +186,6 @@ class SphinxSearch:
             if abs(results[0]['strong_rank'] - results[1]['strong_rank']) == 0.0:
                 raise FiasException("No matches")
             else:
-                print results[0]['text'], results[0]['strong_rank']
                 return results[0]
 
         return results
