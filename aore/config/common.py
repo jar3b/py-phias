@@ -1,29 +1,45 @@
 # -*- coding: utf-8 -*-
 
-class basic:
+
+class BasicConfig:
     logging = False
     logfile = ""
 
+    def __init__(self):
+        pass
 
-class sphinx_conf:
+
+class SphinxConfig:
     listen = "127.0.0.1:9312"
     index_addjobj = "idx_fias_addrobj"
     index_sugg = "idx_fias_sugg"
     var_dir = None
     min_length_to_star = 3
 
+    def __init__(self):
+        pass
 
-class db_conf:
+
+class DatabaseConfig:
     host = None
     user = None
     password = None
     database = None
     port = None
 
+    def __init__(self):
+        pass
 
-class unrar_config:
+
+class UnrarConfig:
     path = None
 
+    def __init__(self):
+        pass
 
-class folders:
+
+class Folders:
     temp = None
+
+    def __init__(self):
+        pass

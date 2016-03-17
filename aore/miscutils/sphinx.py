@@ -5,7 +5,7 @@ import os
 
 from bottle import template
 
-from aore.config import folders, db_conf, sphinx_conf
+from aore.config import Folders, DatabaseConfig, SphinxConfig
 from aore.miscutils.trigram import trigram
 from aore.updater.aoxmltableentry import AoXmlTableEntry
 from aore.updater.dbhandler import DbHandler
@@ -18,16 +18,16 @@ class SphinxHelper:
         self.aodp = DbHandler()
 
         # Создаем временную папку, если ее нет
-        if not os.path.exists(folders.temp):
-            os.makedirs(folders.temp)
+        if not os.path.exists(Folders.temp):
+            os.makedirs(Folders.temp)
 
         # оздаем 3 папки для Сфинкса
-        if not os.path.exists(sphinx_conf.var_dir+'/run'):
-            os.makedirs(sphinx_conf.var_dir+'/run')
-        if not os.path.exists(sphinx_conf.var_dir+'/log'):
-            os.makedirs(sphinx_conf.var_dir+'/log')
-        if not os.path.exists(sphinx_conf.var_dir+'/data'):
-            os.makedirs(sphinx_conf.var_dir+'/data')
+        if not os.path.exists(SphinxConfig.var_dir+ '/run'):
+            os.makedirs(SphinxConfig.var_dir + '/run')
+        if not os.path.exists(SphinxConfig.var_dir+ '/log'):
+            os.makedirs(SphinxConfig.var_dir + '/log')
+        if not os.path.exists(SphinxConfig.var_dir+ '/data'):
+            os.makedirs(SphinxConfig.var_dir + '/data')
 
     def configure_indexer(self, indexer_binary, config_filename):
         logging.info("Start configuring Sphinx...")
@@ -64,15 +64,15 @@ class SphinxHelper:
         logging.info("Successfully configured. Please restart searchd.")
 
     def __create_sugg_index_config(self):
-        fname = os.path.abspath(folders.temp + "/suggest.conf")
+        fname = os.path.abspath(Folders.temp + "/suggest.conf")
         logging.info("Creating config %s", fname)
 
-        conf_data = template('aore/templates/sphinx/idx_suggest.conf', db_host=db_conf.host,
-                             db_user=db_conf.user,
-                             db_password=db_conf.password,
-                             db_name=db_conf.database, db_port=db_conf.port,
-                             index_name=sphinx_conf.index_sugg,
-                             sphinx_var_path=sphinx_conf.var_dir)
+        conf_data = template('aore/templates/sphinx/idx_suggest.conf', db_host=DatabaseConfig.host,
+                             db_user=DatabaseConfig.user,
+                             db_password=DatabaseConfig.password,
+                             db_name=DatabaseConfig.database, db_port=DatabaseConfig.port,
+                             index_name=SphinxConfig.index_sugg,
+                             sphinx_var_path=SphinxConfig.var_dir)
 
         f = open(fname, "w")
         f.write(conf_data)
@@ -84,7 +84,7 @@ class SphinxHelper:
 
     def __dbexport_sugg_dict(self):
         logging.info("Place suggestion dict to DB %s...", self.files['dict.txt'])
-        dict_dat_fname = os.path.abspath(folders.temp + "/suggdict.csv")
+        dict_dat_fname = os.path.abspath(Folders.temp + "/suggdict.csv")
 
         csv_counter = 0
         with open(self.files['dict.txt'], "r") as dict_file, open(dict_dat_fname, "w") as exit_file:
@@ -115,17 +115,17 @@ class SphinxHelper:
         logging.info("Done.")
 
     def __create_ao_index_config(self):
-        fname = os.path.abspath(folders.temp + "/addrobj.conf")
+        fname = os.path.abspath(Folders.temp + "/addrobj.conf")
         logging.info("Creating config %s", fname)
 
-        conf_data = template('aore/templates/sphinx/idx_addrobj.conf', db_host=db_conf.host,
-                             db_user=db_conf.user,
-                             db_password=db_conf.password,
-                             db_name=db_conf.database, db_port=db_conf.port,
+        conf_data = template('aore/templates/sphinx/idx_addrobj.conf', db_host=DatabaseConfig.host,
+                             db_user=DatabaseConfig.user,
+                             db_password=DatabaseConfig.password,
+                             db_name=DatabaseConfig.database, db_port=DatabaseConfig.port,
                              sql_query=template('aore/templates/postgre/sphinx_query.sql').replace("\n", " \\\n"),
-                             index_name=sphinx_conf.index_addjobj,
-                             sphinx_var_path=sphinx_conf.var_dir,
-                             min_length_to_star=sphinx_conf.min_length_to_star)
+                             index_name=SphinxConfig.index_addjobj,
+                             sphinx_var_path=SphinxConfig.var_dir,
+                             min_length_to_star=SphinxConfig.min_length_to_star)
 
         f = open(fname, "w")
         f.write(conf_data)
@@ -136,11 +136,11 @@ class SphinxHelper:
         return fname
 
     def __create_suggestion_dict(self):
-        fname = os.path.abspath(folders.temp + "/suggdict.txt")
+        fname = os.path.abspath(Folders.temp + "/suggdict.txt")
         logging.info("Make suggestion dict (%s)...", fname)
 
         run_builddict_cmd = "{} {} -c {} --buildstops {} 200000 --buildfreqs".format(self.index_binary,
-                                                                                     sphinx_conf.index_addjobj,
+                                                                                     SphinxConfig.index_addjobj,
                                                                                      self.files['addrobj.conf'], fname)
         os.system(run_builddict_cmd)
         logging.info("Done.")
@@ -152,8 +152,8 @@ class SphinxHelper:
         logging.info("Creating main config %s...", out_filename)
 
         conf_data = template('aore/templates/sphinx/sphinx.conf',
-                             sphinx_listen=sphinx_conf.listen.replace("unix://", ''),
-                             sphinx_var_path=sphinx_conf.var_dir)
+                             sphinx_listen=SphinxConfig.listen.replace("unix://", ''),
+                             sphinx_var_path=SphinxConfig.var_dir)
 
         f = open(out_filename, "w")
         for fname, fpath in self.files.iteritems():

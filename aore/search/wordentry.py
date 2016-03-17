@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 
-from aore.config import sphinx_conf
+from aore.config import SphinxConfig
 from aore.search.wordvariation import WordVariation, VariationType
 
 
@@ -68,7 +68,7 @@ class WordEntry:
             self.MT_AS_IS = False
 
         # Строка слишком котроткая, то по лайку не ищем, сфинкс такого не прожует
-        if self.MT_LAST_STAR and self.word_len < sphinx_conf.min_length_to_star:
+        if self.MT_LAST_STAR and self.word_len < SphinxConfig.min_length_to_star:
             self.MT_LAST_STAR = False
             self.MT_AS_IS = True
 

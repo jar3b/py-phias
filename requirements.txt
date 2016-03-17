@@ -7,3 +7,4 @@ enum34>=1.0.0
 rarfile
 requests>=2.8.1
 soap2py==1.16
+sphinxapi

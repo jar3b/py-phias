@@ -7,14 +7,14 @@ from traceback import format_exc
 import rarfile
 import requests
 
-from aore.config import folders, unrar_config
+from aore.config import Folders, UnrarConfig
 from aore.miscutils.exceptions import FiasException
 from aoxmltableentry import AoXmlTableEntry
 
 
 class AoRar:
     def __init__(self):
-        rarfile.UNRAR_TOOL = unrar_config.path
+        rarfile.UNRAR_TOOL = UnrarConfig.path
         self.fname = None
         self.mode = None
 
@@ -25,12 +25,12 @@ class AoRar:
     def download(self, url):
         logging.info("Downloading %s", url)
         try:
-            local_filename = os.path.abspath(folders.temp + "/" + url.split('/')[-1])
+            local_filename = os.path.abspath(Folders.temp + "/" + url.split('/')[-1])
             if os.path.isfile(local_filename):
                 os.remove(local_filename)
             else:
-                if not os.path.exists(folders.temp):
-                    os.makedirs(folders.temp)
+                if not os.path.exists(Folders.temp):
+                    os.makedirs(Folders.temp)
 
             request = requests.get(url, stream=True)
             with open(local_filename, 'wb') as f:

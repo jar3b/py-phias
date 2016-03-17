@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from aore.config import folders
+from aore.config import Folders
 from aore.dbutils.dbschemas import db_shemas
 from aore.miscutils.exceptions import FiasException
 from aore.updater.xmlparser import XMLParser
@@ -16,8 +16,8 @@ class AoDataParser:
             self.allowed_fields = db_shemas[self.datasource.table_name].fields
 
         # Создаем временную папку, если ее нет
-        if not os.path.exists(folders.temp):
-            os.makedirs(folders.temp)
+        if not os.path.exists(Folders.temp):
+            os.makedirs(Folders.temp)
 
         self.pagesize = pagesize
         self.currentpage = 0
@@ -56,7 +56,7 @@ class AoDataParser:
         self.data_bereit_callback = data_callback
         self.currentpage = 0
         self.base_filename = \
-            folders.temp + "/fd_" + \
+            Folders.temp + "/fd_" + \
             str(self.datasource.operation_type) + "_" + \
             self.datasource.table_name + ".csv.part{}"
         self.counter = self.pagesize + 1
