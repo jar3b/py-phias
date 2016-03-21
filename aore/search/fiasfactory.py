@@ -71,6 +71,8 @@ class FiasFactory:
 
             sql_query = self.normalize_templ.replace("//aoid", aoid_guid)
             rows = self.db.get_rows(sql_query, True)
+
+            assert len(rows), "Record with this AOID not found in DB"
         except Exception, err:
             if BasicConfig.logging:
                 logging.error(traceback.format_exc(err))
