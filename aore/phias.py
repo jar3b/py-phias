@@ -21,6 +21,7 @@ class App(BottleCL):
     def init_routes(self):
         self.add_route(r'/expand/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>', self.__expand)
         self.add_route(r'/normalize/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>', self.__normalize)
+        self.add_route(r'/gettext/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>', self.__gettext)
         self.add_route(r'/find/<text>', self.__find)
         self.add_route(r'/find/<text>/<strong>', self.__find)
         self.add_error(404, self.basic_error_handler)
@@ -44,6 +45,12 @@ class App(BottleCL):
         response.set_header('Access-Control-Allow-Origin', '*')
 
         return json.dumps(self._factory.find(text, strong))
+
+    def __gettext(self, aoid):
+        response.content_type = 'application/json'
+        response.set_header('Access-Control-Allow-Origin', '*')
+
+        return json.dumps(self._factory.gettext(aoid))
 
     @staticmethod
     def basic_error_handler(error):
