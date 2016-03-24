@@ -13,7 +13,7 @@ db_shemas = dict()
 db_shemas['ADDROBJ'] = \
     DbSchema("ADDROBJ",
              ["AOID", "AOGUID", "SHORTNAME", "FORMALNAME", "AOLEVEL", "PARENTGUID", "ACTSTATUS", "LIVESTATUS",
-              "NEXTID"],
+              "NEXTID", "REGIONCODE"],
              "aoid",
              "Object")
 

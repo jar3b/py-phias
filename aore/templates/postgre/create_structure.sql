@@ -10,6 +10,7 @@ CREATE TABLE "ADDROBJ" (
   "actstatus"  BOOL,
   "livestatus" BOOL,
   "nextid"     UUID,
+  "regioncode" int2,
   CONSTRAINT "aoid" UNIQUE ("aoid"),
   CONSTRAINT "id_addrobj" PRIMARY KEY ("id")
 )
