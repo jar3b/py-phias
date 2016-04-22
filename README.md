@@ -1,11 +1,12 @@
 # py-phias
 Python application that can operate with FIAS (Russian Address Object DB)
 
-Простое приложение для работы с БД ФИАС, написано для Python 3.4+, использует БД PostgreSQL
+Простое приложение для работы с БД ФИАС, написано для Python 3, использует БД PostgreSQL
 ## Содержание
  - [Возможности](#Возможности)
  - [Установка](#Установка)
  - [Настройка](#Настройка)
+ - [API](#Api)
 
 ## Возможности
 1. API (выходной формат - JSON), основные функции которого:
@@ -41,30 +42,35 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
 1. Python 3, pip
     Для Windows качаем - ставим, для Debian:
     ```
-    sudo apt-get install python-setuptools
-    sudo easy_install pip
-    sudo pip install --upgrade pip 
+    sudo apt-get install python3-setuptools
+    sudo easy_install3 pip
+    sudo pip3 install --upgrade pip
     ```
 
 2. PostgreSql 9.5 и выше (из-за синтаксиса _ON CONFLICT ... DO_)
-    Для Windows, как обычно, [качаем](http://www.enterprisedb.com/products-services-training/pgdownload#windows) - ставим, для Debian:
+    Для Windows, как обычно, [качаем](http://www.enterprisedb.com/products-services-training/pgdownload#windows) - ставим,
+    для Debian 8 и ниже:
     ```
-    sudo sh -c 'echo deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main 9.5 > /etc/apt/sources.list.d/postgresql.list'
+    sudo sh -c 'echo deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main 9.5 > /etc/apt/sources.list.d/postgresql.list'
     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
     sudo apt-get update
     sudo apt-get install postgresql-9.5
     ```
+    , для Debian 9:
+    `sudo apt-get install postgresql`
+
     Затем создайте пользователя и базу данных и установите расширение pg_trgm:
     ```
-    sudo adduser phias
-	sudo -u postgres psql
-	postgres=# CREATE DATABASE fias_db;
-	postgres=# CREATE USER phias WITH password 'phias';
-	postgres=# GRANT ALL privileges ON DATABASE fias_db TO phias;
-	postgres=# ALTER USER phias WITH SUPERUSER;
-	postgres=# \q
-	sudo -u phias psql -d fias_db -U phias
-	postgres=# CREATE EXTENSION pg_trgm SCHEMA public;
+    sudo adduser --no-create-home fias
+    sudo -u postgres psql
+    postgres=# CREATE DATABASE fias_db;
+    postgres=# CREATE USER fias WITH password 'fias';
+    postgres=# GRANT ALL privileges ON DATABASE fias_db TO fias;
+    postgres=# ALTER USER fias WITH SUPERUSER;
+    postgres=# \q
+    sudo -u fias psql -d fias_db -U fias
+    postgres=# CREATE EXTENSION pg_trgm SCHEMA public;
+    postgres=# \q
     ```
 
 3. Sphinx 2.2.1 и новее:
@@ -79,6 +85,7 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     make
     sudo make install
     ```
+    , не забудте установить _build-essential_ перед этим (касается Debian).
 
 4. Web-сервер с поддержкой WSGI, любой, по Вашему желанию.
 
@@ -87,51 +94,45 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
 `pip install yourmodulename.whl`.
 2. Есть некоторые проблемы с установкой и работой psycopg2 (Windows 10, VS 2015), если у Вас они присутствуют - качаем
 [сборку для Windows](http://www.stickpeople.com/projects/python/win-psycopg/)
-2. Установить unrar.exe (можно установить WinRar целиком).
+3. Установить unrar.exe (можно установить WinRar целиком).
+4. Установить sphinxapi с поддержкой синтаксиса Python3:
+
+    ```
+    pip install https://github.com/jar3b/sphinx-py3-api/zipball/master
+    ```
+
+### Debian Linux
+1. Установить unrar (non-free):
+
+    ```
+    sudo sh -c 'echo deb ftp://ftp.us.debian.org/debian/ <deb_name> main non-free > /etc/apt/sources.list.d/non-free.list'
+    sudo apt-get update
+    sudo apt-get install unrar
+    ```
+
+2. Устанавливаем и настраиваем libxml и виртуальное окружение:
+    ```
+    sudo apt-get install python3-lxml python3-dev
+    sudo pip3 install virtualenv
+    sudo virtualenv /opt/fias-env
+    source /opt/fias-env/bin/activate
+    ```
+    Далее будем все устанавливать внутри virtualenv'a.
+
 3. Установить sphinxapi с поддержкой синтаксиса Python3:
 
     ```
     pip install https://github.com/jar3b/sphinx-py3-api/zipball/master
     ```
-4. Установить приложение, скачав релиз `https://github.com/jar3b/py-phias/archive/v0.0.2.zip`, распакуйте его в удобное
- Вам место и запустите оттуда `python -m pip install -r requirements.txt`
-
-### Debian Linux
-1. Установить libxml:
+### Общая часть:
+Установим приложение из репозитория:
 
     ```
-    sudo apt-get install python-dev libxml2 libxml2-dev libxslt-dev
-    ```
-2. Установить unrar (non-free):
-
-    ```
-    sudo sh -c 'echo deb ftp://ftp.us.debian.org/debian/ stable main non-free > /etc/apt/sources.list.d/non-free.list'
-    sudo apt-get update
-    sudo apt-get install unrar
-    ```
-3. Установить sphinxapi последней версии:
-
-    ```
-    sudo pip install https://github.com/Romamo/sphinxapi/zipball/master
-    ```
-4. Установить, собственно, приложение:
- - полностью:
- 
-    ```
-    sudo mkdir -p /var/www/py-phias
-    sudo chown phias: /var/www/py-phias
-    wget https://github.com/jar3b/py-phias/archive/v0.0.2.tar.gz
-    sudo -u phias tar xzf v0.0.1.tar.gz -C /var/www/py-phias --strip-components=1
-    cd /var/www/py-phias
-    sudo pip install -r requirements.txt
-    ```
- - как repo:
- 
-    ```
-    sudo mkdir -p /var/www/py-phias
-    sudo chown phias: /var/www/py-phias
-    cd /var/www
-    sudo -u phias -H git clone --branch=master https://github.com/jar3b/py-phias.git py-phias
+    cd /opt/fias-env
+    sudo mkdir -p fias-api
+    sudo chown fias: /opt/fias-env/fias-api
+    sudo -u fias -H git clone --branch=py3 https://github.com/jar3b/py-phias.git fias-api
+    cd fias-api
     sudo pip install -r requirements.txt
     ```
 

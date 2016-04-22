@@ -6,4 +6,4 @@ python-Levenshtein==0.12.0
 rarfile
 requests>=2.8.1
 soap2py>=1.16
-sphinxapi>=2.2.9
+sphinx-py3-api>=2.2.9
