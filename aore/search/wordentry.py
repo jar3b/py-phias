@@ -5,6 +5,10 @@ from aore.config import SphinxConfig
 from aore.search.wordvariation import WordVariation, VariationType
 
 
+def cleanup_string(word):
+    return word.replace('-', '').replace('@', '').replace('#', '')
+
+
 class WordEntry:
     # Варианты распеределния для слов с первыми двумя символами, где:
     # 0 - не найдено, 1 - найдено одно, x - найдено много (>1)
@@ -51,14 +55,14 @@ class WordEntry:
 
     def __init__(self, db, word):
         self.db = db
-        self.bare_word = str(word)
-        self.word = self.__cleanify(self.bare_word)
-        self.word_len = len(unicode(self.word))
+        self.bare_word = word
+        self.word = cleanup_string(self.bare_word)
+        self.word_len = len(self.word)
         self.parameters = dict(IS_FREQ=False, SOCR_WORD=None)
         self.ranks = self.__init_ranks()
 
         # Заполняем параметры слова
-        for mt_name, mt_values in self.match_types.iteritems():
+        for mt_name, mt_values in self.match_types.items():
             self.__dict__[mt_name] = False
             for mt_value in mt_values:
                 self.__dict__[mt_name] = self.__dict__[mt_name] or re.search(mt_value, self.ranks)
@@ -71,9 +75,6 @@ class WordEntry:
         if self.MT_LAST_STAR and self.word_len < SphinxConfig.min_length_to_star:
             self.MT_LAST_STAR = False
             self.MT_AS_IS = True
-
-    def __cleanify(self, word):
-        return word.replace('-', '').replace('@', '')
 
     def variations_generator(self, strong, suggestion_func):
         default_var_type = VariationType.normal
@@ -115,8 +116,9 @@ class WordEntry:
                   "UNION ALL SELECT COUNT(*), NULL FROM \"AOTRIG\" WHERE word='{}' " \
                   "UNION ALL SELECT COUNT(*), MAX(scname) FROM \"SOCRBASE\" WHERE socrname ILIKE '{}'" \
                   "UNION ALL SELECT COUNT(*), NULL FROM \"SOCRBASE\" WHERE scname ILIKE '{}'" \
-                  "UNION ALL SELECT frequency, NULL FROM \"AOTRIG\" WHERE word='{}';".format(
-            self.word, self.word_len, self.word, self.bare_word, self.bare_word, self.word)
+                  "UNION ALL SELECT frequency, NULL FROM \"AOTRIG\" WHERE word='{}';".format(self.word, self.word_len,
+                                                                                             self.word, self.bare_word,
+                                                                                             self.bare_word, self.word)
 
         result = self.db.get_rows(sql_qry)
 

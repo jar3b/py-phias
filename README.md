@@ -1,7 +1,7 @@
 # py-phias
 Python application that can operate with FIAS (Russian Address Object DB)
 
-Простое приложение для работы с БД ФИАС, написано для Python 2.7, использует БД PostgreSQL
+Простое приложение для работы с БД ФИАС, написано для Python 3.4+, использует БД PostgreSQL
 ## Содержание
  - [Возможности](#Возможности)
  - [Установка](#Установка)
@@ -26,7 +26,7 @@ Python application that can operate with FIAS (Russian Address Object DB)
 
 ### Зависимости
 
-_Внимание_! Только Python 2.7+ (на 3+ не тестировал), только PostgreSQL, только Sphinx. MySQL/MariaDB, ElasticSearch/Solr
+_Внимание_! Только Python 3 (для 2.7 пока есть отдельная ветка), только PostgreSQL, только Sphinx. MySQL/MariaDB, ElasticSearch/Solr
 не поддерживаются и, скорее всего, не будут.
  
 Для работы приложения необходимо достаточное кол-во RAM (1Gb+) и ~5.5Gb места на диске 
@@ -38,7 +38,7 @@ _Внимание_! Только Python 2.7+ (на 3+ не тестировал)
 
 Предварительно обязательно установить и настроить:
 
-1. Python 2.7.x, pip
+1. Python 3, pip
     Для Windows качаем - ставим, для Debian:
     ```
     sudo apt-get install python-setuptools
@@ -83,12 +83,15 @@ _Внимание_! Только Python 2.7+ (на 3+ не тестировал)
 4. Web-сервер с поддержкой WSGI, любой, по Вашему желанию.
 
 ### Windows
-1. Установить lxml, скачав [отсюда](https://pypi.python.org/pypi/lxml/3.5.0).
+1. Установить lxml, скачав whl [отсюда](http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml) и сделав
+`pip install yourmodulename.whl`.
+2. Есть некоторые проблемы с установкой и работой psycopg2 (Windows 10, VS 2015), если у Вас они присутствуют - качаем
+[сборку для Windows](http://www.stickpeople.com/projects/python/win-psycopg/)
 2. Установить unrar.exe (можно установить WinRar целиком).
-3. Установить sphinxapi последней версии (либо взять из директории Sphinx): 
+3. Установить sphinxapi с поддержкой синтаксиса Python3:
 
     ```
-    python -m pip install https://github.com/Romamo/sphinxapi/zipball/master
+    pip install https://github.com/jar3b/sphinx-py3-api/zipball/master
     ```
 4. Установить приложение, скачав релиз `https://github.com/jar3b/py-phias/archive/v0.0.2.zip`, распакуйте его в удобное
  Вам место и запустите оттуда `python -m pip install -r requirements.txt`
@@ -163,3 +166,27 @@ _Внимание_! Только Python 2.7+ (на 3+ не тестировал)
 5. Настроим WSGI server, я использую nginx + passenger. Конфиг для passenger - [passenger_wsgi.py](passenger_wsgi.py),
 конфиг для nginx - [py-phias.conf](https://gist.github.com/jar3b/f8f5d351e0ea8ae2ed8e). Вы можете
 использовать любое приемлемое сочетание.
+
+## Api
+
+- `/normalize/<guid>` - актуализирует AOID или AOGUID, на выходе выдает
+
+  `{"aoid": "1d6185b5-25a6-4fe8-9208-e7ddd281926a"}`, где aoid - актуальный AOID.
+- `/find/<text>` и `/find/<text>/strong`- полнотекстовый поиск по названию адресного объекта. `<text>` - строка поиска.
+Если указан параметр `strong`, то поиск будет выдавать меньше результатов, но они будут точнее. Если же флаг не
+указан, но будет выдано 10 наиболее релевантных результатов.
+
+    На выходе будет массив:
+    ```
+    [
+      {
+        "cort": 0,
+        "text": "обл Псковская, р-н Порховский, д Гречушанка",
+        "ratio": 1537,
+        "aoid": "1d6185b5-25a6-4fe8-9208-e7ddd281926a"
+      },
+      ... (up to 10)
+    ]
+    ```
+    ,где cort - количество несовпавших слов, text - полное название адресного объекта, ratio - рейтинг, aoid -
+    актуальный AOID.

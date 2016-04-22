@@ -22,11 +22,11 @@ class SphinxHelper:
             os.makedirs(Folders.temp)
 
         # оздаем 3 папки для Сфинкса
-        if not os.path.exists(SphinxConfig.var_dir+ '/run'):
+        if not os.path.exists(SphinxConfig.var_dir + '/run'):
             os.makedirs(SphinxConfig.var_dir + '/run')
-        if not os.path.exists(SphinxConfig.var_dir+ '/log'):
+        if not os.path.exists(SphinxConfig.var_dir + '/log'):
             os.makedirs(SphinxConfig.var_dir + '/log')
-        if not os.path.exists(SphinxConfig.var_dir+ '/data'):
+        if not os.path.exists(SphinxConfig.var_dir + '/data'):
             os.makedirs(SphinxConfig.var_dir + '/data')
 
     def configure_indexer(self, indexer_binary, config_filename):
@@ -55,7 +55,7 @@ class SphinxHelper:
         logging.info("All indexes were created.")
 
         # remove temp files
-        for fname, fpath in self.files.iteritems():
+        for fname, fpath in self.files.items():
             try:
                 os.remove(fpath)
             except:
@@ -84,10 +84,10 @@ class SphinxHelper:
 
     def __dbexport_sugg_dict(self):
         logging.info("Place suggestion dict to DB %s...", self.files['dict.txt'])
-        dict_dat_fname = os.path.abspath(Folders.temp + "/suggdict.csv")
+        fname = os.path.abspath(Folders.temp + "/suggdict.csv")
 
         csv_counter = 0
-        with open(self.files['dict.txt'], "r") as dict_file, open(dict_dat_fname, "w") as exit_file:
+        with open(self.files['dict.txt'], "r") as dict_file, open(fname, "w") as exit_file:
             line = None
             while line != '':
                 nodes = []
@@ -111,8 +111,10 @@ class SphinxHelper:
         except:
             pass
 
-        self.aodp.bulk_csv(AoXmlTableEntry.OperationType.update, "AOTRIG", csv_counter, dict_dat_fname)
+        self.aodp.bulk_csv(AoXmlTableEntry.OperationType.update, "AOTRIG", csv_counter, fname)
         logging.info("Done.")
+
+        return fname
 
     def __create_ao_index_config(self):
         fname = os.path.abspath(Folders.temp + "/addrobj.conf")
@@ -156,7 +158,7 @@ class SphinxHelper:
                              sphinx_var_path=SphinxConfig.var_dir)
 
         f = open(out_filename, "w")
-        for fname, fpath in self.files.iteritems():
+        for fname, fpath in self.files.items():
             if ".conf" in fname:
                 with open(fpath, "r") as conff:
                     for line in conff:

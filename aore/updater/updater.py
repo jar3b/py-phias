@@ -62,9 +62,9 @@ class Updater:
         mode = None
         while not mode:
             try:
-                mode = int(raw_input('Enter FIAS update version (3 digit):'))
+                mode = int(input('Enter FIAS update version (3 digit):'))
             except ValueError:
-                print "Not a valid fias version, try again."
+                print("Not a valid fias version, try again.")
 
         return mode
 

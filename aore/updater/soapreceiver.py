@@ -2,6 +2,7 @@
 
 from pysimplesoap.client import SoapClient
 
+
 class SoapReceiver:
     def __init__(self):
         self.client = SoapClient(

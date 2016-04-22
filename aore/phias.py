@@ -5,7 +5,7 @@ import logging
 from bottle import response
 
 from aore.search.fiasfactory import FiasFactory
-from miscutils.bottlecl import BottleCL
+from .miscutils.bottlecl import BottleCL
 
 
 class App(BottleCL):

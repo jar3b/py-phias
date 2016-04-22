@@ -22,4 +22,5 @@ config.UnrarConfig.path = "C:\\Program Files\\WinRAR\\unrar.exe"
 config.Folders.temp = "E:\\!TEMP"
 
 config.BasicConfig.logging = True
+config.BasicConfig.debug_print = False
 config.BasicConfig.logfile = "pyphias.log"

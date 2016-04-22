@@ -9,7 +9,7 @@ import requests
 
 from aore.config import Folders, UnrarConfig
 from aore.miscutils.exceptions import FiasException
-from aoxmltableentry import AoXmlTableEntry
+from .aoxmltableentry import AoXmlTableEntry
 
 
 class AoRar:

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 import logging
 import re
-import urllib
+import traceback
+import urllib.parse
 from uuid import UUID
 
 import psycopg2
-import traceback
 from bottle import template
 
 from aore.config import DatabaseConfig, BasicConfig
 from aore.dbutils.dbimpl import DBImpl
-from search import SphinxSearch
+from .search import SphinxSearch
 
 
 class FiasFactory:
@@ -38,10 +38,10 @@ class FiasFactory:
         if rule == "boolean":
             assert isinstance(param, bool), "Invalid parameter type"
         if rule == "uuid":
-            assert (isinstance(param, str) or isinstance(param, unicode)) and self.__check_uuid(
+            assert isinstance(param, str) and self.__check_uuid(
                 param), "Invalid parameter value"
             if rule == "text":
-                assert isinstance(param, str) or isinstance(param, unicode), "Invalid parameter type"
+                assert isinstance(param, str), "Invalid parameter type"
                 assert len(param) > 3, "Text too short"
                 pattern = re.compile(r"[A-za-zА-Яа-я \-,.#№]+")
                 assert pattern.match(param), "Invalid parameter value"
@@ -52,15 +52,17 @@ class FiasFactory:
 
     def find(self, text, strong=False):
         try:
-            text = urllib.unquote(text).decode('utf8')
+            text = urllib.parse.unquote(str(text))
             self.__check_param(text, "text")
             self.__check_param(strong, "boolean")
 
             results = self.searcher.find(text, strong)
-        except Exception, err:
+        except Exception as err:
             if BasicConfig.logging:
-                logging.error(traceback.format_exc(err))
-            return dict(error=err.args[0])
+                logging.error(traceback.format_exc())
+            if BasicConfig.debug_print:
+                traceback.print_exc()
+            return dict(error=str(err))
 
         return results
 
@@ -73,10 +75,12 @@ class FiasFactory:
             rows = self.db.get_rows(sql_query, True)
 
             assert len(rows), "Record with this AOID not found in DB"
-        except Exception, err:
+        except Exception as err:
             if BasicConfig.logging:
-                logging.error(traceback.format_exc(err))
-            return dict(error=err.args[0])
+                logging.error(traceback.format_exc())
+            if BasicConfig.debug_print:
+                traceback.print_exc()
+            return dict(error=str(err))
 
         if len(rows) == 0:
             return []
@@ -94,10 +98,12 @@ class FiasFactory:
 
             sql_query = self.expand_templ.replace("//aoid", normalized_id)
             rows = self.db.get_rows(sql_query, True)
-        except Exception, err:
+        except Exception as err:
             if BasicConfig.logging:
-                logging.error(traceback.format_exc(err))
-            return dict(error=err.args[0])
+                logging.error(traceback.format_exc())
+            if BasicConfig.debug_print:
+                traceback.print_exc()
+            return dict(error=str(err))
 
         return rows
 
@@ -111,9 +117,11 @@ class FiasFactory:
             rows = self.db.get_rows(sql_query, True)
 
             assert len(rows), "Record with this AOID not found in DB"
-        except Exception, err:
+        except Exception as err:
             if BasicConfig.logging:
-                logging.error(traceback.format_exc(err))
-            return dict(error=err.args[0])
+                logging.error(traceback.format_exc())
+            if BasicConfig.debug_print:
+                traceback.print_exc()
+            return dict(error=str(err))
 
         return rows

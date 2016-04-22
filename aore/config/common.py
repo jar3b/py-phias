@@ -3,6 +3,7 @@
 
 class BasicConfig:
     logging = False
+    debug_print = False
     logfile = ""
 
     def __init__(self):

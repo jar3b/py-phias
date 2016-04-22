@@ -7,7 +7,8 @@ class XMLParser:
     def __init__(self, parse_function):
         self.parse_function = parse_function
 
-    def fast_iter(self, context, func, *args, **kwargs):
+    @staticmethod
+    def fast_iter(context, func, *args, **kwargs):
         for event, elem in context:
             # print event
             func(elem, *args, **kwargs)

@@ -11,8 +11,8 @@ from aore.config import SphinxConfig
 from aore.miscutils.exceptions import FiasException
 from aore.miscutils.fysearch import violet_ratio
 from aore.miscutils.trigram import trigram
-from wordentry import WordEntry
-from wordvariation import VariationType
+from .wordentry import WordEntry
+from .wordvariation import VariationType
 
 
 class SphinxSearch:
@@ -62,7 +62,7 @@ class SphinxSearch:
             self.client_show.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
 
     def __get_suggest(self, word, rating_limit, count):
-        word_len = str(len(word) / 2)
+        word_len = len(word)
         trigrammed_word = '"{}"/1'.format(trigram(word))
 
         self.__configure(SphinxConfig.index_sugg, word_len)
@@ -95,7 +95,7 @@ class SphinxSearch:
         return outlist
 
     # Получает список объектов (слово)
-    def __get_word_entries(self, words, strong):
+    def __get_word_entries(self, words):
         we_list = []
         for word in words:
             if word != '':
@@ -111,14 +111,14 @@ class SphinxSearch:
 
     def find(self, text, strong):
         def split_phrase(phrase):
-            phrase = unicode(phrase).lower()
+            phrase = phrase.lower()
             return re.split(r"[ ,:.#$]+", phrase)
 
         # сплитим текст на слова
         words = split_phrase(text)
 
         # получаем список объектов (слов)
-        word_entries = self.__get_word_entries(words, strong)
+        word_entries = self.__get_word_entries(words)
         word_count = len(word_entries)
 
         # проверяем, есть ли вообще что-либо в списке объектов слов (или же все убрали как частое)
@@ -169,7 +169,7 @@ class SphinxSearch:
                     parsed_ids.append(match['attrs']['aoid'])
                     results.append(
                         dict(aoid=match['attrs']['aoid'],
-                             text=unicode(match['attrs']['fullname']),
+                             text=str(match['attrs']['fullname']),
                              ratio=match['attrs']['krank'],
                              cort=i))
 
