@@ -46,10 +46,9 @@ class FiasFactory:
                 pattern = re.compile(r"[A-za-zА-Яа-я \-,.#№]+")
                 assert pattern.match(param), "Invalid parameter value"
 
-                # text - строка поиска
-                # strong - строгий поиск (True) или "мягкий" (False) (с допущением ошибок, опечаток)
-                # Строгий используется при импорте из внешних систем (автоматически), где ошибка критична
-
+    # text - строка поиска
+    # strong - строгий поиск (True) или "мягкий" (False) (с допущением ошибок, опечаток)
+    # Строгий используется при импорте из внешних систем (автоматически), где ошибка критична
     def find(self, text, strong=False):
         try:
             text = urllib.parse.unquote(str(text))

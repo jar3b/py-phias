@@ -110,31 +110,28 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     sudo apt-get install unrar
     ```
 
-2. Устанавливаем и настраиваем libxml и виртуальное окружение:
+2. Устанавливаем и настраиваем libxml:
     ```
-    sudo apt-get install python3-lxml python3-dev
-    sudo pip3 install virtualenv
-    sudo virtualenv /opt/fias-env
-    source /opt/fias-env/bin/activate
+    sudo apt-get install libxml2-dev libxslt1-dev python3-dev python3-lxml
     ```
-    Далее будем все устанавливать внутри virtualenv'a.
 
 3. Установить sphinxapi с поддержкой синтаксиса Python3:
 
     ```
-    pip install https://github.com/jar3b/sphinx-py3-api/zipball/master
+    sudo pip3 install https://github.com/jar3b/sphinx-py3-api/zipball/master
     ```
 ### Общая часть:
-Установим приложение из репозитория:
+1. Установим приложение из репозитория:
 
     ```
-    cd /opt/fias-env
+    cd /var/www/
     sudo mkdir -p fias-api
-    sudo chown fias: /opt/fias-env/fias-api
-    sudo -u fias -H git clone --branch=py3 https://github.com/jar3b/py-phias.git fias-api
+    sudo chown fias: /var/www/fias-api
+    sudo -H -u fias git clone --branch=py3 https://github.com/jar3b/py-phias.git fias-api
     cd fias-api
-    sudo pip install -r requirements.txt
+    sudo pip3 install -r requirements.txt
     ```
+2. Иные пути установки ... (soon)
 
 ## Настройка
 ### Первоначальная настройка базы данных
@@ -143,9 +140,9 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
 конфигурационного файла (создается рядом с wsgi app), пример конфига находится в файле
 [config.example.py](config.example.py).
 2. Создадим базу:
-    - из архива `sudo -u phias python manage.py -b create -s /tmp/fias_xml.rar`
-    - из директории `sudo -u phias python manage.py -b create -s /tmp/fias_xml_unpacked`
-    - онлайн, с сервера ФНС `sudo -u phias python manage.py -b create -s http`
+    - из архива `sudo -u fias python3 manage.py -b create -s /tmp/fias_xml.rar`
+    - из директории `sudo -u fias python3 manage.py -b create -s /tmp/fias_xml_unpacked`
+    - онлайн, с сервера ФНС `sudo -u fias python3 manage.py -b create -s http`
     - Также, можно указать конкретную версию ФИАС _только_ при http загрузке, с ключом `--update-version <num>`, где num -
 номер версии ФИАС, все доступные версии можно получить, выполнив `manage.py -v`.
 
@@ -156,7 +153,7 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     указанной в `config.folders.temp`, иначе будет Permission denied при попытке bulk-import.
 3. Проиндексируем Sphinx:
     - Windows: `python manage.py -c -i C:\sphinx\bin\indexer.exe -o C:\sphinx\sphinx.conf`
-    - Debian: `sudo python manage.py -c -i indexer -o /usr/local/sphinx/etc/sphinx.conf`
+    - Debian: `sudo python3 manage.py -c -i indexer -o /usr/local/etc/sphinx.conf`
 4. Затем запустим searchd:
     - Windows: 
         - Устанавливаем службу: `C:\Sphinx\bin\searchd --install --config C:\Sphinx\sphinx.conf --servicename sphinxsearch`
@@ -164,20 +161,23 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     - Debian:
         - Запустим : `sudo searchd --config /usr/local/sphinx/etc/sphinx.conf`
         - если необходимо, добавьте `searchd --config /usr/local/sphinx/etc/sphinx.conf` в `/etc/rc.local` для автостарта
-5. Настроим WSGI server, я использую nginx + passenger. Конфиг для passenger - [passenger_wsgi.py](passenger_wsgi.py),
-конфиг для nginx - [py-phias.conf](https://gist.github.com/jar3b/f8f5d351e0ea8ae2ed8e). Вы можете
-использовать любое приемлемое сочетание.
+5. Для проверки работы выполните `sudo -H -u fias python3 passenger_wsgi.py`, по адресу `http://example.com/find/москва`
+Вы должны увидеть результаты запроса.
 
 ## Api
 
 - `/normalize/<guid>` - актуализирует AOID или AOGUID, на выходе выдает
 
-  `{"aoid": "1d6185b5-25a6-4fe8-9208-e7ddd281926a"}`, где aoid - актуальный AOID.
-- `/find/<text>` и `/find/<text>/strong`- полнотекстовый поиск по названию адресного объекта. `<text>` - строка поиска.
-Если указан параметр `strong`, то поиск будет выдавать меньше результатов, но они будут точнее. Если же флаг не
-указан, но будет выдано 10 наиболее релевантных результатов.
+  ```
+  {"aoid": "1d6185b5-25a6-4fe8-9208-e7ddd281926a"}
+  ```
 
-    На выходе будет массив:
+  , где aoid - актуальный AOID.
+- `/find/<text>?strong=<0,1>`- полнотекстовый поиск по названию адресного объекта. `<text>` - строка поиска.
+Если указан параметр `strong=1`, то в массиве будет один результат, или ошибка. Если же флаг не указан, но будет выдано 10
+наиболее релевантных результатов.
+
+    На выходе будет массив от 1 до 10 элементов:
     ```
     [
       {

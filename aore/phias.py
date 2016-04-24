@@ -2,7 +2,7 @@
 import json
 import logging
 
-from bottle import response
+from bottle import response, request
 
 from aore.search.fiasfactory import FiasFactory
 from .miscutils.bottlecl import BottleCL
@@ -23,7 +23,6 @@ class App(BottleCL):
         self.add_route(r'/normalize/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>', self.__normalize)
         self.add_route(r'/gettext/<aoid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>', self.__gettext)
         self.add_route(r'/find/<text>', self.__find)
-        self.add_route(r'/find/<text>/<strong>', self.__find)
         self.add_error(404, self.basic_error_handler)
         self.add_error(500, self.basic_error_handler)
 
@@ -39,8 +38,8 @@ class App(BottleCL):
 
         return json.dumps(self._factory.normalize(aoid))
 
-    def __find(self, text, strong=False):
-        strong = (strong == "strong")
+    def __find(self, text):
+        strong = 'strong' in request.query and request.query.strong == '1'
         response.content_type = 'application/json'
         response.set_header('Access-Control-Allow-Origin', '*')
 

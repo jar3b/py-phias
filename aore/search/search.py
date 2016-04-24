@@ -174,18 +174,18 @@ class SphinxSearch:
                              cort=i))
 
         # При строгом поиске нам надо еще добавить fuzzy и выбрать самое большое значение при отклонении
-        # выше заданного
+        # выше заданного, по сути переопределяем ratio
         if strong:
             for result in results:
-                result['strong_rank'] = violet_ratio(text, result['text'].lower())
+                result['ratio'] = violet_ratio(text, result['text'].lower())
 
             # Сортируем по убыванию признака
-            results.sort(key=lambda x: x['strong_rank'], reverse=True)
+            results.sort(key=lambda x: x['ratio'], reverse=True)
 
             # Если подряд два одинаково релеватных результата - это плохо, на автомат такое отдавать нельзя
-            if abs(results[0]['strong_rank'] - results[1]['strong_rank']) == 0.0:
+            if abs(results[0]['ratio'] - results[1]['ratio']) == 0.0:
                 raise FiasException("No matches")
             else:
-                return results[0]
+                results = [results[0]]
 
         return results
