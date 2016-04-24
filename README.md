@@ -159,9 +159,10 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
         - Устанавливаем службу: `C:\Sphinx\bin\searchd --install --config C:\Sphinx\sphinx.conf --servicename sphinxsearch`
         - и запускаем: `net start sphinxsearch`
     - Debian:
-        - Запустим : `sudo searchd --config /usr/local/sphinx/etc/sphinx.conf`
-        - если необходимо, добавьте `searchd --config /usr/local/sphinx/etc/sphinx.conf` в `/etc/rc.local` для автостарта
-5. Для проверки работы выполните `sudo -H -u fias python3 passenger_wsgi.py`, по адресу `http://example.com/find/москва`
+        - Запустим : `sudo searchd --config /usr/local/etc/sphinx.conf`
+        - если необходимо, добавьте `searchd --config /usr/local/etc/sphinx.conf` в `/etc/rc.local` для автостарта
+5. Для проверки работы выполните `sudo -H -u fias python3 passenger_wsgi.py`, по адресу
+`http://example.com:8087/find/москва`
 Вы должны увидеть результаты запроса.
 
 ## Api
@@ -172,7 +173,7 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
   {"aoid": "1d6185b5-25a6-4fe8-9208-e7ddd281926a"}
   ```
 
-  , где aoid - актуальный AOID.
+  , где _aoid_ - актуальный AOID.
 - `/find/<text>?strong=<0,1>`- полнотекстовый поиск по названию адресного объекта. `<text>` - строка поиска.
 Если указан параметр `strong=1`, то в массиве будет один результат, или ошибка. Если же флаг не указан, но будет выдано 10
 наиболее релевантных результатов.
@@ -189,5 +190,50 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
       ... (up to 10)
     ]
     ```
-    ,где cort - количество несовпавших слов, text - полное название адресного объекта, ratio - рейтинг, aoid -
+    ,где _cort_ - количество несовпавших слов, _text_ - полное название адресного объекта, _ratio_ - рейтинг, _aoid_ -
     актуальный AOID.
+- `/expand/<aoid>` - "раскрывает" AOID, возвращая массив адресных элементов. `<aoid>` - актуальный или неактуальный
+AOID
+
+    На выходе будет массив из адресных элементов, упорядоченный по AOLEVEL:
+    ```
+    [
+      {
+        "aoguid": "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
+        "shortname": "г",
+        "aoid": "5c8b06f1-518e-496e-b683-7bf917e0d70b",
+        "formalname": "Москва",
+        "aolevel": 1,
+        "socrname": "Город",
+        "regioncode": 77
+      },
+      {
+        "aoguid": "10409e98-eb2d-4a52-acdd-7166ca7e0e48",
+        "shortname": "п",
+        "aoid": "41451677-aad4-4cb9-ba76-2b0eeb156acb",
+        "formalname": "Вороновское",
+        "aolevel": 3,
+        "socrname": "Поселок",
+        "regioncode": 77
+      },
+      {
+        "aoguid": "266485f4-a204-4382-93ce-7a47ad934869",
+        "shortname": "ул",
+        "aoid": "943c8b81-2491-46ee-aee4-48d0c9fada1a",
+        "formalname": "Новая",
+        "aolevel": 7,
+        "socrname": "Улица",
+        "regioncode": 77
+      }
+    ]
+    ```
+    , все поля из таблицы ADDROBJ.
+- `/gettext/<aoid>` - возвращает текст для произвольного _aoid_, тект аналогичен тому, который возвращает `/find/<text>`,
+на выходе будет:
+    ```
+    [
+      {
+        "fullname": "г Москва, п Вороновское, п ЛМС, ул Новая"
+      }
+    ]
+    ```
