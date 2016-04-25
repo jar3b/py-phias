@@ -1,0 +1,9 @@
+#bind = "127.0.0.1:8888"
+bind = "unix:/tmp/fias-api-unicorn.sock"
+# bind = "unix:/home/proft/projects/blog/run/blog.socket"
+workers = 5
+user = "fias"
+group = "fias"
+logfile = "/var/log/gunicorn.log"
+loglevel = "info"
+proc_name = "blog"
