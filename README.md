@@ -181,10 +181,17 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     ```
     sudo cp -l fias-api.conf ../sites-enabled/fias-api.conf
     ```
-- Запустим gunicorn (пока без демона, для теста):
+- Запустим gunicorn (пока без демона, для теста) и nginx:
     ```
     cd /var/www/fias-api
     sudo gunicorn -c gunicorn.conf.py wsgi:application &
+    sudo service nginx start
+    ```
+- После перезапуска нужно сделать следующее (TODO):
+    ```
+    sudo searchd
+    sudo gunicorn -c gunicorn.conf.py wsgi:application &
+    sudo service nginx start
     ```
 
 ## Api
