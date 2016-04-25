@@ -164,34 +164,40 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
 5. Для проверки работы выполните `sudo -H -u fias python3 passenger_wsgi.py`, по адресу
 `http://example.com:8087/find/москва`
 Вы должны увидеть результаты запроса.
+
 ### Установка Web-сервера (для Debian, на примере nginx + gunicorn, без virtualenv)
 - Установим nginx и gunicorn:
+
     ```
     sudo apt-get install nginx
     sudo pip3 install gunicorn
     ```
 - По пути с приложением отредактируйте файл [gunicorn.conf.py](gunicorn.conf.py)
 - Настройте nginx. Примерно так:
+
     ```
     cd /etc/nginx/sites-available
     sudo wget -O fias-api.conf https://gist.githubusercontent.com/jar3b/f8f5d351e0ea8ae2ed8e/raw/2f1b0d2a6f9ce9db017117993954158ccce049dd/py-phias.conf
     sudo nano fias-api.conf
     ```
     , отредактируйте и сохраните файл, затем оздайте линк
+
     ```
     sudo cp -l fias-api.conf ../sites-enabled/fias-api.conf
     ```
 - Запустим gunicorn (пока без демона, для теста) и nginx:
+
     ```
     cd /var/www/fias-api
     sudo gunicorn -c gunicorn.conf.py wsgi:application &
     sudo service nginx start
     ```
 - После перезапуска нужно сделать следующее (TODO):
+
     ```
-    sudo searchd
+    sudo searchd --config /usr/local/etc/sphinx.conf
+    cd /var/www/fias-api
     sudo gunicorn -c gunicorn.conf.py wsgi:application &
-    sudo service nginx start
     ```
 
 ## Api
