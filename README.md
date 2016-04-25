@@ -136,7 +136,7 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
 ## Настройка
 ### Первоначальная настройка базы данных
 1. Настроим конфиг, для этого необходимо изменить параметры в Вашем wsgi-entrypoint (в моем случае
-[passenger_wsgi.py](passenger_wsgi.py)): в строке `from config import *` измените _config_ на имя Вашего
+[wsgi.py](wsgi.py)): в строке `from config import *` измените _config_ на имя Вашего
 конфигурационного файла (создается рядом с wsgi app), пример конфига находится в файле
 [config.example.py](config.example.py).
 2. Создадим базу:
@@ -169,6 +169,22 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     ```
     sudo apt-get install nginx
     sudo pip3 install gunicorn
+    ```
+- По пути с приложением отредактируйте файл [gunicorn.conf.py](gunicorn.conf.py)
+- Настройте nginx. Примерно так:
+    ```
+    cd /etc/nginx/sites-available
+    sudo wget -O fias-api.conf https://gist.githubusercontent.com/jar3b/f8f5d351e0ea8ae2ed8e/raw/2f1b0d2a6f9ce9db017117993954158ccce049dd/py-phias.conf
+    sudo nano fias-api.conf
+    ```
+    , отредактируйте и сохраните файл, затем оздайте линк
+    ```
+    sudo cp -l fias-api.conf ../sites-enabled/fias-api.conf
+    ```
+- Запустим gunicorn (пока без демона, для теста):
+    ```
+    cd /var/www/fias-api
+    sudo gunicorn -c gunicorn.conf.py wsgi:application &
     ```
 
 ## Api
