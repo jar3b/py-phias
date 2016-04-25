@@ -164,6 +164,12 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
 5. Для проверки работы выполните `sudo -H -u fias python3 passenger_wsgi.py`, по адресу
 `http://example.com:8087/find/москва`
 Вы должны увидеть результаты запроса.
+### Установка Web-сервера (для Debian, на примере nginx + gunicorn, без virtualenv)
+- Установим nginx и gunicorn:
+    ```
+    sudo apt-get install nginx
+    sudo pip3 install gunicorn
+    ```
 
 ## Api
 
