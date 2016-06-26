@@ -60,8 +60,9 @@ def get_allowed_updates(updates_str, mode="create"):
             yield all_versions[-1]
         else:
             assert len(user_defined_list) == 1, "Ony single update number allowed for DB create"
-            if user_defined_list[0] in all_versions:
-                yield user_defined_list[0]
+            for ver in all_versions:
+                if ver['intver'] == user_defined_list[0]:
+                    yield ver
             else:
                 raise Exception("Update #%d not found on remote server" % user_defined_list[0])
     if mode == "update":
