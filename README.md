@@ -192,15 +192,24 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     sudo gunicorn -c gunicorn.conf.py wsgi:application &
     sudo service nginx start
     ```
-- В пристейшем случае Ваш `/etc/rc.local` может выглядеть так, как ниже. Лмбо используйте аналоги supervisor.
-
+- Ниже пример конфига для systemd для запуска как сервис, для этого нужно создать файл `fias.service` в директории `/etc/systemd/system/`
+    
     ```
-    searchd --config /usr/local/etc/sphinx.conf
-    cd /var/www/fias-api
-    gunicorn -c gunicorn.conf.py wsgi:application &
-
-    exit 0
+    [Unit]
+    Description=Gunicorn instance to serve fias
+    After=network.target
+    
+    [Service]
+    User=fias
+    Group=www-data
+    WorkingDirectory=/var/www/fias-api
+    ExecStart=/usr/local/bin/gunicorn --workers 6 --bind unix:/tmp/fias-api-unicorn.sock -m 007 wsgi:application
+    
+    [Install]
+    WantedBy=multi-user.target
     ```
+
+- Для запуска сервиса используем `sudo systemctl start fias`, для регистрации в автозапуске `sudo systemctl enable fias`
 
 ## Api
 
