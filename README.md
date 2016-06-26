@@ -192,12 +192,14 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     sudo gunicorn -c gunicorn.conf.py wsgi:application &
     sudo service nginx start
     ```
-- После перезапуска нужно сделать следующее (TODO):
+- В пристейшем случае Ваш `/etc/rc.local` может выглядеть так, как ниже. Лмбо используйте аналоги supervisor.
 
     ```
-    sudo searchd --config /usr/local/etc/sphinx.conf
+    searchd --config /usr/local/etc/sphinx.conf
     cd /var/www/fias-api
-    sudo gunicorn -c gunicorn.conf.py wsgi:application &
+    gunicorn -c gunicorn.conf.py wsgi:application &
+
+    exit 0
     ```
 
 ## Api
