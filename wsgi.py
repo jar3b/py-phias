@@ -8,11 +8,12 @@ try:
 except ImportError:
     assert "No config"
 
-# Define main app
-phias_app = phias.App(config.BasicConfig.logfile)
+# Create main app
+phias.App(config.BasicConfig.logfile)
+
 # Define wsgi app
-application = phias_app.get_app()
+application = phias.app
 
 # Run bottle WSGI server if no external
 if __name__ == '__main__':
-    phias_app.start(host='0.0.0.0', port=8087, debug=True)
+    application.run(host='0.0.0.0', port=8087, debug=True)
