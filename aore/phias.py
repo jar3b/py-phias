@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
+from borest import app, Route, Error
 import json
 import logging
 
 from bottle import response, request
 
 from aore.search.fiasfactory import FiasFactory
-from borest import app, Route, Error
 
 
 class App(object):
@@ -50,15 +50,7 @@ class App(object):
             return json.dumps(App._factory.gettext(aoid))
 
     @staticmethod
-    @Error(404)
-    def basic_error_handler(error):
-        response.content_type = 'application/json'
-        response.set_header('Access-Control-Allow-Origin', '*')
-
-        return json.dumps(dict(error=error.status))
-
-    @staticmethod
-    @Error(500)
+    @Error([404, 500])
     def basic_error_handler(error):
         response.content_type = 'application/json'
         response.set_header('Access-Control-Allow-Origin', '*')
