@@ -94,8 +94,10 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
 `pip install yourmodulename.whl`.
 2. Есть некоторые проблемы с установкой и работой psycopg2 (Windows 10, VS 2015), если у Вас они присутствуют - качаем
 [сборку для Windows](http://www.stickpeople.com/projects/python/win-psycopg/)
-3. Установить unrar.exe (можно установить WinRar целиком).
-4. Установить sphinxapi с поддержкой синтаксиса Python3:
+3. Если есть проблемы с Python-Levenshtein, скачать [отсюда](http://www.lfd.uci.edu/~gohlke/pythonlibs/#python-levenshtein) 
+и установить
+4. Установить unrar.exe (можно установить WinRar целиком).
+5. Установить sphinxapi с поддержкой синтаксиса Python3:
 
     ```
     pip install https://github.com/jar3b/sphinx-py3-api/zipball/master
@@ -203,7 +205,7 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     User=fias
     Group=www-data
     WorkingDirectory=/var/www/fias-api
-    ExecStart=/usr/local/bin/gunicorn --workers 6 --bind unix:/tmp/fias-api-unicorn.sock -m 007 wsgi:application
+    ExecStart=/usr/local/bin/gunicorn -k gevent_pywsgi --worker-connections 1001 --bind unix:/tmp/fias-api-unicorn.sock -m 007 wsgi:application --log-file /var/log/fias_errors.log
     
     [Install]
     WantedBy=multi-user.target

@@ -1,4 +1,4 @@
-lxml==3.6.0
+lxml>=3.6.0
 bottle>=0.12.9
 psycopg2>=2.6.1
 PySimpleSOAP==1.16
