@@ -23,7 +23,7 @@ Python application that can operate with FIAS (Russian Address Object DB)
 
 
 ## Установка
-Протестирована работа на следующих ОС: [Windows](#windows) (8.1) и [Debian](#debian-linux) Jessie
+Протестирована работа на следующих ОС: [Windows](#windows) (8.1, 10) и [Debian](#debian-linux) Jessie, Stretch
 
 ### Зависимости
 
@@ -139,8 +139,7 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
 ### Первоначальная настройка базы данных
 1. Настроим конфиг, для этого необходимо изменить параметры в Вашем wsgi-entrypoint (в моем случае
 [wsgi.py](wsgi.py)): в строке `from config import *` измените _config_ на имя Вашего
-конфигурационного файла (создается рядом с wsgi app), пример конфига находится в файле
-[config.example.py](config.example.py).
+конфигурационного файла (создается рядом с wsgi app)
 2. Создадим базу:
     - из архива `sudo -u fias python3 manage.py -b create -s /tmp/fias_xml.rar`
     - из директории `sudo -u fias python3 manage.py -b create -s /tmp/fias_xml_unpacked`
@@ -163,7 +162,7 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     - Debian:
         - Запустим : `sudo searchd --config /usr/local/etc/sphinx.conf`
         - если необходимо, добавьте `searchd --config /usr/local/etc/sphinx.conf` в `/etc/rc.local` для автостарта
-5. Для проверки работы выполните `sudo -H -u fias python3 passenger_wsgi.py`, по адресу
+5. Для проверки работы выполните `sudo -H -u fias python3 wsgi.py`, по адресу
 `http://example.com:8087/find/москва`
 Вы должны увидеть результаты запроса.
 
@@ -174,7 +173,6 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     sudo apt-get install nginx
     sudo pip3 install gunicorn
     ```
-- По пути с приложением отредактируйте файл [gunicorn.conf.py](gunicorn.conf.py)
 - Настройте nginx. Примерно так:
 
     ```
@@ -182,19 +180,13 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     sudo wget -O fias-api.conf https://gist.githubusercontent.com/jar3b/f8f5d351e0ea8ae2ed8e/raw/2f1b0d2a6f9ce9db017117993954158ccce049dd/py-phias.conf
     sudo nano fias-api.conf
     ```
-    , отредактируйте и сохраните файл, затем оздайте линк
+    , отредактируйте и сохраните файл, затем cоздайте линк
 
     ```
     sudo cp -l fias-api.conf ../sites-enabled/fias-api.conf
     ```
-- Запустим gunicorn (пока без демона, для теста) и nginx:
-
-    ```
-    cd /var/www/fias-api
-    sudo gunicorn -c gunicorn.conf.py wsgi:application &
-    sudo service nginx start
-    ```
-- Ниже пример конфига для systemd для запуска как сервис, для этого нужно создать файл `fias.service` в директории `/etc/systemd/system/`
+- Теперь настроим автозапуск gunicorn. Ниже пример конфига для systemd для запуска как сервис, для этого нужно создать 
+файл `fias.service` в директории `/etc/systemd/system/`
     
     ```
     [Unit]
@@ -205,12 +197,12 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     User=fias
     Group=www-data
     WorkingDirectory=/var/www/fias-api
-    ExecStart=/usr/local/bin/gunicorn -k gevent_pywsgi --worker-connections 1001 --bind unix:/tmp/fias-api-unicorn.sock -m 007 wsgi:application --log-file /var/log/fias_errors.log
+    ExecStart=/usr/local/bin/gunicorn -k gevent_pywsgi --worker-connections 200 --bind unix:/tmp/fias-api-unicorn.sock -m 007 wsgi:application --log-file /var/log/fias_errors.log
     
     [Install]
     WantedBy=multi-user.target
     ```
-
+- Применим изменения: `sudo systemctl daemon-reload`
 - Для запуска сервиса используем `sudo systemctl start fias`, для регистрации в автозапуске `sudo systemctl enable fias`
 
 ## Api
