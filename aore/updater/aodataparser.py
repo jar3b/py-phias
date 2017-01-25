@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-
+import codecs
 from aore.config import Folders
 from aore.dbutils.dbschemas import db_shemas
 from aore.miscutils.exceptions import FiasException
@@ -38,7 +38,7 @@ class AoDataParser:
             # Prepare to next iteration
             self.counter = 0
             self.currentpage += 1
-            self.csv_file = open(self.base_filename.format(self.currentpage), "w")
+            self.csv_file = codecs.open(self.base_filename.format(self.currentpage), "w", "utf-8")
 
         exit_nodes = list()
         for allowed_field in self.allowed_fields:
