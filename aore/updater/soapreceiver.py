@@ -6,7 +6,7 @@ from pysimplesoap.client import SoapClient
 class SoapReceiver:
     def __init__(self):
         self.client = SoapClient(
-            location="http://fias.nalog.ru/WebServices/Public/DownloadService.asmx",
+            location="https://fias.nalog.ru/WebServices/Public/DownloadService.asmx",
             action='http://fias.nalog.ru/WebServices/Public/DownloadService.asmx/',
             namespace="http://fias.nalog.ru/WebServices/Public/DownloadService.asmx",
             soap_ns='soap', trace=False, ns=False)
