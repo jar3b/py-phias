@@ -1,10 +1,10 @@
 lxml>=3.6.0
-bottle>=0.12.9
-psycopg2>=2.6.1
-PySimpleSOAP==1.16
+bottle==0.12.13
+psycopg2==2.7.5
+PySimpleSOAP==1.16.2
 python-Levenshtein==0.12.0
-rarfile
+rarfile==3.0
 requests>=2.8.1
 soap2py>=1.16
 git+https://github.com/jar3b/sphinx-py3-api
-bottle-oop-rest>=0.0.4
+bottle-oop-rest>=0.0.5
