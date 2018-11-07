@@ -1,7 +1,9 @@
 # py-phias
+
 Python application that can operate with FIAS (Russian Address Object DB)
 
 Простое приложение для работы с БД ФИАС, написано для Python 3, использует БД PostgreSQL
+
 ## Содержание
  - [Возможности](#Возможности)
  - [Установка](#Установка)
@@ -23,12 +25,14 @@ Python application that can operate with FIAS (Russian Address Object DB)
 
 
 ## Установка
-Протестирована работа на следующих ОС: [Windows](#windows) (8.1, 10) и [Debian](#debian-linux) Jessie, Stretch
+
+Протестирована работа на следующих ОС: [Windows](#windows) (8.1, 10) и [Debian](#debian-linux) Jessie, Stretch. 
+Необходима версия Python == 3.5 
 
 ### Зависимости
 
-_Внимание_! Только Python 3 (для 2.7 пока есть отдельная ветка), только PostgreSQL, только Sphinx. MySQL/MariaDB, ElasticSearch/Solr
-не поддерживаются и, скорее всего, не будут.
+_Внимание_! Только Python 3 (для 2.7 пока есть отдельная ветка), только PostgreSQL, только Sphinx. MySQL/MariaDB, 
+ElasticSearch/Solr не поддерживаются и, скорее всего, не будут.
  
 Для работы приложения необходимо достаточное кол-во RAM (1Gb+) и ~5.5Gb места на диске 
 (3-3.5Gb для скачивания архива с базой, 350-400Mb для индексов Sphinx, 1Gb для базы). Также необходимы root права 
@@ -117,11 +121,12 @@ _Внимание_! Только Python 3 (для 2.7 пока есть отде
     sudo apt-get install libxml2-dev libxslt1-dev python3-dev python3-lxml
     ```
 
-3. Установить sphinxapi с поддержкой синтаксиса Python3:
+3. Увстановить python3-dev, для того, чтобы корректно установился levenshtein
 
-    ```
-    sudo pip3 install https://github.com/jar3b/sphinx-py3-api/zipball/master
-    ```
+```
+sudo apt-get install python3-dev
+```
+
 ### Общая часть:
 1. Установим приложение из репозитория:
 
