@@ -22,7 +22,7 @@ class AoXmlTableEntry:
     @classmethod
     def from_dir(cls, file_name, path):
         # for extracted into folder
-        return AoXmlTableEntry(file_name, lambda: open(path + file_name))
+        return AoXmlTableEntry(file_name, lambda: open(path + file_name, 'rb'))
 
     def __init__(self, file_name, lamda_open):
         matchings = re.search('^(AS_)(DEL_)*([A-Z]+)', file_name)
