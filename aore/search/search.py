@@ -65,11 +65,6 @@ class SphinxSearch:
         word_len = len(word)
         trigrammed_word = '"{}"/1'.format(trigram(word))
 
-        logging.info(word)
-        logging.info(rating_limit)
-        logging.info(count)
-        logging.info(trigrammed_word)
-
         self.__configure(SphinxConfig.index_sugg, word_len)
         result = self.client_sugg.Query(trigrammed_word, SphinxConfig.index_sugg)
 
