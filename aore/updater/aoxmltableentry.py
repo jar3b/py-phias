@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import re
 
 from enum import Enum
@@ -41,9 +39,6 @@ class AoXmlTableEntry:
 
     def close(self):
         self.file_descriptor.close()
-
-    def __unicode__(self):
-        return "Entry for {} table {}".format(self.operation_type, self.table_name)
 
     def __str__(self):
         return "Entry for {} table {}".format(self.operation_type, self.table_name)

@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
-from borest import app, Route, Error
 import json
 import logging
-
+from borest import app, Route, Error
 from bottle import response, request
 
 from aore.search.fiasfactory import FiasFactory
 
 
-class App(object):
+class App:
     _factory = None
 
     def __init__(self, log_filename):

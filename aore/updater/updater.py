@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import logging
-from os import walk, path
-
 import psycopg2
+from os import walk, path
 
 from aore.config import DatabaseConfig
 from aore.dbutils.dbimpl import DBImpl

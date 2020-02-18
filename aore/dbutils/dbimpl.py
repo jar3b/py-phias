@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-
-from traceback import format_exc
-
 import psycopg2.extras
+from traceback import format_exc
 
 from aore.miscutils.exceptions import FiasException
 

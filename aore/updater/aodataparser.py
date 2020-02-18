@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-import os
 import codecs
+import os
+
 from aore.config import Folders
 from aore.dbutils.dbschemas import db_shemas
 from aore.miscutils.exceptions import FiasException

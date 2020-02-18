@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import os.path
-from traceback import format_exc
-
 import rarfile
 import requests
+from traceback import format_exc
 
 from aore.config import Folders, UnrarConfig
 from aore.miscutils.exceptions import FiasException

@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 import logging
+import psycopg2
 import re
 import traceback
 import urllib.parse
-from uuid import UUID
-
-import psycopg2
 from bottle import template
+from uuid import UUID
 
 from aore.config import DatabaseConfig, BasicConfig
 from aore.dbutils.dbimpl import DBImpl

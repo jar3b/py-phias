@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class BasicConfig:
     logging = False
     debug_print = False

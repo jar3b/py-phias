@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
+import Levenshtein
 import logging
 import re
-import time
-
-import Levenshtein
 import sphinxapi
+import time
 
 from aore.config import BasicConfig
 from aore.config import SphinxConfig
@@ -108,7 +106,6 @@ class SphinxSearch:
     # text - текст найденного адресного объекта
     # ratio - рейтинг найденного пункта
     # cort - рейтинг количества совпавших слов
-
     def find(self, text, strong):
         def split_phrase(phrase):
             phrase = phrase.lower()

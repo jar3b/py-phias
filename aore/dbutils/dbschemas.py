@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class DbSchema:
     def __init__(self, name, fieldlist, unique_key, xmltag):
         self.tablename = name
@@ -29,4 +26,3 @@ db_shemas['AOTRIG'] = \
              None)
 
 allowed_tables = ["ADDROBJ", "SOCRBASE"]
-

@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import os
-
 from bottle import template
 
 from aore.config import Folders, DatabaseConfig, SphinxConfig

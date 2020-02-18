@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-import re
-
 import Levenshtein
+import re
 
 
 def violet_ratio(pattern, candidate):
@@ -21,7 +19,7 @@ def violet_ratio(pattern, candidate):
                 max_ratio = ratio
                 max_j = j
 
-        result.append(max_j*abs(max_ratio))
+        result.append(max_j * abs(max_ratio))
 
         if max_j > -1:
             del allowed_nums[max_j]

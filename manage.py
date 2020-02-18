@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 import optparse
 import sys
@@ -23,7 +22,7 @@ def print_fias_versions():
     all_versions = imp.get_update_list()
 
     print("Installed version: {}".format(current_version))
-    print("Avaliable updates:")
+    print("Available updates:")
     print("Number\t\tDate")
     for upd in all_versions:
         mark_current = (' ', '*')[int(upd['intver']) == current_version]

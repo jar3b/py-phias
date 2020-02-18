@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
 import logging
-
 import psycopg2
 from bottle import template
 
@@ -66,4 +63,3 @@ class DbHandler:
 
         self.db.execute(sql_query)
         logging.info("All indexes was deleted.")
-
