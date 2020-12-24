@@ -30,6 +30,14 @@ class App:
 
             return json.dumps(App._factory.normalize(aoid))
 
+    @Route(r'/aoid2aoguid/<aoguid:re:[\w]{8}(-[\w]{4}){3}-[\w]{12}>')
+    class Convert(object):
+        def get(self, aoguid):
+            response.content_type = 'application/json'
+            response.set_header('Access-Control-Allow-Origin', '*')
+
+            return json.dumps(App._factory.convert(aoguid))
+
     @Route(r'/find/<text>')
     class Find(object):
         def get(self, text):

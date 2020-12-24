@@ -17,6 +17,7 @@ class FiasFactory:
         self.searcher = SphinxSearch(self.db)
         self.expand_templ = template('aore/templates/postgre/expand_query.sql', aoid="//aoid")
         self.normalize_templ = template('aore/templates/postgre/normalize_query.sql', aoid="//aoid")
+        self.convert_templ = template('aore/templates/postgre/convert_query.sql', aoid="//aoid")
         self.gettext_templ = template('aore/templates/postgre/gettext_query.sql', aoid="//aoid")
 
     # Проверка, что строка является действительым UUID v4
@@ -69,6 +70,27 @@ class FiasFactory:
             self.__check_param(aoid_guid, "uuid")
 
             sql_query = self.normalize_templ.replace("//aoid", aoid_guid)
+            rows = self.db.get_rows(sql_query, True)
+
+            assert len(rows), "Record with this AOID not found in DB"
+        except Exception as err:
+            if BasicConfig.logging:
+                logging.error(traceback.format_exc())
+            if BasicConfig.debug_print:
+                traceback.print_exc()
+            return dict(error=str(err))
+
+        if len(rows) == 0:
+            return []
+        else:
+            return rows[0]
+
+    # Преобразует AOID в AOGUID
+    def convert(self, aoid: str):
+        try:
+            self.__check_param(aoid, "uuid")
+
+            sql_query = self.convert_templ.replace("//aoid", aoid)
             rows = self.db.get_rows(sql_query, True)
 
             assert len(rows), "Record with this AOID not found in DB"
