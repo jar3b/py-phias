@@ -1,5 +1,5 @@
 lxml>=3.6.0
-bottle==0.12.13
+bottle==0.12.20
 psycopg2==2.7.5
 PySimpleSOAP==1.16.2
 python-Levenshtein==0.12.0
