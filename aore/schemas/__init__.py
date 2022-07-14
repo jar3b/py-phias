@@ -15,6 +15,13 @@ class AoidModel(BaseModel):
     aoid: uuid.UUID = Field(description="Нормализованный AOID")
 
 
+class AoguidModel(BaseModel):
+    """
+    Содержит нормализованный AOGUID
+    """
+    aoguid: uuid.UUID = Field(description="Нормализованный AOGUID")
+
+
 class AoElementModel(BaseModel):
     """
     Содержит развернутое описание элемента адресного объекта

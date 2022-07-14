@@ -1,13 +1,12 @@
-import logging
-import re
-import traceback
-import urllib.parse
+import uuid
+from typing import Dict, List
+
 import uuid
 from typing import Dict, List
 
 import asyncpg
 from aiohttp import web
-from jinja2 import Template, FileSystemLoader, Environment
+from jinja2 import FileSystemLoader, Environment
 
 from .search import SphinxSearch
 from .. import log
@@ -61,6 +60,20 @@ class FiasFactory:
             log.error(f'Cannot expand {aoid_or_aoguid}', exc_info=e)
             raise
 
+    # Преобразует AOID в AOGUID
+    async def convert(self, aoid: uuid.UUID) -> uuid.UUID:
+        try:
+            async with self.pool.acquire() as conn:
+                record = await conn.fetchrow(self.queries['convert'], aoid)
+
+            if not record:
+                raise FiasNotFoundException("Record with this AOID not found in DB")
+
+            return record['aoguid']
+        except Exception as e:
+            log.error(f'Cannot convert {aoid}', exc_info=e)
+            raise
+
     # # Проверка, что строка является действительым UUID v4
     # @staticmethod
     # def __check_uuid(guid):
@@ -107,26 +120,6 @@ class FiasFactory:
     #
 
     #
-    # # Преобразует AOID в AOGUID
-    # def convert(self, aoid: str):
-    #     try:
-    #         self.__check_param(aoid, "uuid")
-    #
-    #         sql_query = self.convert_templ.replace("//aoid", aoid)
-    #         rows = self.db.get_rows(sql_query, True)
-    #
-    #         assert len(rows), "Record with this AOID not found in DB"
-    #     except Exception as err:
-    #         if BasicConfig.logging:
-    #             logging.error(traceback.format_exc())
-    #         if BasicConfig.debug_print:
-    #             traceback.print_exc()
-    #         return dict(error=str(err))
-    #
-    #     if len(rows) == 0:
-    #         return []
-    #     else:
-    #         return rows[0]
     #
     #
     # # Возвращает простую текстовую строку по указанному AOID (при AOGUID будет
