@@ -49,7 +49,7 @@ def run(port: int) -> None:
     # --
     # ** OAS (OpenAPI Swagger docs) **
     # --
-    oas.setup(app, url_prefix='/docs', raise_validation_errors=True)
+    oas.setup(app, title_spec="Py-Phias API", url_prefix='/docs', raise_validation_errors=True)
 
     # now run_app using default asyncio loop
     web.run_app(app, port=port)
