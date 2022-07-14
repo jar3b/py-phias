@@ -12,14 +12,28 @@ class AoidModel(BaseModel):
     """
     Содержит нормализованный AOID
     """
-    aoid: uuid.UUID = Field(description="Нормализованный AOID")
+    aoid: uuid.UUID = Field(description="Нормализованный AOID", example="352e53dd-7645-41e9-a854-28192ca8710b")
 
 
 class AoguidModel(BaseModel):
     """
     Содержит нормализованный AOGUID
     """
-    aoguid: uuid.UUID = Field(description="Нормализованный AOGUID")
+    aoguid: uuid.UUID = Field(description="Нормализованный AOGUID", example="fc22fe8c-bbf6-4428-b728-25cf0cc4b64b")
+
+
+class AoNameModel(BaseModel):
+    """
+    Содержит текстовую строку с полным именем адресного объекта
+    """
+    fullname: str = Field(description="Имя адресного объекта", example="АО Чукотский, р-н Билибинский")
+
+
+class AoNameListModel(BaseModel):
+    """
+    Содержит массив из текстовых строк объекта (для совместимости)
+    """
+    __root__: List[AoNameModel]
 
 
 class AoElementModel(BaseModel):

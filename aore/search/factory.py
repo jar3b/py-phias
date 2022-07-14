@@ -1,9 +1,6 @@
 import uuid
 from typing import Dict, List
 
-import uuid
-from typing import Dict, List
-
 import asyncpg
 from aiohttp import web
 from jinja2 import FileSystemLoader, Environment
@@ -74,30 +71,21 @@ class FiasFactory:
             log.error(f'Cannot convert {aoid}', exc_info=e)
             raise
 
-    # # Проверка, что строка является действительым UUID v4
-    # @staticmethod
-    # def __check_uuid(guid):
-    #     try:
-    #         UUID(guid)
-    #     except ValueError:
-    #         return False
-    #
-    #     return True
-    #
-    # # Проверяет входящий параметр на соотвествие
-    # # param - сам параметр
-    # # rule - "boolean", "uuid", "text"
-    # def __check_param(self, param, rule):
-    #     if rule == "boolean":
-    #         assert isinstance(param, bool), "Invalid parameter type"
-    #     if rule == "uuid":
-    #         assert isinstance(param, str) and self.__check_uuid(
-    #             param), "Invalid parameter value"
-    #         if rule == "text":
-    #             assert isinstance(param, str), "Invalid parameter type"
-    #             assert len(param) > 3, "Text too short"
-    #             pattern = re.compile(r"[A-za-zА-Яа-я \-,.#№]+")
-    #             assert pattern.match(param), "Invalid parameter value"
+    # Возвращает простую текстовую строку по указанному AOID (при AOGUID будет
+    # ошибка, так что нужно предварительно нормализовать)
+    async def gettext(self, aoid: uuid.UUID) -> str:
+        try:
+            async with self.pool.acquire() as conn:
+                record = await conn.fetchrow(self.queries['gettext'], aoid)
+
+            if not record:
+                raise FiasNotFoundException("Record with this AOID not found in DB")
+
+            return record['fullname']
+        except Exception as e:
+            log.error(f'Cannot get text for {aoid}', exc_info=e)
+            raise
+
     #
     # # text - строка поиска
     # # strong - строгий поиск (True) или "мягкий" (False) (с допущением ошибок, опечаток)
@@ -117,26 +105,3 @@ class FiasFactory:
     #         return dict(error=str(err))
     #
     #     return results
-    #
-
-    #
-    #
-    #
-    # # Возвращает простую текстовую строку по указанному AOID (при AOGUID будет
-    # # ошибка, так что нужно предварительно нормализовать), ищет и в
-    # def gettext(self, aoid):
-    #     try:
-    #         self.__check_param(aoid, "uuid")
-    #
-    #         sql_query = self.gettext_templ.replace("//aoid", aoid)
-    #         rows = self.db.get_rows(sql_query, True)
-    #
-    #         assert len(rows), "Record with this AOID not found in DB"
-    #     except Exception as err:
-    #         if BasicConfig.logging:
-    #             logging.error(traceback.format_exc())
-    #         if BasicConfig.debug_print:
-    #             traceback.print_exc()
-    #         return dict(error=str(err))
-    #
-    #     return rows
