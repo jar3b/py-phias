@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, List
+from typing import Dict, List, cast
 
 import asyncpg
 from aiohttp import web
@@ -37,7 +37,7 @@ class FiasFactory:
             if not record:
                 raise FiasNotFoundException("Record with this AOID not found in DB")
 
-            return record['aoid']
+            return cast(uuid.UUID, record['aoid'])
         except Exception as e:
             log.error(f'Cannot normalize {aoid_or_aoguid}', exc_info=e)
             raise
@@ -66,7 +66,7 @@ class FiasFactory:
             if not record:
                 raise FiasNotFoundException("Record with this AOID not found in DB")
 
-            return record['aoguid']
+            return cast(uuid.UUID, record['aoguid'])
         except Exception as e:
             log.error(f'Cannot convert {aoid}', exc_info=e)
             raise
@@ -81,7 +81,7 @@ class FiasFactory:
             if not record:
                 raise FiasNotFoundException("Record with this AOID not found in DB")
 
-            return record['fullname']
+            return cast(str, record['fullname'])
         except Exception as e:
             log.error(f'Cannot get text for {aoid}', exc_info=e)
             raise
