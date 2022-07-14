@@ -49,6 +49,7 @@ class SphinxSearch:
 
     def __configure(self, index_name, word_len):
         self.client_sugg.ResetFilters()
+
         if index_name == SphinxConfig.index_sugg:
             self.client_sugg.SetRankingMode(sphinxapi.SPH_RANK_WORDCOUNT)
             self.client_sugg.SetFilterRange("len", int(word_len) - self.delta_len, int(word_len) + self.delta_len)
