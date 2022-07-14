@@ -4,7 +4,7 @@ from aiohttp_pydantic import oas
 
 from . import settings, log
 from .search import FiasFactory
-from .views import NormalizeAoidView, error_middleware, ExpandAoidView, ConvertAoidView, GetAoidTextView
+from .views import NormalizeAoidView, error_middleware, ExpandAoidView, ConvertAoidView, FindAoView
 
 
 async def init_fias(app: web.Application) -> None:
@@ -44,7 +44,7 @@ def run(port: int) -> None:
     app.router.add_view('/normalize/{aoid}', NormalizeAoidView)
     app.router.add_view('/expand/{aoid}', ExpandAoidView)
     app.router.add_view('/aoid2aoguid/{aoid}', ConvertAoidView)
-    app.router.add_view('/gettext/{aoid}', GetAoidTextView)
+    app.router.add_view('/find/{text}', FindAoView)
 
     # --
     # ** OAS (OpenAPI Swagger docs) **

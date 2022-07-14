@@ -8,7 +8,7 @@ from jinja2 import FileSystemLoader, Environment
 from .search import SphinxSearch
 from .. import log
 from ..exceptions import FiasNotFoundException
-from ..schemas import AoElementModel
+from ..schemas import AoElementModel, AoResultItemModel
 
 
 class FiasFactory:
@@ -86,22 +86,19 @@ class FiasFactory:
             log.error(f'Cannot get text for {aoid}', exc_info=e)
             raise
 
-    #
-    # # text - строка поиска
-    # # strong - строгий поиск (True) или "мягкий" (False) (с допущением ошибок, опечаток)
-    # # Строгий используется при импорте из внешних систем (автоматически), где ошибка критична
-    # def find(self, text, strong=False):
-    #     try:
-    #         text = urllib.parse.unquote(str(text))
-    #         self.__check_param(text, "text")
-    #         self.__check_param(strong, "boolean")
-    #
-    #         results = self.searcher.find(text, strong)
-    #     except Exception as err:
-    #         if BasicConfig.logging:
-    #             logging.error(traceback.format_exc())
-    #         if BasicConfig.debug_print:
-    #             traceback.print_exc()
-    #         return dict(error=str(err))
-    #
-    #     return results
+    async def find(self, text: str, strong: bool = False) -> List[AoResultItemModel]:
+        """
+        Ищет адресный объект по тексту
+
+        :param text: строка поиска
+        :param strong: строгий поиск (True) или "мягкий" (False) (с допущением ошибок, опечаток)
+        Строгий используется при импорте из внешних систем (автоматически), где ошибка критична
+        :return:
+        """
+
+        # TODO: implement
+        # results = self.searcher.find(text, strong)
+        return [AoResultItemModel(
+            cort=0, text="г Усть-Перепиздуйск", ratio=1288,
+            aoid=uuid.UUID('5c8b06f1-518e-496e-b683-7bf917e0d70b')
+        )]

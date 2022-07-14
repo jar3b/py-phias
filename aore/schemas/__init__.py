@@ -54,3 +54,18 @@ class AoListElementsModel(BaseModel):
     Последовательность элементов для адресного объекта
     """
     __root__: List[AoElementModel]
+
+
+class AoResultItemModel(BaseModel):
+    """
+    Описатель найденного варианта адресного объекта
+    """
+    cort: int = Field(description="Количество несовпавших слов", example=1)
+    text: str = Field(description="Полное название адресного объекта",
+                      example="обл Псковская, р-н Порховский, д Гречушанка")
+    ratio: int = Field(description="Рейтинг совпадения (выше - лучше)", example=1537)
+    aoid: uuid.UUID = Field(description="AOID адресного объекта", example="1d6185b5-25a6-4fe8-9208-e7ddd281926a")
+
+
+class AoResultsModel(BaseModel):
+    __root__: List[AoResultItemModel]
