@@ -1,4 +1,4 @@
-Copyright (c) 2020, jar3b
+Copyright (c) 2022, jar3b
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

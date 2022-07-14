@@ -11,7 +11,7 @@ from aore.dbutils.dbimpl import DBImpl
 from .search import SphinxSearch
 
 
-class FiasFactory:
+class FiasFactoryOld:
     def __init__(self):
         self.db = DBImpl(psycopg2, DatabaseConfig)
         self.searcher = SphinxSearch(self.db)
