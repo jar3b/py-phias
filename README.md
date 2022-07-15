@@ -5,46 +5,47 @@ Python application that can operate with FIAS (Russian Address Object DB)
 Простое приложение для работы с БД ФИАС, написано для Python 3, использует БД PostgreSQL
 
 ## Содержание
- - [Возможности](#Возможности)
- - [Установка](#Установка)
- - [Настройка](#Настройка)
- - [API](#Api)
+
+- [Возможности](#Возможности)
+- [Установка](#Установка)
+- [Настройка](#Настройка)
+- [API](#Api)
 
 ## Возможности
+
 1. API (выходной формат - JSON), основные функции которого:
     - Актуализация AOID, AOGUID.
     - Получение полного дерева адресного объекта по AOID.
     - Поиск адресного объекта по произвольной строке, выдает 10 самых релеватных результатов, может быть "мягким",
-    с более широкими вариациями и исправлением опечаток (для подсказок), или "строгим" (к примеру, для автоматического 
-    импорта из внешних систем).
+      с более широкими вариациями и исправлением опечаток (для подсказок), или "строгим" (к примеру, для автоматического
+      импорта из внешних систем).
 2. Автоматическое развертывание базы ФИАС
     - Из директории с файлами XML (like 'AS_ADDROBJ_20160107_xxx.XML').
     - Из локального файла архива (.rar).
     - Напрямую с HTTP сервера ФНС.
 3. Актуалиация базы (из XML, HTTP) с возможностью выбора необходимых обновлений.
 
-
 ## Установка
 
-Протестирована работа на следующих ОС: [Windows](#windows) (8.1, 10) и [Debian](#debian-linux) Jessie, Stretch. 
-Необходима версия Python == 3.5 
+Протестирована работа на следующих ОС: [Windows](#windows) (8.1, 10) и [Debian](#debian-linux) Jessie, Stretch.
+Необходима версия Python == 3.5
 
 ### Зависимости
 
-_Внимание_! Только Python 3 (для 2.7 пока есть отдельная ветка), только PostgreSQL, только Sphinx. MySQL/MariaDB, 
+_Внимание_! Только Python 3 (для 2.7 пока есть отдельная ветка), только PostgreSQL, только Sphinx. MySQL/MariaDB,
 ElasticSearch/Solr не поддерживаются и, скорее всего, не будут.
- 
-Для работы приложения необходимо достаточное кол-во RAM (1Gb+) и ~5.5Gb места на диске 
-(3-3.5Gb для скачивания архива с базой, 350-400Mb для индексов Sphinx, 1Gb для базы). Также необходимы root права 
-(администратора, для Windows), для работы searchd и предварительной установки. 
-Рекомендую устанавливать или на отдельном сервере, или на своей машине, либо же на VPS. 
-На shared хостинге работоспособность не гарантируется (только если хостер Вам сам все установит и настроит, 
+
+Для работы приложения необходимо достаточное кол-во RAM (1Gb+) и ~5.5Gb места на диске
+(3-3.5Gb для скачивания архива с базой, 350-400Mb для индексов Sphinx, 1Gb для базы). Также необходимы root права
+(администратора, для Windows), для работы searchd и предварительной установки.
+Рекомендую устанавливать или на отдельном сервере, или на своей машине, либо же на VPS.
+На shared хостинге работоспособность не гарантируется (только если хостер Вам сам все установит и настроит,
 и разрешит запуск демонов - читай: "невозможно")
 
 Предварительно обязательно установить и настроить:
 
 1. Python 3, pip
-    Для Windows качаем - ставим, для Debian:
+   Для Windows качаем - ставим, для Debian:
     ```
     sudo apt-get install python3-setuptools
     sudo easy_install3 pip
@@ -52,18 +53,19 @@ ElasticSearch/Solr не поддерживаются и, скорее всего
     ```
 
 2. PostgreSql 9.5 и выше (из-за синтаксиса _ON CONFLICT ... DO_)
-    Для Windows, как обычно, [качаем](http://www.enterprisedb.com/products-services-training/pgdownload#windows) - ставим,
-    для Debian 8 и ниже:
+   Для Windows, как обычно, [качаем](http://www.enterprisedb.com/products-services-training/pgdownload#windows) -
+   ставим,
+   для Debian 8 и ниже:
     ```
     sudo sh -c 'echo deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main 9.5 > /etc/apt/sources.list.d/postgresql.list'
     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
     sudo apt-get update
     sudo apt-get install postgresql-9.5
     ```
-    , для Debian 9:
-    `sudo apt-get install postgresql`
+   , для Debian 9:
+   `sudo apt-get install postgresql`
 
-    Затем создайте пользователя и базу данных и установите расширение pg_trgm:
+   Затем создайте пользователя и базу данных и установите расширение pg_trgm:
     ```
     sudo adduser --no-create-home fias
     sudo -u postgres psql
@@ -78,7 +80,7 @@ ElasticSearch/Solr не поддерживаются и, скорее всего
     ```
 
 3. Sphinx 2.2.1 и новее:
-    [Windows](http://sphinxsearch.com/downloads/release/), Debian:
+   [Windows](http://sphinxsearch.com/downloads/release/), Debian:
     ```
     cd /tmp
     wget http://sphinxsearch.com/files/sphinx-2.2.10-release.tar.gz
@@ -89,17 +91,19 @@ ElasticSearch/Solr не поддерживаются и, скорее всего
     make
     sudo make install
     ```
-    , не забудте установить _build-essential_ перед этим (касается Debian).
+   , не забудте установить _build-essential_ перед этим (касается Debian).
 
 4. Web-сервер с поддержкой WSGI, любой, по Вашему желанию.
 
 ### Windows
+
 1. Установить lxml, скачав whl [отсюда](http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml) и сделав
-`pip install yourmodulename.whl`.
+   `pip install yourmodulename.whl`.
 2. Есть некоторые проблемы с установкой и работой psycopg2 (Windows 10, VS 2015), если у Вас они присутствуют - качаем
-[сборку для Windows](http://www.stickpeople.com/projects/python/win-psycopg/)
-3. Если есть проблемы с Python-Levenshtein, скачать [отсюда](http://www.lfd.uci.edu/~gohlke/pythonlibs/#python-levenshtein) 
-и установить
+   [сборку для Windows](http://www.stickpeople.com/projects/python/win-psycopg/)
+3. Если есть проблемы с Python-Levenshtein,
+   скачать [отсюда](http://www.lfd.uci.edu/~gohlke/pythonlibs/#python-levenshtein)
+   и установить
 4. Установить unrar.exe (можно установить WinRar целиком).
 5. Установить sphinxapi с поддержкой синтаксиса Python3:
 
@@ -108,6 +112,7 @@ ElasticSearch/Solr не поддерживаются и, скорее всего
     ```
 
 ### Debian Linux
+
 1. Установить unrar (non-free):
 
     ```
@@ -128,6 +133,7 @@ sudo apt-get install python3-dev
 ```
 
 ### Общая часть:
+
 1. Установим приложение из репозитория:
 
     ```
@@ -141,37 +147,67 @@ sudo apt-get install python3-dev
 2. Иные пути установки ... (soon)
 
 ## Настройка
+
 ### Первоначальная настройка базы данных
+
 1. Настроим конфиг, для этого необходимо изменить параметры в Вашем wsgi-entrypoint (в моем случае
-[wsgi.py](wsgi.py)): в строке `from config import *` измените _config_ на имя Вашего
-конфигурационного файла (создается рядом с wsgi app)
+   [wsgi.py](wsgi.py)): в строке `from config import *` измените _config_ на имя Вашего
+   конфигурационного файла (создается рядом с wsgi app)
 2. Создадим базу:
     - из архива `sudo -u fias python3 manage.py -b create -s /tmp/fias_xml.rar`
     - из директории `sudo -u fias python3 manage.py -b create -s /tmp/fias_xml_unpacked`
     - онлайн, с сервера ФНС `sudo -u fias python3 manage.py -b create -s http`
-    - Также, можно указать конкретную версию ФИАС _только_ при http загрузке, с ключом `--update-version <num>`, где num -
-номер версии ФИАС, все доступные версии можно получить, выполнив `manage.py -v`.
+    - Также, можно указать конкретную версию ФИАС _только_ при http загрузке, с ключом `--update-version <num>`, где num
+      -
+      номер версии ФИАС, все доступные версии можно получить, выполнив `manage.py -v`.
 
-    Примечание 1: Если Вы инициализируете БД из архива или директории, при создании или обновлении базы у Вас будет
-    запрошен номер устанавливаемой версии ФИАС.
+   Примечание 1: Если Вы инициализируете БД из архива или директории, при создании или обновлении базы у Вас будет
+   запрошен номер устанавливаемой версии ФИАС.
 
-    Примечание 2: У пользователя PostgreSql (postgres, либо созданного Вами) должны быть права на чтение из директории,
-    указанной в `config.folders.temp`, иначе будет Permission denied при попытке bulk-import.
+   Примечание 2: У пользователя PostgreSql (postgres, либо созданного Вами) должны быть права на чтение из директории,
+   указанной в `config.folders.temp`, иначе будет Permission denied при попытке bulk-import.
 3. Проиндексируем Sphinx:
     - Windows: `python manage.py -c -i C:\sphinx\bin\indexer.exe -o C:\sphinx\sphinx.conf`
     - Debian: `sudo python3 manage.py -c -i indexer -o /usr/local/etc/sphinx.conf`
 4. Затем запустим searchd:
-    - Windows: 
-        - Устанавливаем службу: `C:\Sphinx\bin\searchd --install --config C:\Sphinx\sphinx.conf --servicename sphinxsearch`
+    - Windows:
+        - Устанавливаем
+          службу: `C:\Sphinx\bin\searchd --install --config C:\Sphinx\sphinx.conf --servicename sphinxsearch`
         - и запускаем: `net start sphinxsearch`
     - Debian:
         - Запустим : `sudo searchd --config /usr/local/etc/sphinx.conf`
         - если необходимо, добавьте `searchd --config /usr/local/etc/sphinx.conf` в `/etc/rc.local` для автостарта
 5. Для проверки работы выполните `sudo -H -u fias python3 wsgi.py`, по адресу
-`http://example.com:8087/find/москва`
-Вы должны увидеть результаты запроса.
+   `http://example.com:8087/find/москва`
+   Вы должны увидеть результаты запроса.
+
+### Config
+
+```
+# Address and port where sphinx was listening,
+# may be a unix socket like 'unix:///tmp/fias-api.sock'
+# or TCP socket like '127.0.0.1:9312'
+config.SphinxConfig.listen = "unix:///tmp/fias-api.sock"
+# Base sphinx folder
+config.SphinxConfig.var_dir = "/etc/sphinx"
+
+# Temp folder, in Linux may be '/tmp/myfolder'
+config.Folders.temp = "/tmp/fitmp"
+
+
+# Address and port where sphinx was listening,
+# may be a unix socket like 'unix:///tmp/fias-api.sock'
+# or TCP socket like '127.0.0.1:9312'
+config.SphinxConfig.listen = "127.0.0.1:9312"
+# Base sphinx folder
+config.SphinxConfig.var_dir = "C:\\Sphinx"
+
+# Temp folder, in Linux may be '/tmp/myfolder'
+config.Folders.temp = "E:\\!TEMP"
+```
 
 ### Установка Web-сервера (для Debian, на примере nginx + gunicorn, без virtualenv)
+
 - Установим nginx и gunicorn:
 
     ```
@@ -185,14 +221,14 @@ sudo apt-get install python3-dev
     sudo wget -O fias-api.conf https://gist.githubusercontent.com/jar3b/f8f5d351e0ea8ae2ed8e/raw/2f1b0d2a6f9ce9db017117993954158ccce049dd/py-phias.conf
     sudo nano fias-api.conf
     ```
-    , отредактируйте и сохраните файл, затем cоздайте линк
+  , отредактируйте и сохраните файл, затем cоздайте линк
 
     ```
     sudo cp -l fias-api.conf ../sites-enabled/fias-api.conf
     ```
-- Теперь настроим автозапуск gunicorn. Ниже пример конфига для systemd для запуска как сервис, для этого нужно создать 
-файл `fias.service` в директории `/etc/systemd/system/`
-    
+- Теперь настроим автозапуск gunicorn. Ниже пример конфига для systemd для запуска как сервис, для этого нужно создать
+  файл `fias.service` в директории `/etc/systemd/system/`
+
     ```
     [Unit]
     Description=Gunicorn instance to serve fias
@@ -220,10 +256,11 @@ sudo apt-get install python3-dev
 
   , где _aoid_ - актуальный AOID.
 - `/find/<text>?strong=<0,1>`- полнотекстовый поиск по названию адресного объекта. `<text>` - строка поиска.
-Если указан параметр `strong=1`, то в массиве будет один результат, или ошибка. Если же флаг не указан, но будет выдано 10
-наиболее релевантных результатов.
+  Если указан параметр `strong=1`, то в массиве будет один результат, или ошибка. Если же флаг не указан, но будет
+  выдано 10
+  наиболее релевантных результатов.
 
-    На выходе будет массив от 1 до 10 элементов:
+  На выходе будет массив от 1 до 10 элементов:
     ```
     [
       {
@@ -235,12 +272,12 @@ sudo apt-get install python3-dev
       ... (up to 10)
     ]
     ```
-    ,где _cort_ - количество несовпавших слов, _text_ - полное название адресного объекта, _ratio_ - рейтинг, _aoid_ -
-    актуальный AOID.
+  ,где _cort_ - количество несовпавших слов, _text_ - полное название адресного объекта, _ratio_ - рейтинг, _aoid_ -
+  актуальный AOID.
 - `/expand/<aoid>` - "раскрывает" AOID, возвращая массив адресных элементов. `<aoid>` - актуальный или неактуальный
-AOID
+  AOID
 
-    На выходе будет массив из адресных элементов, упорядоченный по AOLEVEL:
+  На выходе будет массив из адресных элементов, упорядоченный по AOLEVEL:
     ```
     [
       {
@@ -272,9 +309,10 @@ AOID
       }
     ]
     ```
-    , все поля из таблицы ADDROBJ.
-- `/gettext/<aoid>` - возвращает текст для произвольного _aoid_, тект аналогичен тому, который возвращает `/find/<text>`,
-на выходе будет такой массив с одним элементом:
+  , все поля из таблицы ADDROBJ.
+- `/gettext/<aoid>` - возвращает текст для произвольного _aoid_, тект аналогичен тому, который возвращает `/find/<text>`
+  ,
+  на выходе будет такой массив с одним элементом:
 
     ```
     [

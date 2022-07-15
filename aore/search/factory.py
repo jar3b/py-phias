@@ -18,7 +18,7 @@ class FiasFactory:
 
     def __init__(self, app: web.Application):
         self.pool = app['pg']
-        self.searcher = SphinxSearch(self.pool)
+        self.searcher = SphinxSearch(self.pool, app['config'].sphinx)
 
         env = Environment(loader=FileSystemLoader('aore/templates/postgre'))
         self.queries = {
@@ -96,9 +96,4 @@ class FiasFactory:
         :return:
         """
 
-        # TODO: implement
-        # results = self.searcher.find(text, strong)
-        return [AoResultItemModel(
-            cort=0, text="г Усть-Перепиздуйск", ratio=1288,
-            aoid=uuid.UUID('5c8b06f1-518e-496e-b683-7bf917e0d70b')
-        )]
+        return await self.searcher.find(text, strong)

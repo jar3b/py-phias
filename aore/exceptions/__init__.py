@@ -4,3 +4,7 @@ class FiasException(Exception):
 
 class FiasNotFoundException(FiasException):
     code = 404
+
+
+class FiasBadDataException(FiasException):
+    code = 400

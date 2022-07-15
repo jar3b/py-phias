@@ -122,7 +122,7 @@ class SphinxHelper:
                              db_password=DatabaseConfig.password,
                              db_name=DatabaseConfig.database, db_port=DatabaseConfig.port,
                              sql_query=template('aore/templates/postgre/sphinx_query.sql').replace("\n", " \\\n"),
-                             index_name=SphinxConfig.index_addjobj,
+                             index_name=SphinxConfig.index_addrobj,
                              sphinx_var_path=SphinxConfig.var_dir,
                              min_length_to_star=SphinxConfig.min_length_to_star)
 
@@ -139,7 +139,7 @@ class SphinxHelper:
         logging.info("Make suggestion dict (%s)...", fname)
 
         run_builddict_cmd = "{} {} -c {} --buildstops {} 200000 --buildfreqs".format(self.index_binary,
-                                                                                     SphinxConfig.index_addjobj,
+                                                                                     SphinxConfig.index_addrobj,
                                                                                      self.files['addrobj.conf'], fname)
         os.system(run_builddict_cmd)
         logging.info("Done.")

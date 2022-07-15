@@ -1,12 +1,19 @@
-import Levenshtein
 import re
+from typing import List
+
+import Levenshtein
 
 
-def violet_ratio(pattern, candidate):
+def trigram(inp: str) -> str:
+    inp = u"__" + inp + u"__"
+    return " ".join([inp[i:i + 3] for i in range(0, len(inp) - 2)])
+
+
+def violet_ratio(pattern: str, candidate: str) -> int:
     arr_pattern = re.split(r"[ ,:.#$-]+", pattern)
     arr_candidate = re.split(r"[ ,:.#$-]+", candidate)
 
-    result = list()
+    result: List[int] = []
 
     for i in range(len(arr_pattern) - 1, -1, -1):
         max_j = -1

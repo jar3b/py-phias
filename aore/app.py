@@ -4,6 +4,7 @@ from aiohttp_pydantic import oas
 
 from . import settings, log
 from .search import FiasFactory
+from .settings import AppConfig
 from .views import NormalizeAoidView, error_middleware, ExpandAoidView, ConvertAoidView, FindAoView
 
 
@@ -16,11 +17,11 @@ async def shutdown_fias(app: web.Application) -> None:
 
 
 async def init_pg(app: web.Application) -> None:
-    conf = app['config']['pg']
-    dsn = 'postgres://{user}:{password}@{host}:{port}/{db}'.format(**conf)
-    log.info('Connecting to pg_main (%s:%s)' % (conf['host'], conf['port']))
+    conf: AppConfig.PG = app['config'].pg
+    dsn = f'postgres://{conf.user}:{conf.password}@{conf.host}:{conf.port}/{conf.name}'
+    log.info(f'Connecting to pg_main ({conf.host}:{conf.port})')
 
-    app['pg'] = await asyncpg.create_pool(dsn, max_inactive_connection_lifetime=conf['pool_recycle'])
+    app['pg'] = await asyncpg.create_pool(dsn, max_inactive_connection_lifetime=conf.pool_recycle)
 
 
 async def shutdown_pg(app: web.Application) -> None:
