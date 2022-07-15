@@ -2,9 +2,9 @@ import asyncpg
 from aiohttp import web
 from aiohttp_pydantic import oas
 
-from . import settings, log
+from settings import AppConfig
+from . import log
 from .search import FiasFactory
-from .settings import AppConfig
 from .views import NormalizeAoidView, error_middleware, ExpandAoidView, ConvertAoidView, FindAoView
 
 
@@ -28,12 +28,12 @@ async def shutdown_pg(app: web.Application) -> None:
     await app['pg'].close()
 
 
-def run(port: int) -> None:
+def run(port: int, config: AppConfig) -> None:
     # create web app and set config
     app = web.Application(middlewares=[
         error_middleware
     ])
-    app['config'] = settings.config
+    app['config'] = config
     app['name'] = 'fias-api'
 
     app.on_startup.append(init_pg)

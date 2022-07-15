@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from .settings import LOG_LEVEL
+from settings import LOG_LEVEL
 
 log = logging.getLogger(__name__)
 

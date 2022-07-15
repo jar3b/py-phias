@@ -37,10 +37,8 @@ class AppConfig:
         rating_limit_hard = 0.82
         rating_limit_hard_count = 3
 
-    pg = environ.group(PG)
-    sphinx = environ.group(Shpinx)
+    pg: PG = environ.group(PG)
+    sphinx: Shpinx = environ.group(Shpinx)
 
-
-config: AppConfig = environ.to_config(AppConfig)
 
 LOG_LEVEL = logging.DEBUG if str2bool(os.environ.get('APP_DEBUG', '1')) else logging.INFO

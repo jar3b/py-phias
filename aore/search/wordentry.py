@@ -9,7 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 from aore.search.wordvariation import WordVariation, VariationType
 from .match_types import MatchTypes
 from .ranks_data import RanksData
-from ..settings import AppConfig
+from settings import AppConfig
 
 
 def _cleanup_string(word: str) -> str:

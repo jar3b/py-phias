@@ -1,6 +1,9 @@
 import sys
 
+import environ
+
 from aore.app import run
+from settings import AppConfig
 
 
 def setup_uvloop() -> None:
@@ -19,4 +22,6 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     setup_uvloop()
-    run(int(sys.argv[1]))
+    config: AppConfig = environ.to_config(AppConfig)
+
+    run(int(sys.argv[1]), config)

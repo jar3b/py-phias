@@ -1,3 +1,4 @@
 .idea/
+venv/
+.mypy_cache/
 *.log
-config.py

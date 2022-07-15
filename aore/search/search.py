@@ -11,7 +11,7 @@ from .wordvariation import VariationType
 from .. import log
 from ..exceptions import FiasBadDataException, FiasNotFoundException
 from ..schemas import AoResultItemModel
-from ..settings import AppConfig
+from settings import AppConfig
 from ..utils.search import trigram, violet_ratio
 
 
