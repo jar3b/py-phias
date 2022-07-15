@@ -32,6 +32,7 @@ def initdb(f: str) -> None:
         asyncio.run(filler.create(xml_path))
     except Exception as e:
         click.echo(e)
+        sys.exit(-2)
 
 
 # @click.command()
