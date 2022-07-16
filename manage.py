@@ -18,19 +18,28 @@ def cli():
 
 @click.command()
 @click.option('-f', type=str, required=True, help='folder containing unpacked fias_xml.zip')
-def initdb(f: str) -> None:
+@click.option('-t', type=str, required=True, help='temp folder mounted to Postgres container')
+def initdb(f: str, t: str) -> None:
     click.echo(f'Initializing db "{config.pg.host}:{config.pg.port}" from "{f}"')
 
-    # check path
+    # check XML files path
     xml_path = Path(f)
     if not xml_path.exists() or not xml_path.is_dir():
         click.echo(f'"{f}" must be non-empty dir', err=True)
         sys.exit(-1)
 
+    # check temp folder path
+    temp_path = Path(t)
+    if not temp_path.exists() or not temp_path.is_dir():
+        click.echo(f'"{t}" must be non-empty dir', err=True)
+        sys.exit(-1)
+
     try:
         filler = DbFiller(config)
-        asyncio.run(filler.create(xml_path))
+        asyncio.run(filler.create(xml_path, temp_path))
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         click.echo(e)
         sys.exit(-2)
 
