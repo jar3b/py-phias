@@ -23,7 +23,7 @@ class DbFiller:
         self.conf = conf
         self.indexes_dropped = False
 
-    async def create(self, source: Path, temp_folder: Path) -> None:
+    async def create(self, source: Path, temp_folder: Path, pg_folder: Path) -> None:
         # create pool
         conf = self.conf.pg
         dsn = f'postgres://{conf.user}:{conf.password}@{conf.host}:{conf.port}/{conf.name}'
@@ -39,17 +39,24 @@ class DbFiller:
             await self.__run_query('drop_indexes.sql')
             # fill data
             for table_entry in entries_iterator:
-                await self.__process_single_entry(table_entry, temp_folder)
+                await self.__process_single_entry(table_entry, temp_folder, pg_folder)
             # create indexes
             await self.__run_query('create_indexes.sql')
         finally:
             await self.pool.close()
 
-    async def __process_single_entry(self, table_entry: AoXmlTableEntry, temp_folder: Path,
-                                     chunk_size: int = 50000) -> None:
+    async def __process_single_entry(
+            self, table_entry: AoXmlTableEntry,
+            temp_folder: Path,
+            pg_folder: Path,
+            chunk_size: int = 50000
+    ) -> None:
+        async def bulk_insert_csv(items_count: int, csv_file_path: Path) -> None:
+            click.echo(f'Processing "{csv_file_path}" with {items_count} items...')
+            click.echo(f'BULK as {Path(pg_folder, csv_file_path.name).as_posix()}')
+
         ao_parser = AoDataParser(table_entry, chunk_size, temp_folder)
-        await ao_parser.parse(lambda cnt, f_name: click.echo(f'File {f_name} with {cnt} items was processed'))
-        # ao_parser.parse(lambda x, y: self.db_handler.bulk_csv(operation_type, table_xmlentry.table_name, x, y))
+        await ao_parser.parse(bulk_insert_csv)
 
     def __get_entries_iterator_from_folder(self, folder: Path) -> Iterator[AoXmlTableEntry]:
         for xml_file in folder.glob("*.XML"):

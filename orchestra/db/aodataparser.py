@@ -1,8 +1,6 @@
 import codecs
 from pathlib import Path
-from typing import List, Callable, Dict, Any
-
-import click
+from typing import List, Callable, Dict, Any, Awaitable
 
 from .aoxmltableentry import AoXmlTableEntry
 from .schemas import DB_SCHEMAS
@@ -42,23 +40,23 @@ class AoDataParser:
         # path params
         self.counter = 0
         self.current_page = 0
-        self.base_csv_filename = f'fd_{self.table_entry.op_name}_{self.table_entry.table_name}.csv.part{{}}'
+        self.base_csv_filename = f'fd_{self.table_entry.op_name}_{self.table_entry.table_name}.part{{}}.csv'
         self.csv_file = None
 
     # Output - sql query
-    async def parse(self, data_callback: Callable[[int, Path], None]) -> None:
-        def refresh_csv() -> None:
+    async def parse(self, data_callback: Callable[[int, Path], Awaitable[None]]) -> None:
+        async def refresh_csv() -> None:
             if self.csv_file:
                 self.csv_file.close()
-                data_callback(self.counter, Path(self.csv_file.name))
+                await data_callback(self.counter, Path(self.csv_file.name))
                 # os.remove(self.csv_file.name)
                 self.csv_file = None
 
-        def import_update(attr: Dict[str, Any]) -> None:
+        async def import_update(attr: Dict[str, Any]) -> None:
             if self.counter >= self.page_size:
                 # Send old file to DB engine
                 if self.csv_file:
-                    refresh_csv()
+                    await refresh_csv()
 
                 # Prepare to next iteration
                 self.counter = 0
@@ -84,11 +82,10 @@ class AoDataParser:
         xml_parser = XMLParser(import_update)
         src = self.table_entry.open()
         try:
-            xml_parser.parse_buffer(src, DB_SCHEMAS[self.table_entry.table_name].xml_tag)  # type: ignore
+            await xml_parser.parse_buffer(src, DB_SCHEMAS[self.table_entry.table_name].xml_tag)  # type: ignore
         finally:
             src.close()
 
         # Send last file to db processor
         if self.csv_file:
-            click.echo('last part')
-            refresh_csv()
+            await refresh_csv()

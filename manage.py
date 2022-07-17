@@ -18,8 +18,9 @@ def cli():
 
 @click.command()
 @click.option('-f', type=str, required=True, help='folder containing unpacked fias_xml.zip')
-@click.option('-t', type=str, required=True, help='temp folder mounted to Postgres container')
-def initdb(f: str, t: str) -> None:
+@click.option('-t', type=str, required=True, help='temp folder in app container')
+@click.option('--pg-temp', type=str, help='temp folder mounted in Postgres container (same as `-t` if not specified)')
+def initdb(f: str, t: str, pg_temp: str | None) -> None:
     click.echo(f'Initializing db "{config.pg.host}:{config.pg.port}" from "{f}"')
 
     # check XML files path
@@ -34,9 +35,14 @@ def initdb(f: str, t: str) -> None:
         click.echo(f'"{t}" must be non-empty dir', err=True)
         sys.exit(-1)
 
+    # check if pg-temp specified
+    if pg_temp is None:
+        click.echo(f"Use pg-temp as `-t` ({t})")
+        pg_temp = temp_path
+
     try:
         filler = DbFiller(config)
-        asyncio.run(filler.create(xml_path, temp_path))
+        asyncio.run(filler.create(xml_path, temp_path, Path(pg_temp)))
     except Exception as e:
         import traceback
         traceback.print_exc()
