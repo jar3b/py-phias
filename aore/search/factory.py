@@ -20,7 +20,7 @@ class FiasFactory:
         self.pool = app['pg']
         self.searcher = SphinxSearch(self.pool, app['config'].sphinx)
 
-        env = Environment(loader=FileSystemLoader('aore/templates/postgre'))
+        env = Environment(loader=FileSystemLoader('aore/templates'))
         self.queries = {
             'expand': env.get_template('query_expand.sql').render(),
             'normalize': env.get_template('query_normalize.sql').render(),

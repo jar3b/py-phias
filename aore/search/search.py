@@ -83,6 +83,9 @@ class SphinxSearch:
         self.__configure(self.conf.index_sugg, len(word))
         result = self.client_sugg.Query(f'"{trigram(word)}"/1', self.conf.index_sugg)
 
+        if result is None:
+            raise FiasNotFoundException("Cannot find address sub-text")
+
         # Если по данному слову не найдено подсказок (а такое бывает?), возвращаем []
         if not result['matches']:
             return []

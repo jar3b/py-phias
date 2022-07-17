@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Any
 
 import asyncpg
 import click
@@ -8,7 +8,7 @@ from jinja2 import Environment, FileSystemLoader
 from settings import AppConfig
 from .aodataparser import AoDataParser
 from .aoxmltableentry import AoXmlTableEntry
-from .schemas import ALLOWED_TABLES
+from .schemas import ALLOWED_TABLES, DB_SCHEMAS
 
 
 class DbFiller:
@@ -53,7 +53,24 @@ class DbFiller:
     ) -> None:
         async def bulk_insert_csv(items_count: int, csv_file_path: Path) -> None:
             click.echo(f'Processing "{csv_file_path}" with {items_count} items...')
-            click.echo(f'BULK as {Path(pg_folder, csv_file_path.name).as_posix()}')
+            if table_entry.is_delete:
+                await self.__run_query(
+                    'bulk_delete.sql',
+                    delim='\t',
+                    tablename=table_entry.table_name,
+                    fieldslist=", ".join(DB_SCHEMAS[table_entry.table_name].columns),
+                    csvname=Path(pg_folder, csv_file_path.name).as_posix(),
+                    uniquekey=DB_SCHEMAS[table_entry.table_name].pk
+                )
+            else:
+                await self.__run_query(
+                    'bulk_create.sql',
+                    delim='\t',
+                    tablename=table_entry.table_name,
+                    fieldslist=", ".join(DB_SCHEMAS[table_entry.table_name].columns),
+                    csvname=Path(pg_folder, csv_file_path.name).as_posix()
+                )
+            click.echo(f'"{csv_file_path}" as {Path(pg_folder, csv_file_path.name).as_posix()} executed')
 
         ao_parser = AoDataParser(table_entry, chunk_size, temp_folder)
         await ao_parser.parse(bulk_insert_csv)
@@ -66,10 +83,10 @@ class DbFiller:
             else:
                 del xml_table
 
-    async def __run_query(self, template_name: str) -> None:
+    async def __run_query(self, template_name: str, *args: Any, **kwargs: Any) -> None:
         click.echo(f'Executing "{template_name}"...')
 
-        query = self.tpl_env.get_template(template_name).render()
+        query = self.tpl_env.get_template(template_name).render(*args, **kwargs)
         async with self.pool.acquire() as conn:
             async with conn.transaction():
                 await conn.execute(query)

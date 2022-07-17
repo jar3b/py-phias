@@ -1,4 +1,5 @@
 import codecs
+import os
 from pathlib import Path
 from typing import List, Callable, Dict, Any, Awaitable
 
@@ -49,7 +50,7 @@ class AoDataParser:
             if self.csv_file:
                 self.csv_file.close()
                 await data_callback(self.counter, Path(self.csv_file.name))
-                # os.remove(self.csv_file.name)
+                os.remove(self.csv_file.name)
                 self.csv_file = None
 
         async def import_update(attr: Dict[str, Any]) -> None:

@@ -105,7 +105,7 @@ class WordEntry:
 
     @classmethod
     async def fill(cls, entries: List['WordEntry'], *, pool: asyncpg.Pool, conf: AppConfig.Shpinx) -> None:
-        env = Environment(loader=FileSystemLoader('aore/templates/postgre'))
+        env = Environment(loader=FileSystemLoader('aore/templates'))
         query_ranks = env.get_template('query_ranks.sql').render()
 
         data = [{'w': w.word, 'bare': w.bare_word} for w in entries]
