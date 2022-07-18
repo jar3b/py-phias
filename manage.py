@@ -1,4 +1,5 @@
 import asyncio
+import os
 import sys
 from pathlib import Path
 from typing import Tuple
@@ -6,6 +7,7 @@ from typing import Tuple
 import click
 import environ
 
+from aore.utils.search import trigram
 from orchestra.db import DbFiller
 from orchestra.sphinx import SphinxFiller
 from settings import AppConfig
@@ -84,8 +86,55 @@ def create_addrobj_config(f: str, t: str, container_temp: str | None, sphinx_var
         sys.exit(-2)
 
 
+@click.command()
+@click.option('-f', type=str, required=True, help='name of suggdict.csv file')
+@click.option('-t', type=str, required=True, help='temp folder in app container')
+@click.option('--container-temp', type=str, help='temp folder mounted in Postgres container '
+                                                 '(same as `-t` if not specified)')
+def init_trigram(f: str, t: str, container_temp: str | None):
+    # check temp folder path
+    temp_path, container_temp_path = _get_temps(t, container_temp)
+
+    try:
+        # parse txt into csv
+        txt_file_path = Path(temp_path, f)
+        csv_file_path = Path(temp_path, 'suggdict.csv')
+
+        csv_counter = 0
+        with txt_file_path.open('r', encoding="utf-8") as dict_file, \
+                csv_file_path.open("w", encoding="utf-8") as exit_file:
+            while True:
+                line = dict_file.readline()
+                if line == '':
+                    break
+
+                csv_counter += 1
+                splitting_seq = line.split(' ')
+                keyword = splitting_seq[0]
+                freq = splitting_seq[1].rstrip('\n')
+                if not keyword or not freq:
+                    raise Exception(f'Cannot process {txt_file_path}, invalid line {line}')
+
+                exit_file.write("\t".join([keyword, trigram(keyword), freq]) + "\n")
+
+        click.echo(f'Got {csv_file_path} with {csv_counter} items')
+
+        # write csv into DB
+        filler = DbFiller(config)
+        asyncio.run(filler.create_table_from_csv(container_temp_path, csv_file_path, "AOTRIG"))
+
+        # os.remove(txt_file_path)
+        os.remove(csv_file_path)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        click.echo(e)
+        sys.exit(-2)
+
+
 cli.add_command(initdb)
 cli.add_command(create_addrobj_config)
+cli.add_command(init_trigram)
 
 if __name__ == '__main__':
     cli()

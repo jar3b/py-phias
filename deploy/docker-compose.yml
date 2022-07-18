@@ -17,7 +17,7 @@ services:
     image: sphinx:test
     restart: unless-stopped
     volumes:
-      - './data/sphinx_conf:/var/lib/sphinxsearch/conf'
-      - './data/sphinx_idx:/var/lib/sphinxsearch/data'
+      - './data/sphinx_conf:/etc/sphinxsearch'
+      - './data/sphinx_idx:${SPHINX_VAR}/data'
       - './data/temp:/temp'
-    command: ['searchd', '--nodetach', '-c', '/var/lib/sphinxsearch/conf/searchd.conf']
+    command: ['searchd', '--nodetach', '-c', '/etc/sphinxsearch/sphinx.conf']

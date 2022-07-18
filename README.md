@@ -336,8 +336,9 @@ config.Folders.temp = "E:\\!TEMP"
 ### RUN
 
 ```
-sudo docker-compose up -d db
-sudo docker-compose run -ti app initdb -f "./data/source" -t "/temp" --container-temp "/temp"
-sudo docker-compose run -ti app create-addrobj-config -f idx_addrobj.conf -t "./temp" --container-temp "/temp" --sphinx-var="/var/lib/sphinxsearch"
-sudo docker-compose run -ti --rm sphinx indexer idx_fias_addrobj -c /temp/idx_addrobj.conf --buildstops /temp/suggdict.txt 200000 --buildfreqs
+docker-compose up -d db
+docker-compose run -ti --rm app initdb -f "./data/source" -t "/temp" --container-temp "/temp"
+docker-compose run -ti --rm app create-addrobj-config -f idx_addrobj.conf -t "./temp" --container-temp "/temp" --sphinx-var="${SPHINX_VAR}"
+docker-compose run -ti --rm sphinx indexer idx_fias_addrobj -c /temp/idx_addrobj.conf --buildstops /temp/suggdict.txt 200000 --buildfreqs
+docker-compose run -ti --rm app init-trigram -f suggdict.txt -t "/temp" --container-temp "/temp"
 ```

@@ -75,6 +75,26 @@ class DbFiller:
         ao_parser = AoDataParser(table_entry, chunk_size, temp_folder)
         await ao_parser.parse(bulk_insert_csv)
 
+    async def create_table_from_csv(self, pg_folder: Path, csv_file_path: Path, table_name: str) -> None:
+        # create pool
+        conf = self.conf.pg
+        dsn = f'postgres://{conf.user}:{conf.password}@{conf.host}:{conf.port}/{conf.name}'
+        self.pool = await asyncpg.create_pool(dsn, max_inactive_connection_lifetime=conf.pool_recycle)
+
+        try:
+            async with self.pool.acquire() as conn:
+                await conn.execute(f'TRUNCATE "{table_name}";')
+
+            await self.__run_query(
+                'bulk_create.sql',
+                delim='\t',
+                tablename=table_name,
+                fieldslist=", ".join(DB_SCHEMAS[table_name].columns),
+                csvname=Path(pg_folder, csv_file_path.name).as_posix()
+            )
+        finally:
+            await self.pool.close()
+
     def __get_entries_iterator_from_folder(self, folder: Path) -> Iterator[AoXmlTableEntry]:
         for xml_file in folder.glob("*.XML"):
             xml_table = AoXmlTableEntry.from_dir(xml_file)
