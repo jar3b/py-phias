@@ -24,7 +24,6 @@ class AppConfig:
         listen: str = '127.0.0.1:9312'
         index_addrobj: str = 'idx_fias_addrobj'
         index_sugg: str = 'idx_fias_sugg'
-        var_dir: str = 'C:\\Sphinx'
         min_length_to_star: int = 3
         delta_len: int = 2
         default_rating_delta: int = 2

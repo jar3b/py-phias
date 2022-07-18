@@ -1,0 +1,23 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres:10-alpine3.16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - './data/db:/var/lib/postgresql/data'
+      - './data/temp:/temp:ro'
+    ports:
+      - "5433:5432"
+  sphinx:
+    image: sphinx:test
+    restart: unless-stopped
+    volumes:
+      - './data/sphinx_conf:/var/lib/sphinxsearch/conf'
+      - './data/sphinx_idx:/var/lib/sphinxsearch/data'
+      - './data/temp:/temp'
+    command: ['searchd', '--nodetach', '-c', '/var/lib/sphinxsearch/conf/searchd.conf']

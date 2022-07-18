@@ -2,3 +2,4 @@
 venv/
 .mypy_cache/
 *.log
+deploy/data/

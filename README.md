@@ -332,3 +332,12 @@ config.Folders.temp = "E:\\!TEMP"
 ### develop
 
 Тест поиска: `http://127.0.0.1:8099/find/%D1%80%D0%B5%D1%81%D0%BF%20%D0%B0%D0%BB%D0%B0%D1%82%D0%B0%D0%B9%20%D1%87%D0%BE%D0%B9%D1%81%D0%BA%D0%B8%D0%B9%20%D1%80%D0%B0%D0%B9%D0%BE%D0%BD%20%D1%81%20%D0%BF%D0%B0%D1%81%D0%BF%D0%B0%D1%83%D0%BB%20%D1%83%D0%BB%20%D0%BA%D0%B5%D0%B4%D1%80%D0%BE%D0%B2%D0%B0%D1%8F`
+
+### RUN
+
+```
+sudo docker-compose up -d db
+sudo docker-compose run -ti app initdb -f "./data/source" -t "/temp" --container-temp "/temp"
+sudo docker-compose run -ti app create-addrobj-config -f idx_addrobj.conf -t "./temp" --container-temp "/temp" --sphinx-var="/var/lib/sphinxsearch"
+sudo docker-compose run -ti --rm sphinx indexer idx_fias_addrobj -c /temp/idx_addrobj.conf --buildstops /temp/suggdict.txt 200000 --buildfreqs
+```
