@@ -40,7 +40,7 @@ class WordEntry:
 
         self.is_initialized = False
 
-    async def init(self, rank_data: RanksData, conf: AppConfig.Shpinx) -> None:
+    async def init(self, rank_data: RanksData, conf: AppConfig.Sphinx) -> None:
         self.socr_word = rank_data.scname
         self.is_freq = rank_data.is_freq
 
@@ -65,7 +65,7 @@ class WordEntry:
 
     def generate_variations(
             self,
-            conf: AppConfig.Shpinx,
+            conf: AppConfig.Sphinx,
             strong: bool,
             suggestion_func: Callable[[str, float, int], List[SuggEntity]]
     ) -> Iterator[
@@ -94,7 +94,7 @@ class WordEntry:
         if MatchTypes.MT_AS_IS in self.mt:
             yield WordVariation(
                 self,
-                self.word,
+                self.bare_word if MatchTypes.MT_IS_SOCR else self.word,  # TODO: can be self.word
                 VariationType.FREQ if MatchTypes.MT_IS_SOCR in self.mt else variation_type
             )
 
@@ -104,7 +104,7 @@ class WordEntry:
             yield WordVariation(self, self.socr_word, VariationType.FREQ)
 
     @classmethod
-    async def fill(cls, entries: List['WordEntry'], *, pool: asyncpg.Pool, conf: AppConfig.Shpinx) -> None:
+    async def fill(cls, entries: List['WordEntry'], *, pool: asyncpg.Pool, conf: AppConfig.Sphinx) -> None:
         env = Environment(loader=FileSystemLoader('aore/templates'))
         query_ranks = env.get_template('query_ranks.sql').render()
 

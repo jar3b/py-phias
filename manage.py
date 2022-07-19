@@ -32,7 +32,7 @@ def _get_temps(local_temp: str, container_temp: str | None) -> Tuple[Path, Path]
 
 
 @click.group()
-def cli():
+def cli() -> None:
     pass
 
 
@@ -66,19 +66,19 @@ def initdb(f: str, t: str, container_temp: str | None) -> None:
 @click.command()
 @click.option('-f', type=str, required=True, help='config filename, example="idx_addrobj.conf"')
 @click.option('-t', type=str, required=True, help='temp folder in app container')
-@click.option('--container-temp', type=str, help='temp folder mounted in Postgres container '
+@click.option('--container-temp', type=str, help='temp folder mounted in Sphinx container '
                                                  '(same as `-t` if not specified)')
 @click.option('--sphinx-var', type=str, required=True, help='Sphinx var directory, example="/var/lib/sphinxsearch"')
 def create_addrobj_config(f: str, t: str, container_temp: str | None, sphinx_var: str) -> None:
     # check temp folder path
-    temp_path, _ = _get_temps(t, container_temp)
+    temp_path, container_temp_path = _get_temps(t, container_temp)
 
     try:
         filler = SphinxFiller(config)
         filler.create_addrobj_index_conf(f, temp_path, sphinx_var)
         click.echo(
-            f'indexer {config.sphinx.index_addrobj} -c {Path(container_temp, f).as_posix()} '
-            f'--buildstops {Path(container_temp, "suggdict.txt").as_posix()} 200000 --buildfreqs'
+            f'indexer {config.sphinx.index_addrobj} -c {Path(container_temp_path, f).as_posix()} '
+            f'--buildstops {Path(container_temp_path, "suggdict.txt").as_posix()} 200000 --buildfreqs'
         )
     except Exception as e:
         import traceback
@@ -91,7 +91,7 @@ def create_addrobj_config(f: str, t: str, container_temp: str | None, sphinx_var
 @click.option('-t', type=str, required=True, help='temp folder in app container')
 @click.option('--container-temp', type=str, help='temp folder mounted in Postgres container '
                                                  '(same as `-t` if not specified)')
-def init_trigram(f: str, t: str, container_temp: str | None):
+def init_trigram(f: str, t: str, container_temp: str | None) -> None:
     # check temp folder path
     temp_path, container_temp_path = _get_temps(t, container_temp)
 
@@ -123,7 +123,7 @@ def init_trigram(f: str, t: str, container_temp: str | None):
         filler = DbFiller(config)
         asyncio.run(filler.create_table_from_csv(container_temp_path, csv_file_path, "AOTRIG"))
 
-        # os.remove(txt_file_path)
+        os.remove(txt_file_path)
         os.remove(csv_file_path)
     except Exception as e:
         import traceback
@@ -132,9 +132,23 @@ def init_trigram(f: str, t: str, container_temp: str | None):
         sys.exit(-2)
 
 
+@click.command()
+@click.option('-f', type=str, required=True, help='config output filename, example="/etc/sphinxsearch/sphinx.conf"')
+@click.option('--sphinx-var', type=str, required=True, help='Sphinx var directory, example="/var/lib/sphinxsearch"')
+def create_sphinx_config(f: str, sphinx_var: str) -> None:
+    try:
+        filler = SphinxFiller(config)
+        filler.create_sphinx_conf(Path(f), sphinx_var)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        sys.exit(-2)
+
+
 cli.add_command(initdb)
 cli.add_command(create_addrobj_config)
 cli.add_command(init_trigram)
+cli.add_command(create_sphinx_config)
 
 if __name__ == '__main__':
     cli()

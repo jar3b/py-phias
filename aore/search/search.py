@@ -21,11 +21,11 @@ def _parse_sphinx_address(addr: str) -> Tuple[str, int | None]:
     :param addr: адрес однной строкой
     :return: хост и порт
     """
-    if ":" in addr and "unix:/" not in addr:
+    if ":" in addr:
         sphinx_host, sphinx_port = addr.split(":")
         return sphinx_host, int(sphinx_port)
 
-    return addr, None
+    return 'unix://'+addr, None
 
 
 def _split_phrase(phrase: str) -> List[str]:
@@ -42,11 +42,11 @@ class SphinxSearch:
     __slots__ = ['pool', 'conf', 'client_sugg', 'client_show']
 
     pool: asyncpg.Pool
-    conf: AppConfig.Shpinx
+    conf: AppConfig.Sphinx
     client_sugg: sphinxapi.SphinxClient  # клиент для подсказок
     client_show: sphinxapi.SphinxClient  # клиент для поиска адреса
 
-    def __init__(self, pool: asyncpg.Pool, conf: AppConfig.Shpinx) -> None:
+    def __init__(self, pool: asyncpg.Pool, conf: AppConfig.Sphinx) -> None:
         self.pool = pool
         self.conf = conf
 
@@ -91,7 +91,6 @@ class SphinxSearch:
             return []
 
         maxrank: int = result['matches'][0]['attrs']['krank']
-        print(f'maxrank {maxrank} type={type(maxrank)}')  # TODO: check is really int, remove if none
         maxleven: float | None = None
 
         outlist: List[WordEntry.SuggEntity] = []
@@ -150,7 +149,10 @@ class SphinxSearch:
 
         # формируем строки для поиска в Сфинксе
         for i in range(good_vars_word_count, max(0, good_vars_word_count - 3), -1):
-            first_q = "@fullname \"{}\"/{}".format(" ".join(good_var.text for good_var in good_vars), i)
+            if len(good_vars) == i:
+                first_q = "@fullname {}".format(" ".join(f'{good_var.text}' for good_var in good_vars))
+            else:
+                first_q = "@fullname \"{}\"/{}".format(" ".join(good_var.text for good_var in good_vars), i)
             if self.conf.search_freq_words and freq_vars_word_count > 0:
                 second_q = " @sname {}".format(" ".join(freq_var.text for freq_var in freq_vars))
                 self.client_show.AddQuery(first_q + second_q, self.conf.index_addrobj)
@@ -172,7 +174,6 @@ class SphinxSearch:
         for i in range(0, len(rs)):
             for match in rs[i]['matches']:
                 if len(results) >= self.conf.max_results_count:
-                    log.debug(f'Breaking on {len(results)} >= {self.conf.max_results_count}')
                     break
 
                 if not match['attrs']['aoid'] in parsed_ids:

@@ -14,8 +14,8 @@ class SphinxFiller:
         self.conf = conf
         self.tpl_env = Environment(loader=FileSystemLoader('orchestra/templates'))
 
-    def create_addrobj_index_conf(self, out_filename: str, local_temp: Path, sphinx_var_dir: str) -> None:
-        conf_data = self.tpl_env.get_template('idx_addrobj.conf').render(
+    def __get_addrobj_conf_body(self, sphinx_var_dir: str) -> str:
+        return self.tpl_env.get_template('idx_addrobj.conf').render(
             db_host=self.conf.pg.host,
             db_port=self.conf.pg.port,
             db_user=self.conf.pg.user,
@@ -27,5 +27,35 @@ class SphinxFiller:
             min_length_to_star=self.conf.sphinx.min_length_to_star
         )
 
+    def __get_suggest_conf_body(self, sphinx_var_dir: str) -> str:
+        return self.tpl_env.get_template('idx_suggest.conf').render(
+            db_host=self.conf.pg.host,
+            db_port=self.conf.pg.port,
+            db_user=self.conf.pg.user,
+            db_password=self.conf.pg.password,
+            db_name=self.conf.pg.name,
+            index_name=self.conf.sphinx.index_sugg,
+            sphinx_var_path=sphinx_var_dir,
+        )
+
+    def create_addrobj_index_conf(self, out_filename: str, local_temp: Path, sphinx_var_dir: str) -> None:
         with Path(local_temp, out_filename).open('w') as f:
-            f.write(conf_data)
+            f.write(self.__get_addrobj_conf_body(sphinx_var_dir))
+
+    def create_sphinx_conf(self, out_filename: Path, sphinx_var_dir: str) -> None:
+        main_conf = self.tpl_env.get_template('sphinx.conf').render(
+            sphinx_listen=self.conf.sphinx.listen_port(),
+            sphinx_var_path=sphinx_var_dir,
+        )
+        idx_addrobj = self.__get_addrobj_conf_body(sphinx_var_dir)
+        idx_suggest = self.__get_suggest_conf_body(sphinx_var_dir)
+
+        with out_filename.open('w') as sphinx_conf:
+            sphinx_conf.write(main_conf)
+            sphinx_conf.write('\n\n')
+            sphinx_conf.write(idx_addrobj)
+            sphinx_conf.write('\n\n')
+            sphinx_conf.write(idx_suggest)
+            sphinx_conf.write('\n')
+
+        #out_filename.chmod(0x777)

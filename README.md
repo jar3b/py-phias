@@ -331,14 +331,18 @@ config.Folders.temp = "E:\\!TEMP"
   
 ### develop
 
-Тест поиска: `http://127.0.0.1:8099/find/%D1%80%D0%B5%D1%81%D0%BF%20%D0%B0%D0%BB%D0%B0%D1%82%D0%B0%D0%B9%20%D1%87%D0%BE%D0%B9%D1%81%D0%BA%D0%B8%D0%B9%20%D1%80%D0%B0%D0%B9%D0%BE%D0%BD%20%D1%81%20%D0%BF%D0%B0%D1%81%D0%BF%D0%B0%D1%83%D0%BB%20%D1%83%D0%BB%20%D0%BA%D0%B5%D0%B4%D1%80%D0%BE%D0%B2%D0%B0%D1%8F`
+Тест поиска: `http://127.0.0.1:8099/find/%D0%B3%20%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0,%20%D0%BF%20%D0%92%D0%BE%D1%80%D0%BE%D0%BD%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B5,%20%D0%BF%20%D0%9B%D0%9C%D0%A1,%20%D1%83%D0%BB%20%D0%9D%D0%BE%D0%B2%D0%B0%D1%8F`
 
 ### RUN
 
 ```
 docker-compose up -d db
-docker-compose run -ti --rm app initdb -f "./data/source" -t "/temp" --container-temp "/temp"
-docker-compose run -ti --rm app create-addrobj-config -f idx_addrobj.conf -t "./temp" --container-temp "/temp" --sphinx-var="${SPHINX_VAR}"
+docker-compose run -ti --rm app initdb -f "/source" -t "/temp" --container-temp "/temp"
+docker-compose run --rm app create-addrobj-config -f idx_addrobj.conf -t "./temp" --container-temp "/temp" --sphinx-var="${SPHINX_VAR}"
 docker-compose run -ti --rm sphinx indexer idx_fias_addrobj -c /temp/idx_addrobj.conf --buildstops /temp/suggdict.txt 200000 --buildfreqs
+rm ./data/temp/idx_addrobj.conf
 docker-compose run -ti --rm app init-trigram -f suggdict.txt -t "/temp" --container-temp "/temp"
+docker-compose run -ti --rm app create-sphinx-config -f "/etc/sphinxsearch/sphinx.conf" --sphinx-var="/var/lib/sphinxsearch"
+docker-compose run -ti --rm sphinx indexer -c /etc/sphinxsearch/sphinx.conf --all --rotate
+docker-compose up -d sphinx
 ```

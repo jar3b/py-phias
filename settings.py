@@ -20,8 +20,8 @@ class AppConfig:
         pool_recycle: float = environ.var(30.0, converter=float)
 
     @environ.config
-    class Shpinx:
-        listen: str = '127.0.0.1:9312'
+    class Sphinx:
+        listen: str = environ.var("127.0.0.1:9312")
         index_addrobj: str = 'idx_fias_addrobj'
         index_sugg: str = 'idx_fias_sugg'
         min_length_to_star: int = 3
@@ -35,9 +35,16 @@ class AppConfig:
         rating_limit_soft_count = 6
         rating_limit_hard = 0.82
         rating_limit_hard_count = 3
+        sphinx_user_uid = 104
+
+        def listen_port(self) -> str:
+            if self.listen.startswith('/'):
+                return self.listen
+            else:
+                return self.listen.split(':')[1]
 
     pg: PG = environ.group(PG)
-    sphinx: Shpinx = environ.group(Shpinx)
+    sphinx: Sphinx = environ.group(Sphinx)
 
 
 LOG_LEVEL = logging.DEBUG if str2bool(os.environ.get('APP_DEBUG', '1')) else logging.INFO

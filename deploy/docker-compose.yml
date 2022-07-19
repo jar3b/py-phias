@@ -12,12 +12,39 @@ services:
       - './data/db:/var/lib/postgresql/data'
       - './data/temp:/temp:ro'
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
+
+  app:
+    image: pyphias:latest
+    restart: unless-stopped
+    environment:
+      PG_HOST: db
+      PG_PORT: 5432
+      PG_USER: ${DB_USER}
+      PG_PASSWORD: ${DB_PASS}
+      PG_NAME: ${DB_NAME}
+      SPHINX_LISTEN: "sphinx:9312"
+    volumes:
+      - './data/sphinx_conf:/etc/sphinxsearch'
+      - './data/source:/source'
+      - './data/temp:/temp'
+    command: ["python", "run.py", "8080"]
+    ports:
+      - "8080:8080"
+
   sphinx:
-    image: sphinx:test
+    image: sphinx:latest
     restart: unless-stopped
     volumes:
       - './data/sphinx_conf:/etc/sphinxsearch'
       - './data/sphinx_idx:${SPHINX_VAR}/data'
       - './data/temp:/temp'
     command: ['searchd', '--nodetach', '-c', '/etc/sphinxsearch/sphinx.conf']
+    ports:
+      - "127.0.0.1:${SPHINX_PORT}:${SPHINX_PORT}"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+        reservations:
+          cpus: '0.5'
