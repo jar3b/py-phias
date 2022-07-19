@@ -1,0 +1,8 @@
+.git/
+*.md
+Dockerfile
+mypy.ini
+venv/
+.mypy_cache/
+deploy/
+target/

@@ -23,7 +23,7 @@ services:
       PG_USER: ${DB_USER}
       PG_PASSWORD: ${DB_PASS}
       PG_NAME: ${DB_NAME}
-      SPHINX_LISTEN: "sphinx:9312"
+      SPHINX_LISTEN: ${SHPINX_LISTEN}
     volumes:
       - './data/sphinx_conf:/etc/sphinxsearch'
       - './data/source:/source'
