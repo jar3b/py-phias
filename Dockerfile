@@ -12,6 +12,7 @@ RUN pip install -r requirements.txt && pip install uvloop-0.16.0-cp310-cp310-lin
 RUN apk del .build-deps \
     && rm *.whl
 ADD . .
-RUN rm -rf libs
+RUN rm -rf libs && chmod a+x *.sh
 
+ENTRYPOINT ["./entrypoint.sh"]
 CMD ["python", "run.py", "8080"]

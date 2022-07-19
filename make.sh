@@ -3,6 +3,7 @@ docker build . -t pyphias:latest
 cd deploy/sphinx
 docker build . -t sphinx:latest
 cd ../..
+rm -rf target
 mkdir target
 docker save pyphias:latest | gzip > target/pyphias_img.tar.gz
 docker save sphinx:latest | gzip > target/sphinx_img.tar.gz
