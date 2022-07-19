@@ -2,13 +2,13 @@
 
 Python application that can operate with FIAS (Russian Address Object DB)
 
-Простое приложение для работы с БД ФИАС, написано для Python 3, использует БД PostgreSQL
+Простое приложение для работы с БД ФИАС, используя БД PostgreSQL + Sphinxsearch. ГАР не поддерживается,
+только ФИАС в старом формате, последняя база от 31.08.2021
 
 ## Содержание
 
 - [Возможности](#Возможности)
 - [Установка](#Установка)
-- [Настройка](#Настройка)
 - [API](#Api)
 
 ## Возможности
@@ -19,317 +19,61 @@ Python application that can operate with FIAS (Russian Address Object DB)
     - Поиск адресного объекта по произвольной строке, выдает 10 самых релеватных результатов, может быть "мягким",
       с более широкими вариациями и исправлением опечаток (для подсказок), или "строгим" (к примеру, для автоматического
       импорта из внешних систем).
+    - **ВНИМАНИЕ**: Поиск объекта только до улицы, **по домам** и квартирам **не ищет**! Поддержки нет и в рамках этого
+      проекта не будет точно.
+
 2. Автоматическое развертывание базы ФИАС
-    - Из директории с файлами XML (like 'AS_ADDROBJ_20160107_xxx.XML').
-    - Из локального файла архива (.rar).
-    - Напрямую с HTTP сервера ФНС.
-3. Актуалиация базы (из XML, HTTP) с возможностью выбора необходимых обновлений.
+    - Из директории с файлами XML, распакованными из архива с сайта ФНС (напр. `AS_ADDROBJ_20160107_xxx.XML`)
 
 ## Установка
 
-Протестирована работа на следующих ОС: [Windows](#windows) (8.1, 10) и [Debian](#debian-linux) Jessie, Stretch.
-Необходима версия Python == 3.5
+Должно устанавливаться везде, где есть докер. Требуемое свободное рабочее пространство ~4Гб (БД + индексы + образы
+докера).
+Опционально сюда добавляется архив с базой (14Гб) + распакованная база (до 60Гб, но можно распаковывать не все файлы).
+
+Далее будет описана установка для Ubuntu 20.04 на VDS, но возможно использовать и любой другой дистрибутив.
 
 ### Зависимости
 
-_Внимание_! Только Python 3 (для 2.7 пока есть отдельная ветка), только PostgreSQL, только Sphinx. MySQL/MariaDB,
-ElasticSearch/Solr не поддерживаются и, скорее всего, не будут.
+Обязательна установка Docker, docker-compose. Можете с офф сайта, или такие инструкции:
 
-Для работы приложения необходимо достаточное кол-во RAM (1Gb+) и ~5.5Gb места на диске
-(3-3.5Gb для скачивания архива с базой, 350-400Mb для индексов Sphinx, 1Gb для базы). Также необходимы root права
-(администратора, для Windows), для работы searchd и предварительной установки.
-Рекомендую устанавливать или на отдельном сервере, или на своей машине, либо же на VPS.
-На shared хостинге работоспособность не гарантируется (только если хостер Вам сам все установит и настроит,
-и разрешит запуск демонов - читай: "невозможно")
-
-Предварительно обязательно установить и настроить:
-
-1. Python 3, pip
-   Для Windows качаем - ставим, для Debian:
-    ```
-    sudo apt-get install python3-setuptools
-    sudo easy_install3 pip
-    sudo pip3 install --upgrade pip
-    ```
-
-2. PostgreSql 9.5 и выше (из-за синтаксиса _ON CONFLICT ... DO_)
-   Для Windows, как обычно, [качаем](http://www.enterprisedb.com/products-services-training/pgdownload#windows) -
-   ставим,
-   для Debian 8 и ниже:
-    ```
-    sudo sh -c 'echo deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main 9.5 > /etc/apt/sources.list.d/postgresql.list'
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-    sudo apt-get update
-    sudo apt-get install postgresql-9.5
-    ```
-   , для Debian 9:
-   `sudo apt-get install postgresql`
-
-   Затем создайте пользователя и базу данных и установите расширение pg_trgm:
-    ```
-    sudo adduser --no-create-home fias
-    sudo -u postgres psql
-    postgres=# CREATE DATABASE fias_db;
-    postgres=# CREATE USER fias WITH password 'fias';
-    postgres=# GRANT ALL privileges ON DATABASE fias_db TO fias;
-    postgres=# ALTER USER fias WITH SUPERUSER;
-    postgres=# \q
-    sudo -u fias psql -d fias_db -U fias
-    postgres=# CREATE EXTENSION pg_trgm SCHEMA public;
-    postgres=# \q
-    ```
-
-3. Sphinx 2.2.1 и новее:
-   [Windows](http://sphinxsearch.com/downloads/release/), Debian:
-    ```
-    cd /tmp
-    wget http://sphinxsearch.com/files/sphinx-2.2.10-release.tar.gz
-    tar xzf sphinx-2.2.10-release.tar.gz
-    cd sphinx-2.2.10-release
-    sudo apt-get install postgresql-server-dev-9.5
-    ./configure --without-mysql --with-pgsql
-    make
-    sudo make install
-    ```
-   , не забудте установить _build-essential_ перед этим (касается Debian).
-
-4. Web-сервер с поддержкой WSGI, любой, по Вашему желанию.
-
-### Windows
-
-1. Установить lxml, скачав whl [отсюда](http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml) и сделав
-   `pip install yourmodulename.whl`.
-2. Есть некоторые проблемы с установкой и работой psycopg2 (Windows 10, VS 2015), если у Вас они присутствуют - качаем
-   [сборку для Windows](http://www.stickpeople.com/projects/python/win-psycopg/)
-3. Если есть проблемы с Python-Levenshtein,
-   скачать [отсюда](http://www.lfd.uci.edu/~gohlke/pythonlibs/#python-levenshtein)
-   и установить
-4. Установить unrar.exe (можно установить WinRar целиком).
-5. Установить sphinxapi с поддержкой синтаксиса Python3:
-
-    ```
-    pip install https://github.com/jar3b/sphinx-py3-api/zipball/master
-    ```
-
-### Debian Linux
-
-1. Установить unrar (non-free):
-
-    ```
-    sudo sh -c 'echo deb ftp://ftp.us.debian.org/debian/ <deb_name> main non-free > /etc/apt/sources.list.d/non-free.list'
-    sudo apt-get update
-    sudo apt-get install unrar
-    ```
-
-2. Устанавливаем и настраиваем libxml:
-    ```
-    sudo apt-get install libxml2-dev libxslt1-dev python3-dev python3-lxml
-    ```
-
-3. Увстановить python3-dev, для того, чтобы корректно установился levenshtein
-
-```
-sudo apt-get install python3-dev
+```bash
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg lsb-release
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
 ```
 
-### Общая часть:
+### Подготовка и скачивание исходных данных
 
-1. Установим приложение из репозитория:
+1. Сборка образов. Для этого нужно в корне проекта запустить `./make.sh`, если хост под Windows, то использовать
+   Git Shell либо MinGW, итд. Будет в корне создана папка `target`, где будут образы, compose-файл и утилиты для помощи
+   в инициализации базы.
 
-    ```
-    cd /var/www/
-    sudo mkdir -p fias-api
-    sudo chown fias: /var/www/fias-api
-    sudo -H -u fias git clone --branch=py3 https://github.com/jar3b/py-phias.git fias-api
-    cd fias-api
-    sudo pip3 install -r requirements.txt
-    ```
-2. Иные пути установки ... (soon)
-
-## Настройка
-
-### Первоначальная настройка базы данных
-
-1. Настроим конфиг, для этого необходимо изменить параметры в Вашем wsgi-entrypoint (в моем случае
-   [wsgi.py](wsgi.py)): в строке `from config import *` измените _config_ на имя Вашего
-   конфигурационного файла (создается рядом с wsgi app)
-2. Создадим базу:
-    - из архива `sudo -u fias python3 manage.py -b create -s /tmp/fias_xml.rar`
-    - из директории `sudo -u fias python3 manage.py -b create -s /tmp/fias_xml_unpacked`
-    - онлайн, с сервера ФНС `sudo -u fias python3 manage.py -b create -s http`
-    - Также, можно указать конкретную версию ФИАС _только_ при http загрузке, с ключом `--update-version <num>`, где num
-      -
-      номер версии ФИАС, все доступные версии можно получить, выполнив `manage.py -v`.
-
-   Примечание 1: Если Вы инициализируете БД из архива или директории, при создании или обновлении базы у Вас будет
-   запрошен номер устанавливаемой версии ФИАС.
-
-   Примечание 2: У пользователя PostgreSql (postgres, либо созданного Вами) должны быть права на чтение из директории,
-   указанной в `config.folders.temp`, иначе будет Permission denied при попытке bulk-import.
-3. Проиндексируем Sphinx:
-    - Windows: `python manage.py -c -i C:\sphinx\bin\indexer.exe -o C:\sphinx\sphinx.conf`
-    - Debian: `sudo python3 manage.py -c -i indexer -o /usr/local/etc/sphinx.conf`
-4. Затем запустим searchd:
-    - Windows:
-        - Устанавливаем
-          службу: `C:\Sphinx\bin\searchd --install --config C:\Sphinx\sphinx.conf --servicename sphinxsearch`
-        - и запускаем: `net start sphinxsearch`
-    - Debian:
-        - Запустим : `sudo searchd --config /usr/local/etc/sphinx.conf`
-        - если необходимо, добавьте `searchd --config /usr/local/etc/sphinx.conf` в `/etc/rc.local` для автостарта
-5. Для проверки работы выполните `sudo -H -u fias python3 wsgi.py`, по адресу
-   `http://example.com:8087/find/москва`
-   Вы должны увидеть результаты запроса.
-
-### Config
-
-```
-# Address and port where sphinx was listening,
-# may be a unix socket like 'unix:///tmp/fias-api.sock'
-# or TCP socket like '127.0.0.1:9312'
-config.SphinxConfig.listen = "unix:///tmp/fias-api.sock"
-# Base sphinx folder
-config.SphinxConfig.var_dir = "/etc/sphinx"
-
-# Temp folder, in Linux may be '/tmp/myfolder'
-config.Folders.temp = "/tmp/fitmp"
-
-
-# Address and port where sphinx was listening,
-# may be a unix socket like 'unix:///tmp/fias-api.sock'
-# or TCP socket like '127.0.0.1:9312'
-config.SphinxConfig.listen = "127.0.0.1:9312"
-# Base sphinx folder
-config.SphinxConfig.var_dir = "C:\\Sphinx"
-
-# Temp folder, in Linux may be '/tmp/myfolder'
-config.Folders.temp = "E:\\!TEMP"
+```bash
+./make.sh
 ```
 
-### Установка Web-сервера (для Debian, на примере nginx + gunicorn, без virtualenv)
+2. Отправить файлы на удаленный сервер (можно использовать registry, итд) - тут указан способ с заливкой по SFTP
 
-- Установим nginx и gunicorn:
+```bash
+cd target
+sftp name@vps
+# папка fias должна быть создана на VPS по пути `/home/<user>/fias`, но можно использовать любую другую
+cd fias
+put *
+exit
+```
 
-    ```
-    sudo apt-get install nginx
-    sudo pip3 install gunicorn
-    ```
-- Настройте nginx. Примерно так:
-
-    ```
-    cd /etc/nginx/sites-available
-    sudo wget -O fias-api.conf https://gist.githubusercontent.com/jar3b/f8f5d351e0ea8ae2ed8e/raw/2f1b0d2a6f9ce9db017117993954158ccce049dd/py-phias.conf
-    sudo nano fias-api.conf
-    ```
-  , отредактируйте и сохраните файл, затем cоздайте линк
-
-    ```
-    sudo cp -l fias-api.conf ../sites-enabled/fias-api.conf
-    ```
-- Теперь настроим автозапуск gunicorn. Ниже пример конфига для systemd для запуска как сервис, для этого нужно создать
-  файл `fias.service` в директории `/etc/systemd/system/`
-
-    ```
-    [Unit]
-    Description=Gunicorn instance to serve fias
-    After=network.target
-    
-    [Service]
-    User=fias
-    Group=www-data
-    WorkingDirectory=/var/www/fias-api
-    ExecStart=/usr/local/bin/gunicorn -k gevent_pywsgi --worker-connections 200 --bind unix:/tmp/fias-api-unicorn.sock -m 007 wsgi:application --log-file /var/log/fias_errors.log
-    
-    [Install]
-    WantedBy=multi-user.target
-    ```
-- Применим изменения: `sudo systemctl daemon-reload`
-- Для запуска сервиса используем `sudo systemctl start fias`, для регистрации в автозапуске `sudo systemctl enable fias`
+https://disk.yandex.ru/d/AKQR8DEIcVKeSw
 
 ## Api
 
-- `/normalize/<guid>` - актуализирует AOID или AOGUID, на выходе выдает
-
-  ```
-  {"aoid": "1d6185b5-25a6-4fe8-9208-e7ddd281926a"}
-  ```
-
-  , где _aoid_ - актуальный AOID.
-- `/find/<text>?strong=<0,1>`- полнотекстовый поиск по названию адресного объекта. `<text>` - строка поиска.
-  Если указан параметр `strong=1`, то в массиве будет один результат, или ошибка. Если же флаг не указан, но будет
-  выдано 10
-  наиболее релевантных результатов.
-
-  На выходе будет массив от 1 до 10 элементов:
-    ```
-    [
-      {
-        "cort": 0,
-        "text": "обл Псковская, р-н Порховский, д Гречушанка",
-        "ratio": 1537,
-        "aoid": "1d6185b5-25a6-4fe8-9208-e7ddd281926a"
-      },
-      ... (up to 10)
-    ]
-    ```
-  ,где _cort_ - количество несовпавших слов, _text_ - полное название адресного объекта, _ratio_ - рейтинг, _aoid_ -
-  актуальный AOID.
-- `/expand/<aoid>` - "раскрывает" AOID, возвращая массив адресных элементов. `<aoid>` - актуальный или неактуальный
-  AOID
-
-  На выходе будет массив из адресных элементов, упорядоченный по AOLEVEL:
-    ```
-    [
-      {
-        "aoguid": "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
-        "shortname": "г",
-        "aoid": "5c8b06f1-518e-496e-b683-7bf917e0d70b",
-        "formalname": "Москва",
-        "aolevel": 1,
-        "socrname": "Город",
-        "regioncode": 77
-      },
-      {
-        "aoguid": "10409e98-eb2d-4a52-acdd-7166ca7e0e48",
-        "shortname": "п",
-        "aoid": "41451677-aad4-4cb9-ba76-2b0eeb156acb",
-        "formalname": "Вороновское",
-        "aolevel": 3,
-        "socrname": "Поселок",
-        "regioncode": 77
-      },
-      {
-        "aoguid": "266485f4-a204-4382-93ce-7a47ad934869",
-        "shortname": "ул",
-        "aoid": "943c8b81-2491-46ee-aee4-48d0c9fada1a",
-        "formalname": "Новая",
-        "aolevel": 7,
-        "socrname": "Улица",
-        "regioncode": 77
-      }
-    ]
-    ```
-  , все поля из таблицы ADDROBJ.
-- `/gettext/<aoid>` - возвращает текст для произвольного _aoid_, тект аналогичен тому, который возвращает `/find/<text>`
-  ,
-  на выходе будет такой массив с одним элементом:
-
-    ```
-    [
-      {
-        "fullname": "г Москва, п Вороновское, п ЛМС, ул Новая"
-      }
-    ]
-    ```
-- Ошибки. Если при выполнении запроса произошла ошибка, то ответ будет таким, объект с одним полем описания ошибки:
-
-    ```
-    {
-      "error": "'Cannot find sentence.'"
-    }
-    ```
-  
-### develop
+После старта приложения по адресу: http://127.0.0.1:8080/docs будет доступен Swagger с описанием
 
 Тест поиска: `http://127.0.0.1:8099/find/%D0%B3%20%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0,%20%D0%BF%20%D0%92%D0%BE%D1%80%D0%BE%D0%BD%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B5,%20%D0%BF%20%D0%9B%D0%9C%D0%A1,%20%D1%83%D0%BB%20%D0%9D%D0%BE%D0%B2%D0%B0%D1%8F`
-```

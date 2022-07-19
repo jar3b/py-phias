@@ -37,12 +37,16 @@ def cli() -> None:
 
 
 @click.command()
-@click.option('-f', type=str, required=True, help='folder containing unpacked fias_xml.zip')
+@click.option('-f', type=str, required=True,
+              help='folder containing unpacked fias_xml.zip or zip file with pre-built csv')
 @click.option('-t', type=str, required=True, help='temp folder in app container')
-@click.option('--container-temp', type=str, help='temp folder mounted in Postgres container '
-                                                 '(same as `-t` if not specified)')
+@click.option('--container-temp', type=str,
+              help='temp folder mounted in Postgres container (same as `-t` if not specified)')
 def initdb(f: str, t: str, container_temp: str | None) -> None:
     click.echo(f'Initializing db "{config.pg.host}:{config.pg.port}" from "{f}"')
+
+    # check temp folder path
+    temp_path, container_temp_path = _get_temps(t, container_temp)
 
     # check XML files path
     xml_path = Path(f)
@@ -50,12 +54,37 @@ def initdb(f: str, t: str, container_temp: str | None) -> None:
         click.echo(f'"{f}" must be non-empty dir', err=True)
         sys.exit(-1)
 
-    # check temp folder path
-    temp_path, container_temp_path = _get_temps(t, container_temp)
-
     try:
         filler = DbFiller(config)
         asyncio.run(filler.create(xml_path, temp_path, container_temp_path))
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        click.echo(e)
+        sys.exit(-2)
+
+
+@click.command()
+@click.option('-f', type=str, required=True, help='folder containing unpacked fias_xml.zip')
+@click.option('--target', type=str, required=True, help='target file, like fias_csv.zip')
+def create_fias_csv(f: str, target: str) -> None:
+    # check XML files path
+    xml_path = Path(f)
+    if not xml_path.exists() or not xml_path.is_dir():
+        click.echo(f'"{f}" must be non-empty dir', err=True)
+        sys.exit(-1)
+
+    target_path = Path(target)
+    if not target_path.parent.is_dir():
+        click.echo(f'{target_path.parent} must be directory')
+        sys.exit(-1)
+
+    if target_path.is_file():
+        os.remove(target_path)
+
+    try:
+        filler = DbFiller(config)
+        asyncio.run(filler.create_csv_zip(xml_path, target_path))
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -145,10 +174,13 @@ def create_sphinx_config(f: str, sphinx_var: str) -> None:
         sys.exit(-2)
 
 
+# public
 cli.add_command(initdb)
 cli.add_command(create_addrobj_config)
 cli.add_command(init_trigram)
 cli.add_command(create_sphinx_config)
+# internal
+cli.add_command(create_fias_csv)
 
 if __name__ == '__main__':
     cli()
