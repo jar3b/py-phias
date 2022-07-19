@@ -3,7 +3,7 @@ import re
 import zipfile
 from abc import abstractmethod
 from pathlib import Path
-from typing import Iterator, Any, Awaitable, Callable, Tuple, Optional
+from typing import Iterator, Any, Awaitable, Callable, Tuple, Optional, List
 
 import asyncpg
 import click
@@ -82,6 +82,8 @@ class CsvXmlSource(Source):
         if all({x: x in names for x in ALLOWED_TABLES}.values()):
             return CsvXmlSource(p, zip_file)
 
+        return None
+
     async def generate_csv(
             self,
             table_entry: AoXmlTableEntry,
@@ -115,6 +117,8 @@ class XmlListSource(Source):
         if all({x: x in names for x in ALLOWED_TABLES}.values()):
             return XmlListSource(p)
 
+        return None
+
     async def generate_csv(
             self,
             table_entry: AoXmlTableEntry,
@@ -143,7 +147,9 @@ class DbFiller:
         self.pool = await asyncpg.create_pool(dsn, max_inactive_connection_lifetime=conf.pool_recycle)
 
     def __ensure_source(self, source_path: Path) -> Source:
-        _sources = [y for y in [x.from_path(source_path) for x in [CsvXmlSource, XmlListSource]] if y]
+        _sources: List[Source] = [
+            y for y in [x.from_path(source_path) for x in [CsvXmlSource, XmlListSource]] if y  # type: ignore
+        ]
         if len(_sources) == 0:
             raise Exception(f'"{source_path}" is not valid (no XML or ZIP inside)')
         if len(_sources) > 1:
