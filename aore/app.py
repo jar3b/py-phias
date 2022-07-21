@@ -5,7 +5,7 @@ from aiohttp_pydantic import oas
 from settings import AppConfig
 from . import log
 from .search import FiasFactory
-from .views import NormalizeAoidView, error_middleware, ExpandAoidView, ConvertAoidView, FindAoView
+from .views import NormalizeAoidView, error_middleware, ExpandAoidView, ConvertAoidView, FindAoView, cors_middleware
 
 
 async def init_fias(app: web.Application) -> None:
@@ -31,7 +31,8 @@ async def shutdown_pg(app: web.Application) -> None:
 def run(port: int, config: AppConfig) -> None:
     # create web app and set config
     app = web.Application(middlewares=[
-        error_middleware
+        error_middleware,
+        cors_middleware
     ])
     app['config'] = config
     app['name'] = 'fias-api'
