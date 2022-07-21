@@ -1,0 +1,76 @@
+h1 {
+    text-align: center;
+}
+.half {
+    margin-top: 10px;
+    width: 100%;
+    padding: 0;
+}
+/* Acordeon styles */
+.tab {
+    position: relative;
+    margin-bottom: 1px;
+    width: 100%;
+    /*color: #0b6eb3;*/
+    color: rgba(255, 102, 0, 0.7);
+    overflow: hidden;
+}
+.tab input {
+    position: absolute;
+    opacity: 0;
+    z-index: -1;
+}
+.tab label {
+    position: relative;
+    display: block;
+    /*padding: 0 0 0 1em;*/
+    padding: 0;
+    background: #fff;
+    font-weight: bold;
+    line-height: 2;
+    cursor: pointer;
+}
+.tab-content {
+    max-height: 0;
+    overflow: hidden;
+    background: rgba(11, 110, 179, 0.1);
+}
+.tab-content p {
+    margin: 1em;
+}
+/* :checked */
+.tab input:checked ~ .tab-content {
+    max-height: 100vh;
+}
+/* Icon */
+.tab label::after {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: block;
+    width: 2em;
+    height: 2em;
+    line-height: 2;
+    text-align: center;
+}
+.tab input[type=checkbox] + label::after {
+    content: "+";
+}
+.tab input[type=radio] + label::after {
+    content: "\25BC";
+}
+.tab input[type=checkbox]:checked + label::after {
+    transform: rotate(315deg);
+}
+.tab input[type=radio]:checked + label::after {
+    transform: rotateX(180deg);
+}
+.tab label span {
+    float: right;
+    margin-right: 30px;
+    font-size: 0.8em;
+    height: 100%;
+    vertical-align: middle;
+    margin-top: 5px;
+    color: rgba(11, 110, 179, 0.66);
+}

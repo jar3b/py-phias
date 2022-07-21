@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="favicon.svg" sizes="any" type="image/svg+xml">
+    <link href="main.css" rel="stylesheet">
+    <link href="accordion.css" rel="stylesheet">
+    <script>window.apiPrefix = '';</script>
+    <script src="main.js"></script>
+    <title>Fias-API</title>
+</head>
+<body>
+<div class="outer">
+    <div class="middle">
+        <div class="search-pad">
+            <label for="fias-addr-search">Search for address:</label>
+            <div class="search-wrapper">
+                <input type="search" id="fias-addr-search" name="q">
+                <button id="search-btn">
+                    <svg fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                        <path d="M 10.5 1 C 8.019531 1 6 3.019531 6 5.5 C 6 6.558594 6.382813 7.523438 7 8.292969 L 2.023438 13.269531 L 2.726563 13.980469 L 7.707031 9 C 8.476563 9.617188 9.441406 10 10.5 10 C 12.980469 10 15 7.980469 15 5.5 C 15 3.019531 12.980469 1 10.5 1 Z M 10.5 2 C 12.4375 2 14 3.5625 14 5.5 C 14 7.4375 12.4375 9 10.5 9 C 8.5625 9 7 7.4375 7 5.5 C 7 3.5625 8.5625 2 10.5 2 Z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="results" class="half">
+            </div>
+            <div hidden id="error" class="error">Cannot fetch data</div>
+            <div hidden id="tab-template" class="tab">
+                <input id="tab-four" type="radio" name="ao-tabs">
+                <label for="tab-four"><span class="ratio"></span></label>
+                <div class="tab-content">
+                    <p></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

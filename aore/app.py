@@ -28,6 +28,10 @@ async def shutdown_pg(app: web.Application) -> None:
     await app['pg'].close()
 
 
+async def root_handler(request: web.Request) -> web.StreamResponse:
+    return web.FileResponse('./aore/static/index.html')
+
+
 def run(port: int, config: AppConfig) -> None:
     # create web app and set config
     app = web.Application(middlewares=[
@@ -47,6 +51,9 @@ def run(port: int, config: AppConfig) -> None:
     app.router.add_view('/expand/{aoid}', ExpandAoidView)
     app.router.add_view('/aoid2aoguid/{aoid}', ConvertAoidView)
     app.router.add_view('/find/{text}', FindAoView)
+
+    app.router.add_route('*', '/', root_handler)
+    app.router.add_static('/', './aore/static')
 
     # --
     # ** OAS (OpenAPI Swagger docs) **

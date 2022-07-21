@@ -1,0 +1,79 @@
+body {
+    font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-size: 0.9em;
+}
+
+.outer {
+    display: table;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.middle {
+    display: table-cell;
+    vertical-align: top;
+}
+
+.search-pad {
+    margin-top: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600px;
+}
+
+#fias-addr-search {
+    width: 100%;
+    border-radius: 4px 0 0 4px;
+    border: 1px solid rgba(255, 102, 0, 0.4);
+    border-right-style: none;
+    height: 30px;
+    font-size: 1em;
+}
+
+input:focus {
+    outline: none;
+    box-shadow: 0 0 3px rgba(255, 102, 0, 0.5);
+    clip-path: inset(-5px 0px -5px -5px);
+}
+
+.search-wrapper {
+    display: flex;
+    justify-content: space-between;
+}
+
+#search-btn {
+    top: 17px;
+    right: -30px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(255, 102, 0, 0.4);
+    border-radius: 0 4px 4px 0;
+    border-left-style: none;
+    background-color: rgba(255, 102, 0, 0.2);
+}
+
+#search-btn svg {
+    width: 16px;
+    height: 16px;
+    margin-top: 4px;
+}
+
+#search-btn:hover {
+    box-shadow: 0 0 3px rgba(255, 102, 0, 0.5);
+    /*clip-path: inset(-5px -5px -5px 0);*/
+}
+
+#search-btn:active {
+    background-color: rgba(255, 102, 0, 0.6);
+}
+
+.error{
+    padding-bottom: 10px;
+    padding-top: 10px;
+    background: rgba(248, 37, 109, 0.5);
+    text-align: center;
+    color: rgb(11, 110, 179);
+}
