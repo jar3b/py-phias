@@ -52,13 +52,14 @@ def run(port: int, config: AppConfig) -> None:
     app.router.add_view('/aoid2aoguid/{aoid}', ConvertAoidView)
     app.router.add_view('/find/{text}', FindAoView)
 
-    app.router.add_route('*', '/', root_handler)
-    app.router.add_static('/', './aore/static')
-
     # --
     # ** OAS (OpenAPI Swagger docs) **
     # --
     oas.setup(app, title_spec="Py-Phias API", url_prefix='/docs', raise_validation_errors=True)
+
+    # static
+    app.router.add_route('*', '/', root_handler)
+    app.router.add_static('/', './aore/static')
 
     # now run_app using default asyncio loop
     web.run_app(app, port=port)
