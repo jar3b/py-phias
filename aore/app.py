@@ -5,7 +5,8 @@ from aiohttp_pydantic import oas
 from settings import AppConfig
 from . import log
 from .search import FiasFactory
-from .views import NormalizeAoidView, error_middleware, ExpandAoidView, ConvertAoidView, FindAoView, cors_middleware
+from .views import NormalizeAoidView, error_middleware, ExpandAoidView, ConvertAoidView, FindAoView, cors_middleware, \
+    GetAoidTextView
 
 
 async def init_fias(app: web.Application) -> None:
@@ -50,6 +51,7 @@ def run(port: int, config: AppConfig) -> None:
     app.router.add_view('/normalize/{aoid}', NormalizeAoidView)
     app.router.add_view('/expand/{aoid}', ExpandAoidView)
     app.router.add_view('/aoid2aoguid/{aoid}', ConvertAoidView)
+    app.router.add_view('/gettext/{aoid}', GetAoidTextView)
     app.router.add_view('/find/{text}', FindAoView)
 
     # --
