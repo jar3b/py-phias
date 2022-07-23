@@ -7,9 +7,9 @@ import asyncpg
 from jinja2 import Environment, FileSystemLoader
 
 from aore.search.wordvariation import WordVariation, VariationType
+from settings import AppConfig
 from .match_types import MatchTypes
 from .ranks_data import RanksData
-from settings import AppConfig
 
 
 def _cleanup_string(word: str) -> str:
@@ -88,7 +88,7 @@ class WordEntry:
 
         # Добавляем звездочку на конце
         if MatchTypes.MT_LAST_STAR in self.mt:
-            yield WordVariation(self, f'{self.word}*', variation_type)
+            yield WordVariation(self, f'{self.word}*', variation_type, (self.word, 1.5))
 
         # Добавляем слово "как есть", если это сокращение, то добавляем как частое слово
         if MatchTypes.MT_AS_IS in self.mt:

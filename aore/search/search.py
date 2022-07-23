@@ -141,6 +141,9 @@ class SphinxSearch:
         good_vars = [v for v in all_variations if v.var_type == VariationType.NORM]
         freq_vars = [v for v in all_variations if v.var_type == VariationType.FREQ]
 
+        log.debug([str(x) for x in good_vars])
+        log.debug([str(x) for x in freq_vars])
+
         good_vars_word_count = len(set([v.parent for v in good_vars]))
         freq_vars_word_count = len(set([v.parent for v in freq_vars]))
 
@@ -150,11 +153,11 @@ class SphinxSearch:
         # формируем строки для поиска в Сфинксе
         for i in range(good_vars_word_count, max(0, good_vars_word_count - 3), -1):
             if len(good_vars) == i:
-                first_q = "@fullname {}".format(" ".join(f'{good_var.text}' for good_var in good_vars))
+                first_q = "@fullname {}".format(" ".join(f'{good_var.search_text}' for good_var in good_vars))
             else:
-                first_q = "@fullname \"{}\"/{}".format(" ".join(good_var.text for good_var in good_vars), i)
+                first_q = "@fullname \"{}\"/{}".format(" ".join(good_var.search_text for good_var in good_vars), i)
             if self.conf.search_freq_words and freq_vars_word_count > 0:
-                second_q = " @sname {}".format(" ".join(freq_var.text for freq_var in freq_vars))
+                second_q = " @sname {}".format(" ".join(freq_var.search_text for freq_var in freq_vars))
                 self.client_show.AddQuery(first_q + second_q, self.conf.index_addrobj)
 
             self.client_show.AddQuery(first_q, self.conf.index_addrobj)
