@@ -55,7 +55,6 @@ async function ready() {
     });
 
     searchInput.addEventListener("keyup", function (event) {
-        console.log(event, event.key);
         event.preventDefault();
         if (event.key === 'Enter') {
             searchBtn.click();
