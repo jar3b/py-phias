@@ -1,10 +1,10 @@
-function showError(errText = ''){
+function showError(errText = '') {
     const errorElem = document.getElementById("error");
     errorElem.hidden = !errText;
     errorElem.innerText = errText;
 }
 
-function createResultElem(template, data){
+function createResultElem(template, data) {
     const el = template.cloneNode(true);
     el.removeAttribute('id');
     el.querySelector("input").id = `tab-${data.aoid}`;
@@ -16,14 +16,14 @@ function createResultElem(template, data){
     return el;
 }
 
-function clearResults(results){
+function clearResults(results) {
     results.innerHTML = '';
 }
 
-async function searchAddress(text, results, template){
+async function searchAddress(text, results, template) {
     try {
         const data = await fetch(`${window.apiPrefix}/find/${text}`);
-        if (!data.ok){
+        if (!data.ok) {
             return showError(`${data.status}: ${(await data.json()).error ?? 'Unknown error'}`)
         }
 
@@ -31,7 +31,7 @@ async function searchAddress(text, results, template){
         arr.forEach((value, i, a) => {
             results.appendChild(createResultElem(template, value));
         })
-    }catch (e){
+    } catch (e) {
         showError(e);
     }
 }
@@ -53,6 +53,14 @@ async function ready() {
         clearResults(resultsElem);
         await searchAddress(searchInput.value, resultsElem, templateSearchResElem)
     });
+
+    searchInput.addEventListener("keyup", function (event) {
+        console.log(event, event.key);
+        event.preventDefault();
+        if (event.key === 'Enter') {
+            searchBtn.click();
+        }
+    })
 }
 
 document.addEventListener("DOMContentLoaded", ready);
