@@ -30,11 +30,7 @@ class AppConfig:
         regression_coef: float = 0.08
         max_results_count: int = 10
         search_freq_words: bool = True
-        # rating limits
-        rating_limit_soft = 0.41
-        rating_limit_soft_count = 6
-        rating_limit_hard = 0.82
-        rating_limit_hard_count = 3
+        suggestions_count = 6
         sphinx_user_uid = 104
 
         def listen_port(self) -> str:

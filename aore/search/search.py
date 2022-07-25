@@ -75,13 +75,14 @@ class SphinxSearch:
             self.client_sugg.SetSelect(
                 f"word, len, frequency, @weight+{self.conf.delta_len}-abs(len-{word_len}) AS krank")
             self.client_sugg.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
-        else:
+        elif index_name == self.conf.index_addrobj:
             self.client_show.SetRankingMode(main_ranker)
             self.client_show.SetSelect(f"aoid, fullname, @weight-4*abs(wordcount-{word_len}) AS krank")
             self.client_show.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
+        else:
+            raise FiasBadDataException(f'Invalid index {index_name}')
 
-    # TODO: rating_limit больше не используется, потом  надо будет убрать, но возможно новая версия ищет хуже
-    def __get_suggestions(self, word: str, rating_limit: float, count: int) -> List[WordEntry.SuggEntity]:
+    def __get_suggestions(self, word: str, count: int) -> List[WordEntry.SuggEntity]:
         # настраиваем клиента Sphinx
         self.__configure(self.conf.index_sugg, len(word))
         result = self.client_sugg.Query(f'"{trigram(word)}"/1', self.conf.index_sugg)
@@ -98,11 +99,11 @@ class SphinxSearch:
         suggestions = sorted([
             WordEntry.SuggEntity(
                 word=match['attrs']['word'],
-                jaro=match['attrs']['krank'],
+                rank=match['attrs']['krank'],
                 freq=match['attrs']['frequency'],
                 precision=match['attrs']['krank'] / max_rank
             ) for match in result['matches'] if max_rank - match['attrs']['krank'] < self.conf.default_rating_delta
-        ], key=lambda x: x.jaro, reverse=True)
+        ], key=lambda x: x.rank, reverse=True)
 
         sugg_perfect = [x for x in suggestions if x.precision == 1]
         if len(sugg_perfect) >= 2:
@@ -111,7 +112,7 @@ class SphinxSearch:
 
     # Получает список объектов (слово)
     async def __get_word_entries(self, words: List[str]) -> List[WordEntry]:
-        word_entries = [WordEntry(w) for w in words if w != '']
+        word_entries = [x for x in [WordEntry(w) for w in words if w != ''] if x.word]
         await WordEntry.fill(word_entries, pool=self.pool, conf=self.conf)
 
         return word_entries

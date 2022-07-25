@@ -13,7 +13,7 @@ from .ranks_data import RanksData
 
 
 def _cleanup_string(word: str) -> str:
-    return word.replace('-', '').replace('@', '').replace('#', '')
+    return word.replace('@', '').replace('#', '').strip('-')
 
 
 class WordEntry:
@@ -29,7 +29,7 @@ class WordEntry:
     @dataclass
     class SuggEntity:
         word: str
-        jaro: float
+        rank: float
         freq: int
         precision: float
 
@@ -69,7 +69,7 @@ class WordEntry:
             self,
             conf: AppConfig.Sphinx,
             strong: bool,
-            suggestion_func: Callable[[str, float, int], List[SuggEntity]]
+            suggestion_func: Callable[[str, int], List[SuggEntity]]
     ) -> Iterator[
         WordVariation
     ]:
@@ -81,7 +81,7 @@ class WordEntry:
         if (MatchTypes.MT_MANY_SUGG in self.mt or MatchTypes.MT_SOME_SUGG in self.mt) and not strong:
             max_s = 1
             second_s = 0
-            for suggestion in suggestion_func(self.word, conf.rating_limit_soft, conf.rating_limit_soft_count):
+            for suggestion in suggestion_func(self.word, conf.suggestions_count):
                 if int(suggestion.freq) > 30000:
                     max_s = max(max_s, int(suggestion.freq))
                     socr_words.append((suggestion.word, 1))
@@ -107,10 +107,9 @@ class WordEntry:
 
         # Добавляем слово "как есть", если это сокращение, то добавляем как частое слово
         if MatchTypes.MT_AS_IS in self.mt:
-            if self.is_freq or MatchTypes.MT_IS_SOCR in self.mt:
+            if MatchTypes.MT_IS_SOCR in self.mt:
                 socr_words.append((self.bare_word if MatchTypes.MT_IS_SOCR else self.word, 1))
-
-            if MatchTypes.MT_IS_SOCR not in self.mt:
+            else:
                 full_words.append((self.word, 1))
 
         # Добавляем сокращение
