@@ -1,18 +1,19 @@
 import re
 import time
+from collections import OrderedDict
 from typing import Tuple, List
 
-import Levenshtein
 import asyncpg
 import sphinxapi
 
+from settings import AppConfig
+from .query_generator import SearchQueryGenerator
 from .wordentry import WordEntry
-from .wordvariation import VariationType
+from .wordvariation import WordVariation
 from .. import log
 from ..exceptions import FiasBadDataException, FiasNotFoundException
 from ..schemas import AoResultItemModel
-from settings import AppConfig
-from ..utils.search import trigram, violet_ratio
+from ..utils.search import trigram
 
 
 def _parse_sphinx_address(addr: str) -> Tuple[str, int | None]:
@@ -25,7 +26,7 @@ def _parse_sphinx_address(addr: str) -> Tuple[str, int | None]:
         sphinx_host, sphinx_port = addr.split(":")
         return sphinx_host, int(sphinx_port)
 
-    return 'unix://'+addr, None
+    return 'unix://' + addr, None
 
 
 def _split_phrase(phrase: str) -> List[str]:
@@ -64,20 +65,22 @@ class SphinxSearch:
         self.client_show.SetLimits(0, conf.max_results_count)
         self.client_show.SetConnectTimeout(3.0)
 
-    def __configure(self, index_name: str, word_len: int) -> None:
+    def __configure(self, index_name: str, word_len: int, main_ranker: int = sphinxapi.SPH_RANK_BM25) -> None:
         self.client_sugg.ResetFilters()
 
         if index_name == self.conf.index_sugg:
             self.client_sugg.SetRankingMode(sphinxapi.SPH_RANK_WORDCOUNT)
             self.client_sugg.SetFilterRange("len", int(word_len) - self.conf.delta_len,
                                             int(word_len) + self.conf.delta_len)
-            self.client_sugg.SetSelect(f"word, len, @weight+{self.conf.delta_len}-abs(len-{word_len}) AS krank")
+            self.client_sugg.SetSelect(
+                f"word, len, frequency, @weight+{self.conf.delta_len}-abs(len-{word_len}) AS krank")
             self.client_sugg.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
         else:
-            self.client_show.SetRankingMode(sphinxapi.SPH_RANK_BM25)
-            self.client_show.SetSelect("aoid, fullname, @weight-2*abs(wordcount-{}) AS krank".format(word_len))
+            self.client_show.SetRankingMode(main_ranker)
+            self.client_show.SetSelect(f"aoid, fullname, @weight-4*abs(wordcount-{word_len}) AS krank")
             self.client_show.SetSortMode(sphinxapi.SPH_SORT_EXTENDED, "krank DESC")
 
+    # TODO: rating_limit больше не используется, потом  надо будет убрать, но возможно новая версия ищет хуже
     def __get_suggestions(self, word: str, rating_limit: float, count: int) -> List[WordEntry.SuggEntity]:
         # настраиваем клиента Sphinx
         self.__configure(self.conf.index_sugg, len(word))
@@ -90,24 +93,21 @@ class SphinxSearch:
         if not result['matches']:
             return []
 
-        maxrank: int = result['matches'][0]['attrs']['krank']
-        maxleven: float | None = None
+        max_rank: int = result['matches'][0]['attrs']['krank']
 
-        outlist: List[WordEntry.SuggEntity] = []
-        for match in result['matches']:
-            if len(outlist) >= count:
-                break
+        suggestions = sorted([
+            WordEntry.SuggEntity(
+                word=match['attrs']['word'],
+                jaro=match['attrs']['krank'],
+                freq=match['attrs']['frequency'],
+                precision=match['attrs']['krank'] / max_rank
+            ) for match in result['matches'] if max_rank - match['attrs']['krank'] < self.conf.default_rating_delta
+        ], key=lambda x: x.jaro, reverse=True)
 
-            if maxrank - match['attrs']['krank'] < self.conf.default_rating_delta:
-                jaro_rating: float = Levenshtein.jaro(word, match['attrs']['word'])
-                if not maxleven:
-                    maxleven = jaro_rating - jaro_rating * self.conf.regression_coef
-                if jaro_rating >= rating_limit and jaro_rating >= maxleven:
-                    outlist.append(WordEntry.SuggEntity(word=match['attrs']['word'], jaro=jaro_rating))
-
-        outlist.sort(key=lambda x: x.jaro, reverse=True)
-
-        return outlist
+        sugg_perfect = [x for x in suggestions if x.precision == 1]
+        if len(sugg_perfect) >= 2:
+            return sugg_perfect[:count]
+        return suggestions[:count]
 
     # Получает список объектов (слово)
     async def __get_word_entries(self, words: List[str]) -> List[WordEntry]:
@@ -131,36 +131,42 @@ class SphinxSearch:
 
         # получаем все вариации слов
         start_t = time.time()
-        all_variations = []
+        # Тут OrderedDict, чтобы отсеять одинаковые слова
+        all_variations_dict: OrderedDict[WordVariation, None] = OrderedDict()
         for word_entry in word_entries:
             for variation in word_entry.generate_variations(self.conf, strong, self.__get_suggestions):
-                all_variations.append(variation)
+                all_variations_dict[variation] = None
+        all_variations = list(all_variations_dict.keys())
         elapsed_get_variations = time.time() - start_t
 
-        # делим на плохие (частые) и хорошие (полное слово, редкие) вариации слов
-        good_vars = [v for v in all_variations if v.var_type == VariationType.NORM]
-        freq_vars = [v for v in all_variations if v.var_type == VariationType.FREQ]
+        # Если поиск строгий, то нет подсказок, и может быть такое, что слово будет пустым. Так нельзя
+        if strong and any([x.is_empty for x in all_variations]):
+            raise FiasNotFoundException("Got empty word with strong search")
 
-        log.debug([str(x) for x in good_vars])
-        log.debug([str(x) for x in freq_vars])
+        has_socr = any([v.has_short_words for v in all_variations])
 
-        good_vars_word_count = len(set([v.parent for v in good_vars]))
-        freq_vars_word_count = len(set([v.parent for v in freq_vars]))
-
-        # настраиваем основной клиент (для поиска главной фразы)
-        self.__configure(self.conf.index_addrobj, word_count)
+        # настраиваем основной клиент (для поиска главной фразы), если строгий поиск - то учитываем длизость слов
+        self.__configure(
+            self.conf.index_addrobj,
+            word_count,
+            sphinxapi.SPH_RANK_PROXIMITY_BM25 if strong else sphinxapi.SPH_RANK_BM25
+        )
 
         # формируем строки для поиска в Сфинксе
-        for i in range(good_vars_word_count, max(0, good_vars_word_count - 3), -1):
-            if len(good_vars) == i:
-                first_q = "@fullname {}".format(" ".join(f'{good_var.search_text}' for good_var in good_vars))
-            else:
-                first_q = "@fullname \"{}\"/{}".format(" ".join(good_var.search_text for good_var in good_vars), i)
-            if self.conf.search_freq_words and freq_vars_word_count > 0:
-                second_q = " @sname {}".format(" ".join(freq_var.search_text for freq_var in freq_vars))
-                self.client_show.AddQuery(first_q + second_q, self.conf.index_addrobj)
+        gen = SearchQueryGenerator(all_variations)
+        all_queries = OrderedDict()
+        ops = ['']
+        if not strong:
+            ops.append('MAYBE')
 
-            self.client_show.AddQuery(first_q, self.conf.index_addrobj)
+        for operation in ops:
+            if self.conf.search_freq_words and has_socr:
+                all_queries[gen.get_query(op=operation, with_short=True)] = None
+            all_queries[gen.get_query(op=operation, with_short=False)] = None
+
+        # добавляем все квери, убирая дубликаты
+        for k in all_queries.keys():
+            self.client_show.AddQuery(k, self.conf.index_addrobj)
 
         start_t = time.time()
         rs = self.client_show.RunQueries()
@@ -175,7 +181,11 @@ class SphinxSearch:
         parsed_ids: List[str] = []
 
         for i in range(0, len(rs)):
-            for match in rs[i]['matches']:
+            if rs[i].get('error', None):
+                log.error(f'Invalid query: {rs[i]["error"].decode("utf-8")}')
+                raise FiasNotFoundException("Error searching address text")
+
+            for match in rs[i].get('matches', ()):
                 if len(results) >= self.conf.max_results_count:
                     break
 
@@ -190,14 +200,10 @@ class SphinxSearch:
                         )
                     )
 
-        # При строгом поиске нам надо еще добавить fuzzy и выбрать самое большое значение при отклонении
-        # выше заданного, по сути переопределяем ratio
+        # Доп обработка при строгом поиске, даем ошибку при похожих результатах
         if strong:
-            for result in results:
-                result.ratio = violet_ratio(text, result.text.lower())
-
-            # Сортируем по убыванию признака
-            results.sort(key=lambda x: x.ratio, reverse=True)
+            if not results:
+                raise FiasNotFoundException("No match for strong search")
 
             # Если подряд два одинаково релеватных результата - это плохо, на автомат такое отдавать нельзя
             if len(results) >= 2 and abs(results[0].ratio - results[1].ratio) == 0.0:

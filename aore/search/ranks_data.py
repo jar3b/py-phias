@@ -21,7 +21,7 @@ class RanksData(BaseModel):
         # x = 2, поиск по базе сокращений (по полному), cnt_socr
         # x = 3, то же, но по краткому, cnt_socr_like
         return ''.join([
-            'x' if self.cnt_like > 5 else str(self.cnt_like),  # TODO: need to adjust "5"
+            'x' if self.cnt_like >= 5 else str(self.cnt_like),  # TODO: need to adjust "5"
             'x' if self.cnt_exact > 1 else str(self.cnt_exact),
             'x' if self.cnt_socr > 1 else str(self.cnt_socr),
             'x' if self.cnt_socr_like > 1 else str(self.cnt_socr_like),

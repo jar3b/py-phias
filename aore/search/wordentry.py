@@ -1,12 +1,12 @@
 import json
 import re
 from dataclasses import dataclass
-from typing import cast, List, Iterator, Callable
+from typing import cast, List, Iterator, Callable, Tuple
 
 import asyncpg
 from jinja2 import Environment, FileSystemLoader
 
-from aore.search.wordvariation import WordVariation, VariationType
+from aore.search.wordvariation import WordVariation
 from settings import AppConfig
 from .match_types import MatchTypes
 from .ranks_data import RanksData
@@ -30,6 +30,8 @@ class WordEntry:
     class SuggEntity:
         word: str
         jaro: float
+        freq: int
+        precision: float
 
     def __init__(self, word: str) -> None:
         self.bare_word = word
@@ -51,14 +53,14 @@ class WordEntry:
                 if mt_entry in self.mt or re.search(mt_value, rank_data.rank):
                     self.mt.add(mt_entry)
 
-        # Если ищем по лайку, то точное совпадение не ищем (оно и так будет включено)
-        if MatchTypes.MT_LAST_STAR in self.mt:
-            self.mt.discard(MatchTypes.MT_AS_IS)
-
         # Строка слишком котроткая, то по лайку не ищем, сфинкс такого не прожует
         if MatchTypes.MT_LAST_STAR in self.mt and len(self.word) < conf.min_length_to_star:
             self.mt.discard(MatchTypes.MT_LAST_STAR)
             self.mt.add(MatchTypes.MT_AS_IS)
+
+        # Если звездочки с двух сторон, то с одной убираем
+        if MatchTypes.MT_BOTH_STAR in self.mt:
+            self.mt.discard(MatchTypes.MT_LAST_STAR)
 
         # Теперь модель иницилизирована
         self.is_initialized = True
@@ -72,36 +74,50 @@ class WordEntry:
         WordVariation
     ]:
         # Если слово встречается часто, ставим у всех вариантов тип VariationType.freq
-        variation_type = VariationType.FREQ if self.is_freq else VariationType.NORM
+        socr_words: List[Tuple[str, float]] = []
+        full_words: List[Tuple[str, float]] = []
 
         # Добавляем подсказки (много штук)
-        if MatchTypes.MT_MANY_SUGG in self.mt and not strong:
-            suggs = suggestion_func(self.word, conf.rating_limit_soft, conf.rating_limit_soft_count)
-            for suggestion in suggs:
-                yield WordVariation(self, suggestion.word, variation_type)
+        if (MatchTypes.MT_MANY_SUGG in self.mt or MatchTypes.MT_SOME_SUGG in self.mt) and not strong:
+            max_s = 1
+            second_s = 0
+            for suggestion in suggestion_func(self.word, conf.rating_limit_soft, conf.rating_limit_soft_count):
+                if int(suggestion.freq) > 30000:
+                    max_s = max(max_s, int(suggestion.freq))
+                    socr_words.append((suggestion.word, 1))
+                else:
+                    second_s = max(second_s, int(suggestion.freq))
+                    full_words.append((suggestion.word, round(suggestion.precision - 0.2, 2)))
 
-        # Добавляем подсказки (немного)
-        if MatchTypes.MT_SOME_SUGG in self.mt and not strong:
-            suggs = suggestion_func(self.word, conf.rating_limit_hard, conf.rating_limit_hard_count)
-            for suggestion in suggs:
-                yield WordVariation(self, suggestion.word, variation_type)
+            # Если самое частое слово прям намного чаще чем остальные - отбрасываем их
+            if second_s / max_s < 0.001:
+                full_words = []
+
+            # Если всего одно слово в предложении, ставим бустер в 0.9
+            if len(full_words) == 1:
+                full_words[0] = (full_words[0][0], 0.9)
 
         # Добавляем звездочку на конце
-        if MatchTypes.MT_LAST_STAR in self.mt:
-            yield WordVariation(self, f'{self.word}*', variation_type, (self.word, 1.5))
+        if MatchTypes.MT_LAST_STAR in self.mt and not self.is_freq:
+            full_words.append((f'{self.word}*', 0.9))
+
+        # Добавляем звездочки с двух сторон TODO: Для теста с одной
+        if MatchTypes.MT_BOTH_STAR in self.mt and not self.is_freq:
+            full_words.append((f'{self.word}*', 0.9))
 
         # Добавляем слово "как есть", если это сокращение, то добавляем как частое слово
         if MatchTypes.MT_AS_IS in self.mt:
-            yield WordVariation(
-                self,
-                self.bare_word if MatchTypes.MT_IS_SOCR else self.word,  # TODO: can be self.word
-                VariationType.FREQ if MatchTypes.MT_IS_SOCR in self.mt else variation_type
-            )
+            if self.is_freq or MatchTypes.MT_IS_SOCR in self.mt:
+                socr_words.append((self.bare_word if MatchTypes.MT_IS_SOCR else self.word, 1))
 
-        # -- Дополнительные функции --
+            if MatchTypes.MT_IS_SOCR not in self.mt:
+                full_words.append((self.word, 1))
+
         # Добавляем сокращение
-        if MatchTypes.MT_ADD_SOCR in self.mt and self.socr_word is not None:
-            yield WordVariation(self, self.socr_word, VariationType.FREQ)
+        if MatchTypes.MT_ADD_SOCR in self.mt and self.socr_word:
+            socr_words.append((self.socr_word, 1))
+
+        yield WordVariation(self, full_words, socr_words)
 
     @classmethod
     async def fill(cls, entries: List['WordEntry'], *, pool: asyncpg.Pool, conf: AppConfig.Sphinx) -> None:

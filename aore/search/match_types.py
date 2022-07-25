@@ -35,6 +35,7 @@ class MatchTypes(List[str], Enum):
     MT_MANY_SUGG = ['0000'],
     MT_SOME_SUGG = ['10..', 'x0..'],
     MT_LAST_STAR = ['100.', 'x.0.'],
+    MT_BOTH_STAR = ['x000'],
     MT_AS_IS = ['.1..', '...1', '...x'],
     MT_ADD_SOCR = ['..10', '..x0'],
     MT_IS_SOCR = ['..01', '..0x']

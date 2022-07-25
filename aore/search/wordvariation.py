@@ -1,37 +1,41 @@
-from enum import Enum
-from typing import TYPE_CHECKING, Tuple, Dict
+from typing import TYPE_CHECKING, Tuple, List
 
 if TYPE_CHECKING:
     from .wordentry import WordEntry
 
 
-class VariationType(int, Enum):
-    """
-    Типы вариаций слова
-    """
-    NORM = 0  # нормальный
-    FREQ = 1  # частый
+def _t(val: Tuple[str, float]) -> str:
+    return val[0] if val[1] == 1 or val[0].endswith('*') else f'{val[0]}^{val[1]}'
 
 
 class WordVariation:
     parent: 'WordEntry'
-    text: str
-    var_type: VariationType
-    extra_words: Tuple[Tuple[str, float], ...]
+    full_words: List[Tuple[str, float]]
+    abbr_words: List[Tuple[str, float]]
 
-    def __init__(self, parent_word: 'WordEntry', text: str, var_type: VariationType = VariationType.NORM,
-                 *extra_words: Tuple[str, float]):
+    def __init__(
+            self,
+            parent_word: 'WordEntry',
+            full_words: List[Tuple[str, float]],
+            abbr_words: List[Tuple[str, float]]
+    ):
         self.parent = parent_word
-        self.text = text
-        self.var_type = var_type
-        self.extra_words = extra_words
+        self.full_words = full_words
+        self.abbr_words = abbr_words
 
     @property
-    def search_text(self) -> str:
-        if not self.extra_words:
-            return self.text
+    def has_short_words(self) -> bool:
+        return len(self.abbr_words) > 0
 
-        return '({})'.format(' | '.join([self.text, *[f'{x[0]}^{x[1]}' for x in self.extra_words]]))
+    @property
+    def is_empty(self) -> bool:
+        return not self.full_words and not self.abbr_words
+
+    def __hash__(self) -> int:
+        return hash(str(self))
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, WordVariation) and hash(self) == hash(other)
 
     def __str__(self) -> str:
-        return f'{self.search_text} ({self.var_type.name})'
+        return f'full={(", ".join([x[0] for x in self.full_words]))}, short={", ".join([x[0] for x in self.abbr_words])}'
