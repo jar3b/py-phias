@@ -26,9 +26,9 @@ class SearchQueryGenerator:
 
             full_words_list.append(self.__get_word_text([_t(x) for x in v.full_words]))
 
-        self.full_words_list = [x for x in self.full_words_list if x]
-        self.short_words_list = [x for x in self.short_words_list if x]
-        self.strip_word_list = [x for x in self.strip_word_list if x]
+        self.full_words_list = [x for x in full_words_list if x]
+        self.short_words_list = [x for x in short_words_list if x]
+        self.strip_word_list = [x for x in strip_word_list if x]
 
     @staticmethod
     def __get_word_text(words: List[str]) -> str | None:
