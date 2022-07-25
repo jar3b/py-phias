@@ -154,7 +154,7 @@ class SphinxSearch:
 
         # формируем строки для поиска в Сфинксе
         gen = SearchQueryGenerator(all_variations)
-        all_queries = OrderedDict()
+        all_queries: OrderedDict[str, None] = OrderedDict()
         ops = ['']
         if not strong:
             ops.append('MAYBE')

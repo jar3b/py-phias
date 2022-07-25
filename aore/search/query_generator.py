@@ -14,17 +14,17 @@ class SearchQueryGenerator:
     strip_word_list: List[str]
 
     def __init__(self, variations: List[WordVariation]):
-        self.full_words_list = []
-        self.short_words_list = []
-        self.strip_word_list = []
+        full_words_list = []
+        short_words_list = []
+        strip_word_list = []
 
         for v in variations:
             if v.has_short_words:
-                self.short_words_list.append(' '.join([x[0] for x in v.abbr_words]))
+                short_words_list.append(' '.join([x[0] for x in v.abbr_words]))
             else:
-                self.strip_word_list.append(self.__get_word_text([_t(x) for x in v.full_words]))
+                strip_word_list.append(self.__get_word_text([_t(x) for x in v.full_words]))
 
-            self.full_words_list.append(self.__get_word_text([_t(x) for x in v.full_words]))
+            full_words_list.append(self.__get_word_text([_t(x) for x in v.full_words]))
 
         self.full_words_list = [x for x in self.full_words_list if x]
         self.short_words_list = [x for x in self.short_words_list if x]
