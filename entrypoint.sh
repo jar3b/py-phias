@@ -1,8 +1,8 @@
 #!/bin/sh
 set -e
 
-if [ "$1" = 'python' ]; then
-  exec "$@"
-else
-  python manage.py "$@"
-fi
+case "$1" in
+python) exec "$@" ;;
+/*) exec "$@" ;;
+*) python manage.py "$@" ;;
+esac
