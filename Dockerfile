@@ -7,12 +7,12 @@ RUN apk add --no-cache \
     && apk add --no-cache --virtual .build-deps \
         build-base linux-headers git \
     && pip install --upgrade pip
-ADD requirements.txt ./libs/ ./
-RUN pip install -r requirements.txt && pip install uvloop-0.16.0-cp310-cp310-linux_x86_64.whl
-RUN apk del .build-deps \
-    && rm *.whl
+ADD requirements.txt ./
+RUN pip install -r requirements.txt && \
+    pip install uvloop && \
+    apk del .build-deps
 ADD . .
-RUN rm -rf libs && chmod a+x *.sh
+RUN chmod a+x *.sh
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["python", "run.py", "8080"]

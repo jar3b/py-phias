@@ -15,5 +15,5 @@ show_error_codes = true
 [tool.flake8]
 ignore = "F401"
 max-line-length = 120
-exclude = [".git", "__pycache__", ".mypy_cache", "deploy", "libs", "target", "venv", ".github"]
+exclude = [".git", "__pycache__", ".mypy_cache", "deploy", "venv", ".github"]
 max-complexity = 20
