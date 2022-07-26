@@ -58,4 +58,4 @@ class SphinxFiller:
             sphinx_conf.write(idx_suggest)
             sphinx_conf.write('\n')
 
-        #out_filename.chmod(0x777)
+        # out_filename.chmod(0x777)

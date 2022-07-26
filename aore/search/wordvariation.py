@@ -38,4 +38,5 @@ class WordVariation:
         return isinstance(other, WordVariation) and hash(self) == hash(other)
 
     def __str__(self) -> str:
-        return f'full={(", ".join([x[0] for x in self.full_words]))}, short={", ".join([x[0] for x in self.abbr_words])}'
+        return f'full={(", ".join([x[0] for x in self.full_words]))}, ' \
+               f'short={", ".join([x[0] for x in self.abbr_words])}'

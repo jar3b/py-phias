@@ -9,7 +9,7 @@ from settings import AppConfig
 def setup_uvloop() -> None:
     try:
         import uvloop
-    except:
+    except ModuleNotFoundError:
         print('Cannot use uvloop')
     else:
         print('Using uvloop')
@@ -18,7 +18,7 @@ def setup_uvloop() -> None:
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print(f'Usage: run <port>')
+        print('Usage: run <port>')
         sys.exit(-1)
 
     setup_uvloop()

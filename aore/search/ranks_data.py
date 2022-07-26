@@ -30,7 +30,8 @@ class RanksData(BaseModel):
     @classmethod
     def load(cls, s: str) -> 'RanksData':
         # сшивает строку типа
-        # "[{"cnt_like" : 1}, {"cnt_exact" : 1}, {"cnt_socr" : 0, "scname" : null}, {"cnt_socr_like" : 0}, {"freq" : 200}]"
+        # "[{"cnt_like" : 1}, {"cnt_exact" : 1}, {"cnt_socr" : 0, "scname" : null}, {"cnt_socr_like" : 0},
+        # {"freq" : 200}]"
         # в словарь вроде
         # {'freq': 200, 'cnt_socr_like': 0, 'cnt_socr': 0, 'scname': None, 'cnt_exact': 1, 'cnt_like': 1}
         # и оборачивает его в объект RanksData

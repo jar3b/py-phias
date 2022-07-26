@@ -109,7 +109,7 @@ def create_addrobj_config(f: str, t: str, container_temp: str | None, sphinx_var
             f'indexer {config.sphinx.index_addrobj} -c {Path(container_temp_path, f).as_posix()} '
             f'--buildstops {Path(container_temp_path, "suggdict.txt").as_posix()} 200000 --buildfreqs'
         )
-    except Exception as e:
+    except Exception:
         import traceback
         traceback.print_exc()
         sys.exit(-2)
@@ -168,7 +168,7 @@ def create_sphinx_config(f: str, sphinx_var: str) -> None:
     try:
         filler = SphinxFiller(config)
         filler.create_sphinx_conf(Path(f), sphinx_var)
-    except Exception as e:
+    except Exception:
         import traceback
         traceback.print_exc()
         sys.exit(-2)
