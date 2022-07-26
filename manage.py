@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import sys
 from pathlib import Path
@@ -6,7 +7,9 @@ from typing import Tuple
 
 import click
 import environ
+from aiohttp_pydantic import oas
 
+from aore.app import _get_app
 from aore.utils import trigram
 from orchestra.db import DbFiller
 from orchestra.sphinx import SphinxFiller
@@ -174,6 +177,18 @@ def create_sphinx_config(f: str, sphinx_var: str) -> None:
         sys.exit(-2)
 
 
+@click.command()
+@click.option('-o', type=str, required=True, help='Output file with OAS')
+def generate_oas(o: str) -> None:
+    try:
+        with Path(o).open('w') as f:
+            f.write(json.dumps(oas.view.generate_oas([_get_app(None)], title_spec="Py-Phias API")))
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        sys.exit(-2)
+
+
 # public
 cli.add_command(initdb)
 cli.add_command(create_addrobj_config)
@@ -181,6 +196,7 @@ cli.add_command(init_trigram)
 cli.add_command(create_sphinx_config)
 # internal
 cli.add_command(create_fias_csv)
+cli.add_command(generate_oas)
 
 if __name__ == '__main__':
     cli()

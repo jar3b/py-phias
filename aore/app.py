@@ -33,7 +33,7 @@ async def root_handler(request: web.Request) -> web.StreamResponse:
     return web.FileResponse('./aore/static/index.html')
 
 
-def run(port: int, config: AppConfig) -> None:
+def _get_app(config: AppConfig | None) -> web.Application:
     # create web app and set config
     app = web.Application(middlewares=[
         error_middleware,
@@ -63,5 +63,9 @@ def run(port: int, config: AppConfig) -> None:
     app.router.add_route('*', '/', root_handler)
     app.router.add_static('/', './aore/static')
 
+    return app
+
+
+def run(port: int, config: AppConfig) -> None:
     # now run_app using default asyncio loop
-    web.run_app(app, port=port)
+    web.run_app(_get_app(config), port=port)
