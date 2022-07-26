@@ -1,9 +1,11 @@
+import re
 from typing import Union
 
 from aiohttp import web
 from aiohttp_pydantic import PydanticView
 from aiohttp_pydantic.oas.typing import r200, r404
 
+from aore.exceptions import FiasBadDataException
 from aore.schemas import HttpError, AoResultsModel
 
 
@@ -20,5 +22,7 @@ class FindAoView(PydanticView):
         Если указан параметр `?strong=true` (или `?strong=1`), то в массиве будет один результат, или ошибка. Если же
         флаг не указан (или `false`), то будет выдано 10 наиболее релевантных результатов.
         """
+        if not re.match('^[0-9A-zА-яЁё, .-/]{3,}$', text):
+            raise FiasBadDataException('Invalid input text')
         found_hints = await self.request.app['ff'].find(text, strong)
         return web.json_response(text=AoResultsModel(__root__=found_hints).json())
