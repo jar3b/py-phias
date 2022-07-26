@@ -55,36 +55,25 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
 ### Подготовка и скачивание компонентов ПО
 
-1. Сборка образов. Для этого нужно в корне проекта запустить `./make.sh`, если хост под Windows, то использовать
-   Git Shell либо MinGW, итд. Будет в корне создана папка `target`, где будут образы, compose-файл и утилиты для помощи
-   в инициализации базы.
+Копируем на удаленный хост файлы из папки `deploy` ([.env](deploy/.env),
+[docker-compose.yml](deploy/docker-compose.yml) & [init.sh](deploy/init.sh))
 
-```bash
-./make.sh
+Далее настраиваем файл `.env` (можно и не менять), пример:
+
+```dotenv
+DB_USER=admin
+DB_PASS=devpass
+DB_NAME=fias
+DB_HOST=db
+DB_PORT=5432
+# директория, в которой будут хранится индексы сфинкса
+SPHINX_VAR=/var/lib/sphinxsearch
+# порт прослушки, важно, если SHPINX_LISTEN представляет собой TCP сокет, а не юникс
+SPHINX_PORT=9312
+# что слушает сфинкс, 'shpinx:9312' для TCP (где 'shpinx' - это имя контейнера) или '/temp/fias.sock'
+# для юникс-сокета
+SHPINX_LISTEN=/temp/fias.sock
 ```
-
-2. Отправить файлы на удаленный сервер (можно использовать registry, итд) - тут указан способ с заливкой по SFTP
-
-```bash
-cd target
-sftp name@vps
-# папка fias должна быть создана на VPS по пути `/home/<user>/fias`, но можно использовать любую другую
-cd fias
-put *
-put .env
-exit
-```
-
-3. Далее, заходим на виртуалку по SSH в созданную папку `/home/<user>/fias` и выполняем
-
-```bash
-# загружаем образы
-sudo docker load -i pyphias_img.tar.gz -i sphinx_img.tar.gz
-# создаем директорию под исходные файлы (ее точное имя в docker-compose.yml:29)
-mkdir -p data/source
-```
-
-Все готово для загрузки данных
 
 ### Загрузка исходных данных
 
