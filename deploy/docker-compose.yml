@@ -15,7 +15,7 @@ services:
       - "127.0.0.1:5433:5432"
 
   app:
-    image: pyphias:latest
+    image: jar3b/pyphias:latest
     restart: unless-stopped
     environment:
       PG_HOST: db
@@ -33,7 +33,7 @@ services:
       - "8080:8080"
 
   sphinx:
-    image: sphinx:latest
+    image: jar3b/sphinxsearch:2.3.2
     restart: unless-stopped
     volumes:
       - './data/sphinx_conf:/etc/sphinxsearch'
