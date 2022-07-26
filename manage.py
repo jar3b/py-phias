@@ -7,7 +7,7 @@ from typing import Tuple
 import click
 import environ
 
-from aore.utils.search import trigram
+from aore.utils import trigram
 from orchestra.db import DbFiller
 from orchestra.sphinx import SphinxFiller
 from settings import AppConfig

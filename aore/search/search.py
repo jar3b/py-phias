@@ -13,7 +13,7 @@ from .wordvariation import WordVariation
 from .. import log
 from ..exceptions import FiasBadDataException, FiasNotFoundException
 from ..schemas import AoResultItemModel
-from ..utils.search import trigram
+from ..utils import trigram
 
 
 def _parse_sphinx_address(addr: str) -> Tuple[str, int | None]:
