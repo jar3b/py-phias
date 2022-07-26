@@ -4,3 +4,5 @@ Dockerfile
 venv/
 .mypy_cache/
 deploy/
+.github/
+*ignore
