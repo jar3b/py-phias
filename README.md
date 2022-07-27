@@ -5,6 +5,8 @@ Python application that can operate with FIAS (Russian Address Object DB)
 Простое приложение для работы с БД ФИАС, используя БД PostgreSQL + Sphinxsearch. ГАР не поддерживается,
 только ФИАС в старом формате, последняя база от 31.08.2021
 
+![Пример работы](.github/example.webm)
+
 Swagger: [github-pages](https://jar3b.github.io/py-phias/)
 
 ## Содержание
