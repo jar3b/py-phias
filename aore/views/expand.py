@@ -3,13 +3,16 @@ from typing import Union, List
 
 from aiohttp import web
 from aiohttp_pydantic import PydanticView
-from aiohttp_pydantic.oas.typing import r200, r404
+from aiohttp_pydantic.oas.typing import r200
 
-from aore.schemas import HttpError, AoElementModel, AoListElementsModel
+from aore.schemas import standard_errors, AoElementModel, AoListElementsModel
 
 
 class ExpandAoidView(PydanticView):
-    async def get(self, aoid: uuid.UUID, /, ) -> Union[r200[AoListElementsModel], r404[HttpError]]:
+    async def get(self, aoid: uuid.UUID, /, ) -> Union[
+        r200[AoListElementsModel],
+        standard_errors
+    ]:
         """
         Разворачивает AOID в представление (перед этим нормализует)
         """

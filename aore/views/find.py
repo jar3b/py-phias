@@ -3,14 +3,18 @@ from typing import Union
 
 from aiohttp import web
 from aiohttp_pydantic import PydanticView
-from aiohttp_pydantic.oas.typing import r200, r404
+from aiohttp_pydantic.oas.typing import r200, r400
 
 from aore.exceptions import FiasBadDataException
-from aore.schemas import HttpError, AoResultsModel
+from aore.schemas import AoResultsModel, basic_errors, error
 
 
 class FindAoView(PydanticView):
-    async def get(self, text: str, /, strong: bool = False) -> Union[r200[AoResultsModel], r404[HttpError]]:
+    async def get(self, text: str, /, strong: bool = False) -> Union[
+        r200[AoResultsModel],
+        r400[error(400)],
+        basic_errors
+    ]:
         """
         Полнотекстовый поиск по названию адресного объекта
 

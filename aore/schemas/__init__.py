@@ -1,11 +1,28 @@
 import uuid
-from typing import List
+from typing import List, Type
 
+from aiohttp_pydantic.oas.typing import r404, r422, r500, r504
 from pydantic import BaseModel, Field
 
 
-class HttpError(BaseModel):
-    error: str = Field(description="Описание ошибки", example="Не удалось найти адресный объект")
+def error(code: int) -> Type[BaseModel]:
+    class HttpError(BaseModel):
+        error: str = Field(
+            description="Описание ошибки",
+            example={
+                400: "Invalid input text",
+                404: "Не удалось найти адресный объект",
+                422: "aoid: value is not a valid uuid",
+                500: "Internal server error",
+                504: "Gateway timeout"
+            }.get(code, 'Internal server error')
+        )
+
+    return HttpError
+
+
+basic_errors = r404[error(404)] | r500[error(500)] | r504[error(504)]
+standard_errors = basic_errors | r422[error(422)]
 
 
 class AoidModel(BaseModel):

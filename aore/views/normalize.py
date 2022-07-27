@@ -3,13 +3,16 @@ from typing import Union
 
 from aiohttp import web
 from aiohttp_pydantic import PydanticView
-from aiohttp_pydantic.oas.typing import r200, r404
+from aiohttp_pydantic.oas.typing import r200
 
-from aore.schemas import AoidModel, HttpError
+from aore.schemas import AoidModel, standard_errors
 
 
 class NormalizeAoidView(PydanticView):
-    async def get(self, aoid: uuid.UUID, /, ) -> Union[r200[AoidModel], r404[HttpError]]:
+    async def get(self, aoid: uuid.UUID, /, ) -> Union[
+        r200[AoidModel],
+        standard_errors
+    ]:
         """
         Нормализует подаваемый AOID или AOGUID в актуальный AOID
         """
