@@ -26,7 +26,7 @@ class FindAoView(PydanticView):
         Если указан параметр `?strong=true` (или `?strong=1`), то в массиве будет один результат, или ошибка. Если же
         флаг не указан (или `false`), то будет выдано 10 наиболее релевантных результатов.
         """
-        if not re.match('^[0-9A-zА-яЁё, .-/]{3,}$', text):
+        if not re.match('^[0-9A-zА-яЁё, .\\-/]{3,}$', text):
             raise FiasBadDataException('Invalid input text')
         found_hints = await self.request.app['ff'].find(text, strong)
         return web.json_response(text=AoResultsModel(__root__=found_hints).json())
